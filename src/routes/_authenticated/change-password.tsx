@@ -5,7 +5,7 @@ import { useAuthStore } from '#/features/auth/store/auth-store'
 import { changePassword } from '#/features/auth/api/client'
 import type { ApiError } from '#/lib/api-client'
 
-export const Route = createFileRoute('/change-password')({
+export const Route = createFileRoute('/_authenticated/change-password')({
   component: ChangePasswordPage,
 })
 

@@ -1,4 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { useAuthStore } from '#/features/auth/store/auth-store'
 import { SiteHeader } from '#/components/site-header'
 import { SiteFooter } from '#/components/site-footer'
 import { HeroSection } from '#/features/landing/components/hero-section'
@@ -8,7 +9,15 @@ import { CtaSection } from '#/features/landing/components/cta-section'
 import { roles } from '#/features/landing/data/roles'
 import { phases } from '#/features/landing/data/phases'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  beforeLoad: () => {
+    const { isAuthenticated } = useAuthStore.getState()
+    if (isAuthenticated) {
+      throw redirect({ to: '/rooms' })
+    }
+  },
+  component: Home,
+})
 
 function Home() {
   return (

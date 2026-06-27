@@ -72,7 +72,7 @@ export async function logout() {
 }
 
 export async function refresh() {
-  return request<{ success: true; data: AuthTokens }>('/accounts/refresh/', {
+  return request<{ success: true; data: AuthTokens }>('/accounts/token/refresh/', {
     method: 'POST',
   })
 }
@@ -89,7 +89,7 @@ export async function getMe(accessToken?: string) {
 
 export async function forgotPassword(body: ForgotPasswordRequest) {
   return request<{ success: true; data: { message: string; resetLink?: string } }>(
-    '/auth/forgot-password/',
+    '/accounts/forgot-password/',
     { method: 'POST', body: JSON.stringify(body) },
   )
 }

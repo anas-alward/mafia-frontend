@@ -23,25 +23,116 @@ export interface ApiError {
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
+// ── Token refresh lock (prevents concurrent refresh calls) ──
+
+let refreshPromise: Promise<string | null> | null = null
+
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const { useAuthStore } = await import('#/features/auth/store/auth-store')
+    return useAuthStore.getState().accessToken
+  } catch {
+    return null
+  }
+}
+
+async function tryRefreshToken(): Promise<string | null> {
+  // If a refresh is already in flight, wait for it
+  if (refreshPromise) return refreshPromise
+
+  refreshPromise = (async () => {
+    try {
+      const { useAuthStore } = await import('#/features/auth/store/auth-store')
+      const currentRefreshToken = useAuthStore.getState().refreshToken
+
+      if (!currentRefreshToken) {
+        useAuthStore.getState().clearAuth()
+        return null
+      }
+
+      const res = await fetch(`${API_BASE}/accounts/token/refresh/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: currentRefreshToken }),
+      })
+
+      if (!res.ok) {
+        useAuthStore.getState().clearAuth()
+        return null
+      }
+
+      const body = await res.json()
+      // Django simplejwt returns { access: "...", refresh: "..." }
+      // or it may be wrapped in { data: { access, refresh } }
+      const payload = body.data ?? body
+      const { access, refresh: newRefresh } = payload
+
+      if (access) {
+        const user = useAuthStore.getState().user
+        if (user) {
+          useAuthStore.getState().setAuth(
+            user,
+            access,
+            newRefresh ?? currentRefreshToken,
+          )
+        }
+        return access
+      }
+
+      return null
+    } catch {
+      return null
+    } finally {
+      refreshPromise = null
+    }
+  })()
+
+  return refreshPromise
+}
+
 // ── Fetch wrapper ──
 
 /**
  * Typed fetch wrapper for the Django REST API.
- * Automatically includes `credentials: 'include'` for httpOnly cookie forwarding
- * and `Content-Type: application/json`. Throws the parsed JSON error body on non-2xx.
+ *
+ * Auth strategy:
+ * - JWT access token sent as `Authorization: Bearer <token>`.
+ * - On 401, silently attempts token refresh via httpOnly refresh cookie, then retries once.
+ * - `credentials: 'include'` sends httpOnly cookies automatically.
  */
 export async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  })
+  const token = await getAccessToken()
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const doFetch = (overrideHeaders?: Record<string, string>) =>
+    fetch(`${API_BASE}${path}`, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        ...headers,
+        ...(overrideHeaders ?? {}),
+        ...(options.headers as Record<string, string> | undefined),
+      },
+    })
+
+  let res = await doFetch()
+
+  // 401 → try refresh and retry once (skip if this IS the refresh endpoint)
+  if (res.status === 401 && !path.includes('/token/refresh/')) {
+    const newToken = await tryRefreshToken()
+    if (newToken) {
+      res = await doFetch({ Authorization: `Bearer ${newToken}` })
+    }
+  }
 
   const body = await res.json()
 

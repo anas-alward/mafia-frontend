@@ -17,6 +17,8 @@
     "deploy": "bun run build && wrangler deploy"
   },
   "dependencies": {
+    "@cloudflare/realtimekit-react": "^2.0.0",
+    "@cloudflare/realtimekit-react-ui": "^2.0.0",
     "@cloudflare/vite-plugin": "^1.26.0",
     "@cloudflare/workers-types": "^4.20260626.1",
     "@hookform/resolvers": "^5.4.0",

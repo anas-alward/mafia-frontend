@@ -4,7 +4,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '#/components/ui/form'
-import { forgotPasswordSchema, type ForgotPasswordInput } from '../schemas/auth'
+import { forgotPasswordSchema  } from '../schemas/auth'
+import type {ForgotPasswordInput} from '../schemas/auth';
 
 interface ForgotPasswordFormProps {
   onSubmit: (data: ForgotPasswordInput) => Promise<{ success: boolean }>

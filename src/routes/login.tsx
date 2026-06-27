@@ -26,8 +26,7 @@ function LoginPage() {
   const handleSubmit = async (data: LoginInput) => {
     try {
       const result = await login(data)
-      console.log("results ", result)
-      setAuth(result.user, result.access)
+      setAuth(result.user, result.access, result.refresh)
       await navigate({ to: redirect || '/dashboard' })
     } catch (err) {
       console.log("there was an error ", err)
