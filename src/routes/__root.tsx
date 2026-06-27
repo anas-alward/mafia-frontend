@@ -7,13 +7,16 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import { SessionInit } from '../features/auth/components/session-init'
 
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import type { AuthState } from '../features/auth/types'
 
 interface MyRouterContext {
   queryClient: QueryClient
+  auth: AuthState
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
@@ -52,6 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <SessionInit />
         {children}
         <TanStackDevtools
           config={{
