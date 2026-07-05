@@ -1,39 +1,31 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { API_BASE } from '#/lib/api-client'
 import { useAuthStore } from '#/features/auth/store/auth-store'
+import type {
+  RoomStateEvent,
+  PlayerJoinedEvent,
+  PlayerLeftEvent,
+  HostChangedEvent,
+  RoomClosedEvent,
+  ChatMessageEvent,
+  JoinRequestReceivedEvent,
+  JoinRequestAcceptedEvent,
+  JoinRequestRejectedEvent,
+} from '../events'
 
-// ── WebSocket message types ──
+// ── WebSocket message union ──
 
-export interface RoomStateCredentials {
-  participant_id: string
-  token: string
-}
-
-export interface RoomStateHost {
-  id: number
-  username: string
-}
-
-export interface RoomStateRoom {
-  code: string
-  name: string
-  status: string
-  meeting_id: string
-  host: RoomStateHost
-  max_members: number
-  role_configuration: Record<string, unknown>
-  scheduled_at: string | null
-}
-
-export interface RoomStateEvent {
-  type: 'room_state'
-  credentials: RoomStateCredentials
-  room: RoomStateRoom
-  members: unknown[]
-  member_count: number
-}
-
-export type WsMessage = RoomStateEvent | { type: string; [key: string]: unknown }
+export type WsMessage =
+  | RoomStateEvent
+  | PlayerJoinedEvent
+  | PlayerLeftEvent
+  | HostChangedEvent
+  | RoomClosedEvent
+  | ChatMessageEvent
+  | JoinRequestReceivedEvent
+  | JoinRequestAcceptedEvent
+  | JoinRequestRejectedEvent
+  | { type: string; [key: string]: unknown }
 
 export type WsState = 'connecting' | 'open' | 'closed' | 'error'
 
@@ -49,17 +41,26 @@ function getWebSocketUrl(code: string, token: string | null): string {
 
 export function useRoomWebSocket(code: string | undefined) {
   const wsRef = useRef<WebSocket | null>(null)
+  const wasEverOpenRef = useRef(false)
   const [state, setState] = useState<WsState>('connecting')
   const [lastMessage, setLastMessage] = useState<WsMessage | null>(null)
+  const [wasEverOpen, setWasEverOpen] = useState(false)
 
-  useEffect(() => {
+  const connect = useCallback(() => {
     if (!code) return
 
     const token = useAuthStore.getState().accessToken
     const url = getWebSocketUrl(code, token)
     const ws = new WebSocket(url)
 
-    ws.onopen = () => setState('open')
+    ws.onopen = () => {
+      setState('open')
+      if (!wasEverOpenRef.current) {
+        wasEverOpenRef.current = true
+        setWasEverOpen(true)
+      }
+    }
+
     ws.onclose = () => setState('closed')
     ws.onerror = () => setState('error')
 
@@ -73,16 +74,24 @@ export function useRoomWebSocket(code: string | undefined) {
     }
 
     wsRef.current = ws
+  }, [code])
+
+  useEffect(() => {
+    wasEverOpenRef.current = false
+    setWasEverOpen(false)
+    connect()
 
     return () => {
-      ws.onopen = null
-      ws.onclose = null
-      ws.onerror = null
-      ws.onmessage = null
-      ws.close()
-      wsRef.current = null
+      if (wsRef.current) {
+        wsRef.current.onopen = null
+        wsRef.current.onclose = null
+        wsRef.current.onerror = null
+        wsRef.current.onmessage = null
+        wsRef.current.close()
+        wsRef.current = null
+      }
     }
-  }, [code])
+  }, [connect])
 
   const send = useCallback((data: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -90,5 +99,30 @@ export function useRoomWebSocket(code: string | undefined) {
     }
   }, [])
 
-  return { state, lastMessage, send }
+  const reconnect = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.onopen = null
+      wsRef.current.onclose = null
+      wsRef.current.onerror = null
+      wsRef.current.onmessage = null
+      wsRef.current.close()
+      wsRef.current = null
+    }
+    setState('connecting')
+    connect()
+  }, [connect])
+
+  const acceptJoinRequest = useCallback(
+    (userId: number) => send({ type: 'accept_join_request', user_id: userId }),
+    [send],
+  )
+
+  const rejectJoinRequest = useCallback(
+    (userId: number) => send({ type: 'reject_join_request', user_id: userId }),
+    [send],
+  )
+
+  const closeRoom = useCallback(() => send({ type: 'close_room' }), [send])
+
+  return { state, lastMessage, send, reconnect, wasEverOpen, acceptJoinRequest, rejectJoinRequest, closeRoom }
 }
