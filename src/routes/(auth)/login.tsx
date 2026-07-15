@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { LoginForm } from '#/features/auth/components/login-form'
-import type { LoginInput } from '#/features/auth/schemas/auth'
-import { useAuthStore } from '#/features/auth/store/auth-store'
-import { login } from '#/features/auth/api/client'
-import type { ApiError } from '#/lib/api-client'
+import { LoginForm } from '#/features/auth/components/login-form.tsx'
+import type { LoginInput } from '#/features/auth/schemas/auth.ts'
+import { useAuthStore } from '#/features/auth/store/auth-store.ts'
+import { login } from '#/features/auth/api/client.ts'
+import type { ApiError } from '#/lib/api-client.ts'
 
 interface LoginSearch {
   redirect?: string
@@ -27,7 +27,7 @@ function LoginPage() {
     try {
       const result = await login(data)
       setAuth(result.user, result.access, result.refresh)
-      await navigate({ to: redirect || '/dashboard' })
+      await navigate({ to: redirect || '/' })
     } catch (err) {
       console.log("there was an error ", err)
       const apiErr = err as ApiError

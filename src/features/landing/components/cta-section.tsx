@@ -1,18 +1,12 @@
+import { Link } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
 
 interface CtaSectionProps {
   title: string
   description: string
-  ctaLabel: string
-  ctaHref: string
 }
 
-export function CtaSection({
-  title,
-  description,
-  ctaLabel,
-  ctaHref,
-}: CtaSectionProps) {
+export function CtaSection({ title, description }: CtaSectionProps) {
   return (
     <section id="join" className="py-20 sm:py-28 reveal-on-scroll">
       <div className="page-wrap">
@@ -24,14 +18,12 @@ export function CtaSection({
             {description}
           </p>
 
-          <div className="mt-8">
-            <Button
-              asChild
-              variant={'default'}
-              size="lg"
-              className=" cta-glow text-base px-8 py-6 rounded-xl shadow-none text-white"
-            >
-              <a href={ctaHref}>{ctaLabel}</a>
+          <div className="mt-8 flex items-center justify-center gap-4">
+            <Button asChild variant="outline" size="lg" className="text-base px-8 py-6 rounded-xl">
+              <Link to="/login">Log in</Link>
+            </Button>
+            <Button asChild size="lg" className="cta-glow text-white text-base px-8 py-6 rounded-xl shadow-none">
+              <Link to="/signup">Sign up</Link>
             </Button>
           </div>
         </div>

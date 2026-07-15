@@ -1,11 +1,10 @@
 import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
-import { VerifyEmailForm } from '#/features/auth/components/verify-email-form'
-import { verifyEmail } from '#/features/auth/api/client'
+import { VerifyEmailForm } from '#/features/auth/components/verify-email-form.tsx'
+import { verifyEmail } from '#/features/auth/api/client.ts'
+import type { VerifyEmailInput } from '#/features/auth/schemas/auth.ts'
+import type { ApiError } from '#/lib/api-client.ts'
 
-import type { VerifyEmailInput } from '#/features/auth/schemas/auth'
-import type { ApiError } from '#/lib/api-client'
-
-export const Route = createFileRoute('/verify-email')({
+export const Route = createFileRoute('/(auth)/verify-email')({
   validateSearch: (search: Record<string, unknown>) => {
     if (typeof search.email !== 'string' || !search.email.includes('@')) {
       throw redirect({ to: '/signup' })

@@ -1,11 +1,32 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   useRealtimeKitClient,
   useRealtimeKitMeeting,
+  useRealtimeKitSelector,
   RealtimeKitProvider,
 } from '@cloudflare/realtimekit-react'
-import { RtkMeeting } from '@cloudflare/realtimekit-react-ui'
-import { Check, X, Users } from 'lucide-react'
+import {
+  RtkUiProvider,
+  RtkStage,
+  RtkGridPagination,
+  RtkParticipantCount,
+  RtkViewerCount,
+  RtkFullscreenToggle,
+  RtkMicToggle,
+  RtkCameraToggle,
+  RtkStageToggle,
+  RtkLeaveButton,
+  RtkSetupScreen,
+  RtkWaitingScreen,
+  RtkEndedScreen,
+  RtkParticipantsAudio,
+  RtkDialogManager,
+  RtkNotifications,
+  RtkNameTag,
+  RtkAudioVisualizer,
+} from '@cloudflare/realtimekit-react-ui'
+import type { States } from '@cloudflare/realtimekit-react-ui'
+import JoinRequestsPanel from '#/features/rooms/components/join-requests-pannel.tsx'
 import type { RoomStateEvent } from '../events'
 import type { JoinRequest } from '../hooks/use-room-state'
 
@@ -14,6 +35,56 @@ interface MeetingRoomProps {
   joinRequests?: JoinRequest[]
   onAcceptJoinRequest?: (userId: number) => void
   onRejectJoinRequest?: (userId: number) => void
+}
+
+// ─────────────────────────────────────────────────────────────
+// CUSTOM PARTICIPANT TILE
+// Bypasses RtkParticipantTile's internal (shadow-DOM, size-token
+// based) video sizing so we can fully control fill/stretch via
+// a plain <video> element registered directly with the SDK.
+// ─────────────────────────────────────────────────────────────
+interface CustomParticipantTileProps {
+  participant: any // RTKSelf | RTKParticipant
+}
+
+function CustomParticipantTile({ participant }: CustomParticipantTileProps) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoEnabled = useRealtimeKitSelector(() => participant.videoEnabled)
+  const videoTrack = useRealtimeKitSelector(() => participant.videoTrack)
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el || !participant) return
+
+    participant.registerVideoElement(el)
+    return () => {
+      participant.deregisterVideoElement(el)
+    }
+  }, [participant, videoTrack])
+
+  return (
+    <div className="relative w-full h-full rounded-2xl overflow-hidden border border-neutral-700 shadow-lg bg-neutral-900 transition-all hover:border-blue-500">
+      {videoEnabled ? (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted={participant.isLocal}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-neutral-400 text-3xl font-medium">
+          {participant.name?.[0]?.toUpperCase() ?? '?'}
+        </div>
+      )}
+
+      <div className="absolute bottom-2 left-2">
+        <RtkNameTag participant={participant}>
+          <RtkAudioVisualizer />
+        </RtkNameTag>
+      </div>
+    </div>
+  )
 }
 
 function MeetingRoomInner({
@@ -26,90 +97,170 @@ function MeetingRoomInner({
   onRejectJoinRequest?: (userId: number) => void
 }) {
   const { meeting } = useRealtimeKitMeeting()
-  const [open, setOpen] = useState(false)
-  const count = joinRequests?.length ?? 0
+  const [currentState, setCurrentState] = useState('idle')
+  const [uiStates, setUiStates] = useState<States | null>(null)
 
-  const toggle = useCallback(() => setOpen((p) => !p), [])
+  const fullScreenRef = useRef<HTMLDivElement>(null)
+
+  const handleStatesUpdate = (event: { detail: States }) => {
+    setUiStates(event.detail)
+    const meetingState = event.detail.meeting
+
+    if (meetingState === 'idle' && currentState !== 'idle')
+      setCurrentState('idle')
+    else if (meetingState === 'setup' && currentState !== 'setup')
+      setCurrentState('setup')
+    else if (meetingState === 'waiting' && currentState !== 'waiting')
+      setCurrentState('waiting')
+    else if (meetingState === 'joined' && currentState !== 'joined')
+      setCurrentState('joined')
+    else if (meetingState === 'ended' && currentState !== 'ended')
+      setCurrentState('ended')
+  }
+
+  const localParticipant = meeting.self
+  const remoteParticipants = meeting.participants.joined.toArray()
+  const allParticipants = [localParticipant, ...remoteParticipants]
+
+  // ✅ DYNAMIC GRID CALCULATION
+  // Adjusts the number of columns based on how many people are in the call
+  const getGridCols = (count: number) => {
+    if (count <= 1) return 'grid-cols-1'
+    if (count <= 4) return 'grid-cols-2'
+    if (count <= 9) return 'grid-cols-3'
+    return 'grid-cols-4'
+  }
+
+  const gridColsClass = getGridCols(allParticipants.length)
 
   return (
-    <div className="flex flex-col h-full relative">
-      <RtkMeeting
-        mode="fill"
+    <div className="flex flex-col h-full w-full relative overflow-hidden bg-white">
+      <RtkUiProvider
+        ref={fullScreenRef}
         meeting={meeting}
         showSetupScreen={true}
-      />
-
-      {/* Toggle button */}
-      <button
-        type="button"
-        onClick={toggle}
-        className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-700 text-neutral-300 hover:border-neutral-500 transition-colors shadow-lg"
+        onRtkStatesUpdate={handleStatesUpdate}
+        className={'bg-neutral-800'}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          width: '100%',
+          margin: 0,
+        }}
       >
-        <Users className="h-4 w-4" />
-        <span className="text-sm font-medium">Requests</span>
-        {count > 0 && (
-          <span className="text-xs bg-red-600 text-white px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center leading-none">
-            {count}
-          </span>
-        )}
-      </button>
-
-      {/* Panel */}
-      {open && (
-        <>
-          <div className="absolute inset-0 z-30 bg-black/50" onClick={toggle} />
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-40 w-80 max-h-[60vh] bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-neutral-800">
-              <Users className="h-5 w-5 text-neutral-400" />
-              <h3 className="text-sm font-semibold text-neutral-100">Join Requests</h3>
-              {count > 0 && (
-                <span className="ml-auto text-xs text-neutral-400 bg-neutral-800 px-2 py-0.5 rounded-full">
-                  {count}
-                </span>
-              )}
+        <div
+          id="meeting-container"
+          className="flex flex-col flex-1 h-full w-full"
+        >
+          {currentState === 'idle' && (
+            <div className="flex items-center justify-center h-full text-neutral-500">
+              Meeting is loading...
             </div>
+          )}
+          {currentState === 'setup' && <RtkSetupScreen />}
+          {currentState === 'waiting' && <RtkWaitingScreen />}
 
-            <div className="overflow-y-auto flex-1">
-              {count === 0 ? (
-                <p className="px-5 py-8 text-sm text-neutral-500 text-center">No pending requests</p>
-              ) : (
-                <ul className="divide-y divide-neutral-800">
-                  {joinRequests!.map((req) => (
-                    <li key={req.userId} className="px-5 py-4 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-9 w-9 rounded-full bg-neutral-800 flex items-center justify-center shrink-0">
-                          <span className="text-sm font-medium text-neutral-300">
-                            {req.username.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="text-sm text-neutral-200 truncate">{req.username}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => onAcceptJoinRequest?.(req.userId)}
-                          className="p-2 rounded-lg bg-green-600 text-white hover:bg-green-500 transition-colors"
-                          aria-label={`Accept ${req.username}`}
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onRejectJoinRequest?.(req.userId)}
-                          className="p-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 transition-colors"
-                          aria-label={`Reject ${req.username}`}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </li>
+          {currentState === 'joined' && uiStates && (
+            <>
+              <RtkStage
+                style={{
+                  flex: 1,
+                  flexGrow: 1,
+                  flexShrink: 1,
+                  position: 'relative',
+                }}
+              >
+                <div
+                  className={'m-3 rounded-2xl p-2'}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    color: 'white',
+                  }}
+                >
+                  <div
+                    id="header-right"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      height: '48px',
+                      gap: '12px',
+                    }}
+                  >
+                    <RtkGridPagination />
+                    <RtkParticipantCount />
+                    <RtkViewerCount />
+                  </div>
+                </div>
+
+                {/* --- DYNAMIC CUSTOM PARTICIPANT GRID --- */}
+                <div
+                  className={`grid ${gridColsClass} gap-2 p-2 h-[80%] w-full`}
+                >
+                  {allParticipants.map((participant) => (
+                    <CustomParticipantTile
+                      key={
+                        participant.id ||
+                        participant.userId ||
+                        'local-participant'
+                      }
+                      participant={participant}
+                    />
                   ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+                </div>
+                {/* ----------------------------------------- */}
+              </RtkStage>
+              <JoinRequestsPanel
+                joinRequests={joinRequests}
+                onAcceptJoinRequest={onAcceptJoinRequest}
+                onRejectJoinRequest={onRejectJoinRequest}
+              />
+
+              <div
+                style={{
+                  display: 'flex',
+                  width: '100%',
+                  padding: '8px 12px',
+                  color: 'white',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div
+                  id="controlbar-left"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <RtkFullscreenToggle targetElement={fullScreenRef.current} />
+                </div>
+                <div
+                  id="controlbar-center"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                  }}
+                >
+                  <RtkMicToggle />
+                  <RtkCameraToggle />
+                  <RtkStageToggle />
+                  <RtkLeaveButton />
+                </div>
+              </div>
+            </>
+          )}
+
+          {currentState === 'ended' && <RtkEndedScreen />}
+        </div>
+
+        <RtkParticipantsAudio />
+        <RtkDialogManager />
+        <RtkNotifications />
+      </RtkUiProvider>
     </div>
   )
 }
@@ -119,17 +270,17 @@ export function MeetingRoom(props: MeetingRoomProps) {
   const [initError, setInitError] = useState<string | null>(null)
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- roomState may not have credentials at runtime
-    if (!props.roomState?.credentials?.token) return
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- meeting is undefined before initMeeting resolves
+    if (!props.roomState?.credentials) return
     if (meeting) return
 
     initMeeting({ authToken: props.roomState.credentials.token })
       .then((result) => {
-        if (!result) return // init already in-flight (StrictMode double-fire)
+        if (!result) return
       })
       .catch((err: unknown) => {
-        setInitError(err instanceof Error ? err.message : 'Failed to connect to meeting.')
+        setInitError(
+          err instanceof Error ? err.message : 'Failed to connect to meeting.',
+        )
       })
   }, [props.roomState?.credentials.token, meeting, initMeeting])
 
@@ -149,7 +300,6 @@ export function MeetingRoom(props: MeetingRoomProps) {
     )
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- meeting is undefined at runtime before init
   if (!meeting) {
     return (
       <div className="flex items-center justify-center h-64">

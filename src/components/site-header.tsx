@@ -1,12 +1,26 @@
 import { Link } from '@tanstack/react-router'
 import { Button } from '#/components/ui/button'
+import { Avatar, AvatarFallback } from '#/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '#/components/ui/dropdown-menu'
 import { useAuthStore } from '#/features/auth/store/auth-store'
 import { logout } from '#/features/auth/api/client'
+import { KeyRound, LogOut } from 'lucide-react'
 
-const navItems = [
-  { label: 'How to Play', href: '#how-to-play' },
-  { label: 'Game Mechanics', href: '#game-mechanics' },
-] as const
+function getInitials(username: string): string {
+  return username
+    .split(/[\s._-]+/)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+}
 
 export function SiteHeader() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -24,49 +38,48 @@ export function SiteHeader() {
           Mafia
         </Link>
 
-        <nav
-          aria-label="Main navigation"
-          className="hidden sm:flex items-center gap-8"
-        >
-          {navItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="nav-link text-sm font-medium"
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-
         <div className="flex items-center gap-4">
           {isLoading ? null : isAuthenticated && user ? (
-            <>
-              <span className="text-sm text-neutral-600 hidden sm:inline">
-                {user.username}
-              </span>
-              <Link
-                to="/change-password"
-                className="text-sm text-neutral-600 hover:text-neutral-900 underline underline-offset-2 hidden sm:inline"
-              >
-                Change password
-              </Link>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    await logout()
-                  } catch {
-                    // Proceed with local logout even if Django call fails
-                  }
-                  clearAuth()
-                  window.location.href = '/'
-                }}
-              >
-                Log out
-              </Button>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="rounded-full ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-neutral-200 text-neutral-700 text-xs font-medium">
+                    {getInitials(user.username)}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-sm font-medium text-neutral-900">
+                      {user.username}
+                    </p>
+                    <p className="text-xs text-neutral-500">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/change-password">
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    Change Password
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    try {
+                      await logout()
+                    } catch {
+                      // Proceed with local logout even if Django call fails
+                    }
+                    clearAuth()
+                    window.location.href = '/'
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Log Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm">

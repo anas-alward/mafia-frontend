@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { SignUpForm } from '#/features/auth/components/sign-up-form'
-import type { SignUpInput } from '#/features/auth/schemas/auth'
-import { signUp } from '#/features/auth/api/client'
-import type { ApiError } from '#/lib/api-client'
+import { SignUpForm } from '#/features/auth/components/sign-up-form.tsx'
+import type { SignUpInput } from '#/features/auth/schemas/auth.ts'
+import { signUp } from '#/features/auth/api/client.ts'
+import type { ApiError } from '#/lib/api-client.ts'
 
-export const Route = createFileRoute('/signup')({
+export const Route = createFileRoute('/(auth)/signup')({
   component: SignUpPage,
 })
 

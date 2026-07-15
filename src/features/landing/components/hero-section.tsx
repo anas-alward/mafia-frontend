@@ -1,19 +1,13 @@
+import type { ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Button } from '#/components/ui/button'
 
 interface HeroSectionProps {
   headline: string
   subheadline: string
-  ctaLabel: string
-  ctaHref: string
+  children?: ReactNode
 }
 
-export function HeroSection({
-  headline,
-  subheadline,
-  ctaLabel,
-  ctaHref,
-}: HeroSectionProps) {
+export function HeroSection({ headline, subheadline, children }: HeroSectionProps) {
   return (
     <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-4">
       <div className="rise-in max-w-3xl mx-auto">
@@ -24,15 +18,7 @@ export function HeroSection({
           {subheadline}
         </p>
 
-        <div className="mt-10">
-          <Button
-            asChild
-            size="lg"
-            className="cta-glow text-white text-base px-8 py-6 rounded-xl shadow-none"
-          >
-            <a href={ctaHref}>{ctaLabel}</a>
-          </Button>
-        </div>
+        <div className="mt-10">{children}</div>
       </div>
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 motion-safe:animate-bounce">

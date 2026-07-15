@@ -1,23 +1,15 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { useAuthStore } from '#/features/auth/store/auth-store'
+import { createFileRoute } from '@tanstack/react-router'
 import { SiteHeader } from '#/components/site-header'
 import { SiteFooter } from '#/components/site-footer'
 import { HeroSection } from '#/features/landing/components/hero-section'
 import { HowToPlaySection } from '#/features/landing/components/how-to-play-section'
 import { GameMechanicsSection } from '#/features/landing/components/game-mechanics-section'
-import { CtaSection } from '#/features/landing/components/cta-section'
+import { CreateMeetingButton } from '#/features/rooms/components/create-meeting-button'
+import { JoinMeetingForm } from '#/features/rooms/components/join-meeting-form'
 import { roles } from '#/features/landing/data/roles'
 import { phases } from '#/features/landing/data/phases'
 
-export const Route = createFileRoute('/')({
-  beforeLoad: () => {
-    const { isAuthenticated } = useAuthStore.getState()
-    if (isAuthenticated) {
-      throw redirect({ to: '/rooms' })
-    }
-  },
-  component: Home,
-})
+export const Route = createFileRoute('/')({ component: Home })
 
 function Home() {
   return (
@@ -28,9 +20,17 @@ function Home() {
         <HeroSection
           headline="Deceive. Deduce. Survive."
           subheadline="Mafia is the ultimate social deduction game where trust is your weapon and lies are your shield. Play online with friends — who will you believe?"
-          ctaLabel="Join the Waitlist"
-          ctaHref="#join"
-        />
+        >
+          <div className="flex flex-col items-center gap-4">
+            <CreateMeetingButton />
+            <div className="flex items-center gap-4 w-full max-w-md">
+              <div className="flex-1 h-px bg-neutral-200" />
+              <span className="text-sm text-neutral-400">or</span>
+              <div className="flex-1 h-px bg-neutral-200" />
+            </div>
+            <JoinMeetingForm />
+          </div>
+        </HeroSection>
 
         <HowToPlaySection
           title="Choose Your Role"
@@ -40,12 +40,6 @@ function Home() {
 
         <GameMechanicsSection title="The Game Cycle" phases={phases} />
 
-        <CtaSection
-          title="Ready to Play?"
-          description="The game is launching soon. Join the waitlist to be the first to know when Mafia goes live."
-          ctaLabel="Join the Waitlist"
-          ctaHref="#join"
-        />
       </main>
 
       <SiteFooter />
