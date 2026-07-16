@@ -31,10 +31,10 @@ export default function CustomParticipantTile({ participant }: CustomParticipant
 
   return (
     <div
-      className={`group relative w-full h-full rounded-xs overflow-hidden shadow-lg transition-all duration-200 ${
+      className={`group relative w-full h-full rounded-lg overflow-hidden transition-all duration-200 ${
         isSpeaking
-          ? 'ring-2 ring-blue-500 ring-offset-1 ring-offset-neutral-900'
-          : 'ring-1 ring-neutral-700/50 hover:ring-neutral-500'
+          ? 'ring-2 ring-[#60a5fa] ring-offset-1 ring-offset-[#161618]'
+          : 'ring-1 ring-white/5 hover:ring-white/10'
       }`}
     >
       {videoEnabled ? (
@@ -46,9 +46,9 @@ export default function CustomParticipantTile({ participant }: CustomParticipant
           className="w-full h-full object-cover"
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-b from-neutral-700 to-neutral-800 flex items-center justify-center">
-          <div className="h-20 w-20 rounded-full bg-neutral-600/50 flex items-center justify-center">
-            <span className="text-4xl font-semibold text-neutral-200 select-none">
+        <div className="w-full h-full bg-gradient-to-b from-[#212124] to-[#161618] flex items-center justify-center">
+          <div className="h-20 w-20 rounded-full bg-white/5 flex items-center justify-center">
+            <span className="text-4xl font-semibold text-[#a1a1aa] select-none">
               {initial}
             </span>
           </div>
@@ -56,7 +56,7 @@ export default function CustomParticipantTile({ participant }: CustomParticipant
       )}
 
       {/* Bottom gradient overlay */}
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
 
       {/* Name tag */}
       <div className="absolute bottom-3 left-3">
@@ -65,9 +65,9 @@ export default function CustomParticipantTile({ participant }: CustomParticipant
         </RtkNameTag>
       </div>
 
-      {/* Muted indicator */}
+      {/* Local indicator */}
       {isLocal && !videoEnabled && (
-        <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-neutral-900/80 text-xs text-neutral-400">
+        <div className="absolute top-3 right-3 px-2 py-0.5 rounded-md bg-black/40 text-xs text-[#a1a1aa]">
           You
         </div>
       )}

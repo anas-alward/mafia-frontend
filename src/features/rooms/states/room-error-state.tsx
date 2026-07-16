@@ -1,5 +1,4 @@
 import { useNavigate } from '@tanstack/react-router'
-import { Button } from '#/components/ui/button'
 import { ArrowLeft, AlertTriangle, Wifi } from 'lucide-react'
 
 interface RoomErrorStateProps {
@@ -10,31 +9,34 @@ export function RoomErrorState({ onReconnect }: RoomErrorStateProps) {
   const navigate = useNavigate()
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-white">
-      <Button
-        variant="ghost"
-        className="absolute top-4 left-4 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100"
+    <div className="flex flex-col items-center justify-center h-screen bg-[#161618]">
+      {/* Back button */}
+      <button
+        type="button"
         onClick={() => navigate({ to: '/' })}
+        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-[#a1a1aa] hover:text-[#f4f4f5] transition-colors"
       >
-        <ArrowLeft className="h-4 w-4 mr-2" />
+        <ArrowLeft className="h-4 w-4" />
         Back
-      </Button>
-      <div className="bg-white border border-neutral-200 rounded-2xl px-10 py-10 text-center space-y-5 max-w-sm w-full shadow-2xl">
-        <div className="h-14 w-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto">
-          <AlertTriangle className="h-7 w-7 text-red-500" />
+      </button>
+
+      {/* Card */}
+      <div className="bg-[#212124] border border-white/5 rounded-2xl px-10 py-10 text-center space-y-6 max-w-sm w-full shadow-2xl">
+        <div className="h-16 w-16 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto">
+          <AlertTriangle className="h-8 w-8 text-red-500" />
         </div>
-        <div className="space-y-1.5">
-          <h2 className="text-lg font-semibold text-neutral-900">Connection error</h2>
-          <p className="text-sm text-neutral-500">Could not connect to the meeting server.</p>
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold text-[#f4f4f5]">Connection error</h2>
+          <p className="text-sm text-[#a1a1aa]">Could not connect to the meeting server.</p>
         </div>
-        <Button
+        <button
+          type="button"
           onClick={onReconnect}
-          variant="outline"
-          className="gap-2 border-neutral-200 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/5 text-[#f4f4f5] hover:bg-white/10 transition-colors text-sm font-medium"
         >
           <Wifi className="h-4 w-4" />
           Retry
-        </Button>
+        </button>
       </div>
     </div>
   )

@@ -128,7 +128,7 @@ function MeetingRoomPage() {
                 {meetingState === 'waiting' && <MeetingWaitingState />}
 
                 {meetingState === 'joined' && uiStates && (
-                  <RoomActiveState fullScreenRef={fullScreenRef} />
+                  <RoomActiveState fullScreenRef={fullScreenRef} roomId={roomId} />
                 )}
 
                 {meetingState === 'ended' && <MeetingEndedState />}
