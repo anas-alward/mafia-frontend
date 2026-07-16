@@ -1,15 +1,28 @@
-import { lazy, Suspense } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Button } from '#/components/ui/button'
-import { ArrowLeft, Loader2, AlertTriangle, Video, Wifi } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import {
+  useRealtimeKitClient,
+  RealtimeKitProvider,
+} from '@cloudflare/realtimekit-react'
+import {
+  RtkUiProvider,
+  RtkParticipantsAudio,
+  RtkDialogManager,
+  RtkNotifications,
+} from '@cloudflare/realtimekit-react-ui'
+import type { States } from '@cloudflare/realtimekit-react-ui'
 import { useRoomWebSocket } from '#/features/rooms/hooks/use-room-websocket'
 import { useRoomState } from '#/features/rooms/hooks/use-room-state'
-
-const MeetingRoom = lazy(() =>
-  import('#/features/rooms/components/meeting-room').then((m) => ({
-    default: m.MeetingRoom,
-  })),
-)
+import { RoomClosedState } from '#/features/rooms/states/room-closed-state'
+import { RoomConnectingState } from '#/features/rooms/states/room-connecting-state'
+import { RoomErrorState } from '#/features/rooms/states/room-error-state'
+import { RoomWaitingState } from '#/features/rooms/states/room-waiting-state'
+import { RoomActiveState } from '#/features/rooms/states/room-active-state'
+import { MeetingIdleState } from '#/features/rooms/states/meeting-idle-state'
+import { MeetingSetupState } from '#/features/rooms/states/meeting-setup-state'
+import { MeetingWaitingState } from '#/features/rooms/states/meeting-waiting-state'
+import { MeetingEndedState } from '#/features/rooms/states/meeting-ended-state'
+import { RoomContextProvider } from '#/features/rooms/context/room-context'
 
 export const Route = createFileRoute('/_authenticated/rooms/$roomId')({
   component: MeetingRoomPage,
@@ -17,143 +30,117 @@ export const Route = createFileRoute('/_authenticated/rooms/$roomId')({
 
 function MeetingRoomPage() {
   const { roomId } = Route.useParams()
-  const navigate = useNavigate()
+  const {
+    state: wsState,
+    lastMessage,
+    reconnect,
+    acceptJoinRequest,
+    rejectJoinRequest,
+  } = useRoomWebSocket(roomId)
+  const { roomState, roomClosed, joinRequests, dismissJoinRequest } =
+    useRoomState(lastMessage)
 
-  const { state: wsState, lastMessage, reconnect, acceptJoinRequest, rejectJoinRequest } = useRoomWebSocket(roomId)
-  const { roomState, roomClosed, joinRequests, dismissJoinRequest } = useRoomState(lastMessage)
+  const [meeting, initMeeting] = useRealtimeKitClient()
+  const [initError, setInitError] = useState<string | null>(null)
+  const [meetingState, setMeetingState] = useState('idle')
+  const [uiStates, setUiStates] = useState<States | null>(null)
+  const fullScreenRef = useRef<HTMLDivElement>(null)
 
-  // ── Room closed by host ──
+  // Init RealtimeKit meeting when room credentials arrive
+  useEffect(() => {
+    if (!roomState?.credentials) return
+    if (meeting) return
+
+    initMeeting({ authToken: roomState.credentials.token })
+      .then((result) => {
+        if (!result) return
+      })
+      .catch((err: unknown) => {
+        setInitError(
+          err instanceof Error ? err.message : 'Failed to connect to meeting.',
+        )
+      })
+  }, [roomState?.credentials.token, meeting, initMeeting])
+
+  const handleStatesUpdate = (event: { detail: States }) => {
+    setUiStates(event.detail)
+    const state = event.detail.meeting
+
+    if (state === 'idle' && meetingState !== 'idle') setMeetingState('idle')
+    else if (state === 'setup' && meetingState !== 'setup') setMeetingState('setup')
+    else if (state === 'waiting' && meetingState !== 'waiting') setMeetingState('waiting')
+    else if (state === 'joined' && meetingState !== 'joined') setMeetingState('joined')
+    else if (state === 'ended' && meetingState !== 'ended') setMeetingState('ended')
+  }
+
+  // ── Room-closed (host ended the room) ──
   if (roomClosed) {
+    return <RoomClosedState />
+  }
+
+  // ── RealtimeKit init error ──
+  if (initError) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] -m-6 bg-neutral-950">
-        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl px-10 py-10 text-center space-y-5 max-w-sm w-full shadow-2xl">
-          <div className="h-14 w-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto">
-            <Video className="h-7 w-7 text-amber-400" />
-          </div>
-          <div className="space-y-1.5">
-            <h2 className="text-lg font-semibold text-neutral-100">Meeting ended by host</h2>
-            <p className="text-sm text-neutral-400">Redirecting to rooms page...</p>
-          </div>
-          <Button
-            variant="outline"
-            className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-neutral-100"
-            onClick={() => navigate({ to: '/' })}
-          >
-            Back to rooms
-          </Button>
-        </div>
+      <div className="flex items-center justify-center h-screen bg-white">
+        <p className="text-red-500">{initError}</p>
       </div>
     )
   }
 
-  // ── In-call: credentials received, meeting active ──
-  if (roomState) {
-    return (
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center h-full bg-neutral-950">
-            <Loader2 className="h-6 w-6 animate-spin text-neutral-400" />
-          </div>
-        }
-      >
-        <div className="flex flex-col h-screen -m-6 bg-neutral-950">
-          <MeetingRoom
-            roomState={roomState}
-            joinRequests={joinRequests}
-            onAcceptJoinRequest={(userId) => {
-              dismissJoinRequest(userId)
-              acceptJoinRequest(userId)
-            }}
-            onRejectJoinRequest={(userId) => {
-              dismissJoinRequest(userId)
-              rejectJoinRequest(userId)
-            }}
-          />
-        </div>
-      </Suspense>
-    )
+  // ── WS states (no roomState yet) ──
+  if (!roomState) {
+    if (wsState === 'connecting') return <RoomConnectingState roomId={roomId} />
+    if (wsState === 'error') return <RoomErrorState onReconnect={reconnect} />
+    return <RoomWaitingState roomId={roomId} />
   }
 
-  // ── Pre-call: connecting ──
-  if (wsState === 'connecting') {
-    return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] -m-6 bg-neutral-950">
-        <Button
-          variant="ghost"
-          className="absolute top-4 left-4 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-          onClick={() => navigate({ to: '/rooms' })}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl px-10 py-10 text-center space-y-5 max-w-sm w-full shadow-2xl">
-          <div className="h-14 w-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto">
-            <Video className="h-7 w-7 text-blue-400" />
-          </div>
-          <div className="space-y-1.5">
-            <h2 className="text-lg font-semibold text-neutral-100">Joning meeting...</h2>
-            <p className="text-sm text-neutral-400">Code: {roomId}</p>
-          </div>
-          <Loader2 className="h-5 w-5 animate-spin text-neutral-500 mx-auto" />
-        </div>
-      </div>
-    )
-  }
 
-  // ── Pre-call: error ──
-  if (wsState === 'error') {
-    return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] -m-6 bg-neutral-950">
-        <Button
-          variant="ghost"
-          className="absolute top-4 left-4 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-          onClick={() => navigate({ to: '/' })}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl px-10 py-10 text-center space-y-5 max-w-sm w-full shadow-2xl">
-          <div className="h-14 w-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto">
-            <AlertTriangle className="h-7 w-7 text-red-400" />
-          </div>
-          <div className="space-y-1.5">
-            <h2 className="text-lg font-semibold text-neutral-100">Connection error</h2>
-            <p className="text-sm text-neutral-400">Could not connect to the meeting server.</p>
-          </div>
-          <Button
-            onClick={reconnect}
-            variant="outline"
-            className="gap-2 border-neutral-700 text-neutral-300 hover:bg-neutral-800 hover:text-neutral-100"
-          >
-            <Wifi className="h-4 w-4" />
-            Retry
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Pre-call: ws open, waiting for room_state ──
+  // ── Meeting ready, wrap in providers ──
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] -m-6 bg-neutral-950">
-      <Button
-        variant="ghost"
-        className="absolute top-4 left-4 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-        onClick={() => navigate({ to: '/' })}
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back
-      </Button>
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl px-10 py-10 text-center space-y-5 max-w-sm w-full shadow-2xl">
-        <div className="h-14 w-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto">
-          <Video className="h-7 w-7 text-blue-400" />
+    <div className="flex flex-col h-screen bg-white">
+      <RealtimeKitProvider value={meeting}>
+        <div className="flex flex-col h-full w-full relative overflow-hidden bg-white">
+          <RoomContextProvider
+            value={{
+              joinRequests,
+              dismissJoinRequest,
+              acceptJoinRequest,
+              rejectJoinRequest,
+            }}
+          >
+            <RtkUiProvider
+              ref={fullScreenRef}
+              meeting={meeting}
+              showSetupScreen={true}
+              onRtkStatesUpdate={handleStatesUpdate}
+              className={'bg-white'}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                width: '100%',
+                margin: 0,
+              }}
+            >
+              <div id="meeting-container" className="flex flex-col flex-1 h-full w-full">
+                {meetingState === 'idle' && <MeetingIdleState />}
+                {meetingState === 'setup' && <MeetingSetupState />}
+                {meetingState === 'waiting' && <MeetingWaitingState />}
+
+                {meetingState === 'joined' && uiStates && (
+                  <RoomActiveState fullScreenRef={fullScreenRef} />
+                )}
+
+                {meetingState === 'ended' && <MeetingEndedState />}
+              </div>
+
+              <RtkParticipantsAudio />
+              <RtkDialogManager />
+              <RtkNotifications />
+            </RtkUiProvider>
+          </RoomContextProvider>
         </div>
-        <div className="space-y-1.5">
-          <h2 className="text-lg font-semibold text-neutral-100">Joining meeting...</h2>
-          <p className="text-sm text-neutral-400">Code: {roomId}</p>
-        </div>
-        <Loader2 className="h-5 w-5 animate-spin text-neutral-500 mx-auto" />
-      </div>
+      </RealtimeKitProvider>
     </div>
   )
 }

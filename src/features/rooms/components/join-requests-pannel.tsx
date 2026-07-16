@@ -2,19 +2,17 @@ import { useCallback, useState } from 'react'
 
 import { Check, X, Users } from 'lucide-react'
 
-import type { JoinRequest } from '../hooks/use-room-state'
+import { useJoinRequests } from '../hooks/use-join-requests'
+import { useRoomContext } from '../context/room-context'
 
-interface JoinRequestsPanelProps {
-  joinRequests?: JoinRequest[]
-  onAcceptJoinRequest?: (userId: number) => void
-  onRejectJoinRequest?: (userId: number) => void
-}
-
-export default function JoinRequestsPanel({
-  joinRequests,
-  onAcceptJoinRequest,
-  onRejectJoinRequest,
-}: JoinRequestsPanelProps) {
+export default function JoinRequestsPanel() {
+  const ctx = useRoomContext()
+  const { joinRequests, acceptJoinRequest, rejectJoinRequest } = useJoinRequests({
+    joinRequests: ctx.joinRequests,
+    dismissJoinRequest: ctx.dismissJoinRequest,
+    acceptJoinRequest: ctx.acceptJoinRequest,
+    rejectJoinRequest: ctx.rejectJoinRequest,
+  })
   const [open, setOpen] = useState(false)
   const count = joinRequests?.length ?? 0
   const toggle = useCallback(() => setOpen((p) => !p), [])
@@ -102,7 +100,7 @@ export default function JoinRequestsPanel({
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
-                      onClick={() => onAcceptJoinRequest?.(req.userId)}
+                      onClick={() => acceptJoinRequest(req.userId)}
                       className="p-2 rounded-lg bg-green-600 text-white hover:bg-green-500 transition-colors"
                       aria-label={`Accept ${req.username}`}
                     >
@@ -110,7 +108,7 @@ export default function JoinRequestsPanel({
                     </button>
                     <button
                       type="button"
-                      onClick={() => onRejectJoinRequest?.(req.userId)}
+                      onClick={() => rejectJoinRequest(req.userId)}
                       className="p-2 rounded-lg bg-neutral-700 text-neutral-300 hover:bg-neutral-600 transition-colors"
                       aria-label={`Reject ${req.username}`}
                     >
