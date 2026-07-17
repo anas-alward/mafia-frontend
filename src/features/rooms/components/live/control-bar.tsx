@@ -1,13 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import {
-  RtkFullscreenToggle,
-  RtkMicToggle,
-  RtkCameraToggle,
   RtkStageToggle,
 } from '@cloudflare/realtimekit-react-ui'
-import { useRealtimeKitMeeting } from '@cloudflare/realtimekit-react'
-import { Users, Check, X, PhoneOff } from 'lucide-react'
+import { useRealtimeKitMeeting, useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
+import { Users, Check, X, PhoneOff, Mic, MicOff, Video, VideoOff, Maximize, Minimize } from 'lucide-react'
 import { useJoinRequests } from '#/features/rooms/hooks/use-join-requests'
 import { useRoomContext } from '#/features/rooms/context/room-context'
 
@@ -17,6 +14,8 @@ interface ControlBarProps {
 
 export default function ControlBar({ fullScreenRef }: ControlBarProps) {
   const { meeting } = useRealtimeKitMeeting()
+  const audioEnabled = useRealtimeKitSelector(() => meeting.self.audioEnabled)
+  const videoEnabled = useRealtimeKitSelector(() => meeting.self.videoEnabled)
   const navigate = useNavigate()
   const ctx = useRoomContext()
   const { joinRequests, acceptJoinRequest, rejectJoinRequest } = useJoinRequests({
@@ -26,6 +25,22 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
     rejectJoinRequest: ctx.rejectJoinRequest,
   })
   const count = joinRequests?.length ?? 0
+
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
+
+  const toggleFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen()
+    } else {
+      fullScreenRef.current?.requestFullscreen()
+    }
+  }, [fullScreenRef])
 
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -51,13 +66,54 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
     >
       {/* Left: fullscreen */}
       <div className="flex items-center">
-        <RtkFullscreenToggle targetElement={fullScreenRef.current} />
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          className="p-3 rounded-full bg-white/5 text-[#f4f4f5] hover:bg-white/10 transition-colors"
+          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+        >
+          {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+        </button>
       </div>
 
       {/* Center: media controls */}
       <div className="flex items-center gap-3">
-        <RtkMicToggle />
-        <RtkCameraToggle />
+        <button
+          type="button"
+          onClick={() => {
+            if (audioEnabled) {
+              meeting.self.disableAudio()
+            } else {
+              meeting.self.enableAudio()
+            }
+          }}
+          className={`p-3 rounded-full transition-colors ${
+            audioEnabled
+              ? 'bg-white/5 text-[#f4f4f5] hover:bg-white/10'
+              : 'bg-red-500/10 text-[#ef4444] hover:bg-red-500/20'
+          }`}
+          aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
+        >
+          {audioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (videoEnabled) {
+              meeting.self.disableVideo()
+            } else {
+              meeting.self.enableVideo()
+            }
+          }}
+          className={`p-3 rounded-full transition-colors ${
+            videoEnabled
+              ? 'bg-white/5 text-[#f4f4f5] hover:bg-white/10'
+              : 'bg-red-500/10 text-[#ef4444] hover:bg-red-500/20'
+          }`}
+          aria-label={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
+        >
+          {videoEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
+        </button>
         <RtkStageToggle />
         <button
           type="button"
