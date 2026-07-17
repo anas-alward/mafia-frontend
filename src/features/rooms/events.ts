@@ -79,6 +79,11 @@ export interface CloseRoom {
   type: 'close_room'
 }
 
+export interface SendJoinRequest {
+  type: 'join_request'
+  room_code: string
+}
+
 export interface ChatSend {
   type: 'chat'
   message: string

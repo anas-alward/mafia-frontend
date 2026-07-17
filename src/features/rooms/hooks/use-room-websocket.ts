@@ -124,5 +124,10 @@ export function useRoomWebSocket(code: string | undefined) {
 
   const closeRoom = useCallback(() => send({ type: 'close_room' }), [send])
 
-  return { state, lastMessage, send, reconnect, wasEverOpen, acceptJoinRequest, rejectJoinRequest, closeRoom }
+  const sendJoinRequest = useCallback(
+    () => send({ type: 'join_request', room_code: code }),
+    [send, code],
+  )
+
+  return { state, lastMessage, send, reconnect, wasEverOpen, acceptJoinRequest, rejectJoinRequest, closeRoom, sendJoinRequest }
 }

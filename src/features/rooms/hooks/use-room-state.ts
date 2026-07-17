@@ -33,6 +33,7 @@ export function useRoomState(lastMessage: WsMessage | null) {
   const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([])
 
   const [roomState, setRoomState] = useState<RoomStateEvent | null>(null)
+  const [joinRequestStatus, setJoinRequestStatus] = useState<'idle' | 'requested' | 'accepted' | 'rejected'>('idle')
 
   // Persist room_state across other events — only update when a new room_state arrives
   useEffect(() => {
@@ -112,6 +113,9 @@ export function useRoomState(lastMessage: WsMessage | null) {
         setJoinRequests((prev) =>
           prev.filter((r) => r.userId !== lastMessage.user_id),
         )
+        if (currentUser && lastMessage.user_id === Number(currentUser.id)) {
+          setJoinRequestStatus('accepted')
+        }
         break
       }
 
@@ -119,10 +123,13 @@ export function useRoomState(lastMessage: WsMessage | null) {
         setJoinRequests((prev) =>
           prev.filter((r) => r.userId !== lastMessage.user_id),
         )
+        if (currentUser && lastMessage.user_id === Number(currentUser.id)) {
+          setJoinRequestStatus('rejected')
+        }
         break
       }
     }
-  }, [lastMessage, navigate])
+  }, [lastMessage, navigate, currentUser])
 
   const dismissJoinRequest = useCallback((userId: number) => {
     setJoinRequests((prev) => prev.filter((r) => r.userId !== userId))
@@ -138,6 +145,8 @@ export function useRoomState(lastMessage: WsMessage | null) {
     chatMessages,
     joinRequests,
     dismissJoinRequest,
+    joinRequestStatus,
+    setJoinRequestStatus,
     currentUser,
   }
 }
