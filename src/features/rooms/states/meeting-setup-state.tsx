@@ -1,113 +1,154 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { useRealtimeKitMeeting, useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
-import { Mic, MicOff, Video, VideoOff, LogIn, Loader2, ChevronDown } from 'lucide-react'
+import { Mic, MicOff, Video, VideoOff, LogIn, Loader2, ChevronDown, Wifi } from 'lucide-react'
 
 interface MeetingSetupStateProps {
   roomId: string
   isReturningUser: boolean
   joinRequestStatus: 'idle' | 'requested' | 'accepted' | 'rejected'
-  onSendJoinRequest: () => void
+  wsState: string
+  onReconnect: () => void
+  authToken: string | null
+  onJoin: () => void
 }
 
 export function MeetingSetupState({
   roomId,
   isReturningUser,
   joinRequestStatus,
-  onSendJoinRequest,
+  wsState,
+  onReconnect,
+  authToken,
+  onJoin,
 }: MeetingSetupStateProps) {
-  const { meeting } = useRealtimeKitMeeting()
-
-  const name = useRealtimeKitSelector(() => meeting?.self.name ?? null)
-  const videoEnabled = useRealtimeKitSelector(() => meeting?.self.videoEnabled ?? false)
-  const audioEnabled = useRealtimeKitSelector(() => meeting?.self.audioEnabled ?? false)
-
-  const [isJoining, setIsJoining] = useState(false)
-  const [joinError, setJoinError] = useState<string | null>(null)
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
+  const [videoEnabled, setVideoEnabled] = useState(true)
+  const [audioEnabled, setAudioEnabled] = useState(true)
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([])
   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([])
   const [selectedVideoDevice, setSelectedVideoDevice] = useState<string>('')
   const [selectedAudioDevice, setSelectedAudioDevice] = useState<string>('')
   const [mediaReady, setMediaReady] = useState(false)
+  const [mediaError, setMediaError] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const initializedRef = useRef(false)
+  const streamRef = useRef<MediaStream | null>(null)
 
+  // Start camera preview immediately using native getUserMedia
   useEffect(() => {
-    if (!meeting || initializedRef.current) return
-    initializedRef.current = true
+    let cancelled = false
 
-    meeting.self.setupTracks({ video: true, audio: true })
-      .then(() => {
+    async function start() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        })
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop())
+          return
+        }
+        streamRef.current = stream
+        setMediaStream(stream)
         setMediaReady(true)
-        return Promise.all([
-          meeting.self.getVideoDevices(),
-          meeting.self.getAudioDevices(),
-        ])
-      })
-      .then(([vDevices, aDevices]) => {
-        setVideoDevices(vDevices)
-        setAudioDevices(aDevices)
-        const current = meeting.self.getCurrentDevices()
-        if (current.video) setSelectedVideoDevice(current.video.deviceId)
-        if (current.audio) setSelectedAudioDevice(current.audio.deviceId)
-      })
-      .catch(() => {
-        setMediaReady(true)
-      })
-  }, [meeting])
 
+        const devices = await navigator.mediaDevices.enumerateDevices()
+        setVideoDevices(devices.filter((d) => d.kind === 'videoinput'))
+        setAudioDevices(devices.filter((d) => d.kind === 'audioinput'))
+
+        const videoTrack = stream.getVideoTracks()[0]
+        if (videoTrack) setSelectedVideoDevice(videoTrack.getSettings().deviceId ?? '')
+
+        const audioTrack = stream.getAudioTracks()[0]
+        if (audioTrack) setSelectedAudioDevice(audioTrack.getSettings().deviceId ?? '')
+      } catch (err) {
+        if (!cancelled) {
+          setMediaError(
+            err instanceof DOMException && err.name === 'NotAllowedError'
+              ? 'Camera and microphone access was denied. Please allow permissions to join.'
+              : 'Could not access camera or microphone.',
+          )
+          setMediaReady(true)
+        }
+      }
+    }
+
+    start()
+    return () => {
+      cancelled = true
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop())
+        streamRef.current = null
+      }
+    }
+  }, [])
+
+  // Wire video element to media stream
   useEffect(() => {
     const el = videoRef.current
-    if (!el || !meeting) return
-    meeting.self.registerVideoElement(el, true)
-    return () => { meeting.self.deregisterVideoElement(el, true) }
-  }, [meeting])
-
-  const handleJoin = useCallback(async () => {
-    if (!meeting) return
-    setIsJoining(true)
-    setJoinError(null)
-
-    if (isReturningUser) {
-      try {
-        await meeting.join()
-      } catch (err) {
-        setJoinError(err instanceof Error ? err.message : 'Failed to join meeting')
-        setIsJoining(false)
-      }
-    } else {
-      onSendJoinRequest()
-    }
-  }, [meeting, isReturningUser, onSendJoinRequest])
+    if (!el || !mediaStream) return
+    el.srcObject = mediaStream
+    return () => { el.srcObject = null }
+  }, [mediaStream])
 
   const toggleAudio = useCallback(() => {
-    if (!meeting) return
-    if (audioEnabled) meeting.self.disableAudio()
-    else meeting.self.enableAudio()
-  }, [meeting, audioEnabled])
+    if (!streamRef.current) return
+    const track = streamRef.current.getAudioTracks()[0]
+    if (track) {
+      track.enabled = !track.enabled
+      setAudioEnabled(track.enabled)
+    }
+  }, [])
 
   const toggleVideo = useCallback(() => {
-    if (!meeting) return
-    if (videoEnabled) meeting.self.disableVideo()
-    else meeting.self.enableVideo()
-  }, [meeting, videoEnabled])
+    if (!streamRef.current) return
+    const track = streamRef.current.getVideoTracks()[0]
+    if (track) {
+      track.enabled = !track.enabled
+      setVideoEnabled(track.enabled)
+    }
+  }, [])
 
   const handleVideoDeviceChange = useCallback(async (deviceId: string) => {
-    if (!meeting) return
     setSelectedVideoDevice(deviceId)
-    const device = videoDevices.find((d) => d.deviceId === deviceId)
-    if (device) {
-      await meeting.self.setDevice(device)
+    if (!streamRef.current) return
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: { exact: deviceId } },
+        audio: false,
+      })
+      const newTrack = newStream.getVideoTracks()[0]
+      const oldTrack = streamRef.current.getVideoTracks()[0]
+      if (oldTrack) {
+        streamRef.current.removeTrack(oldTrack)
+        oldTrack.stop()
+      }
+      streamRef.current.addTrack(newTrack)
+      if (videoRef.current) videoRef.current.srcObject = streamRef.current
+      setVideoEnabled(true)
+    } catch {
+      // Silently fail — keep current track
     }
-  }, [meeting, videoDevices])
+  }, [])
 
   const handleAudioDeviceChange = useCallback(async (deviceId: string) => {
-    if (!meeting) return
     setSelectedAudioDevice(deviceId)
-    const device = audioDevices.find((d) => d.deviceId === deviceId)
-    if (device) {
-      await meeting.self.setDevice(device)
+    if (!streamRef.current) return
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: false,
+        audio: { deviceId: { exact: deviceId } },
+      })
+      const newTrack = newStream.getAudioTracks()[0]
+      const oldTrack = streamRef.current.getAudioTracks()[0]
+      if (oldTrack) {
+        streamRef.current.removeTrack(oldTrack)
+        oldTrack.stop()
+      }
+      streamRef.current.addTrack(newTrack)
+      setAudioEnabled(true)
+    } catch {
+      // Silently fail — keep current track
     }
-  }, [meeting, audioDevices])
+  }, [])
 
   const isWaiting = joinRequestStatus === 'requested'
   const wasRejected = joinRequestStatus === 'rejected'
@@ -127,6 +168,9 @@ export function MeetingSetupState({
               ? 'Set up your audio and video before joining.'
               : 'Set up your audio and video, then ask to join.'}
           </p>
+          {mediaError && (
+            <p className="text-sm text-amber-400">{mediaError}</p>
+          )}
         </div>
 
         {/* Video preview */}
@@ -137,18 +181,21 @@ export function MeetingSetupState({
             playsInline
             muted
             className="w-full h-full object-cover"
-            style={{ visibility: mediaReady && videoEnabled ? 'visible' : 'hidden' }}
+            style={{ visibility: mediaReady && videoEnabled && !mediaError ? 'visible' : 'hidden' }}
           />
           {!mediaReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#212124]">
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-[#212124] to-[#161618]">
               <Loader2 className="h-8 w-8 animate-spin text-[#71717a]" />
             </div>
           )}
-          {mediaReady && !videoEnabled && (
+          {mediaReady && (!videoEnabled || mediaError) && (
             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-[#212124] to-[#161618]">
-              <div className="h-20 w-20 rounded-full bg-white/5 flex items-center justify-center">
-                <span className="text-4xl font-semibold text-[#a1a1aa] select-none">
-                  {(name || '?').charAt(0).toUpperCase()}
+              <div className="flex flex-col items-center gap-3">
+                <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center">
+                  <VideoOff className="h-6 w-6 text-[#71717a]" />
+                </div>
+                <span className="text-xs text-[#71717a]">
+                  {mediaError ? 'Camera unavailable' : 'Camera off'}
                 </span>
               </div>
             </div>
@@ -202,22 +249,24 @@ export function MeetingSetupState({
           <button
             type="button"
             onClick={toggleAudio}
+            disabled={!!mediaError}
             className={`h-12 w-12 rounded-full flex items-center justify-center transition-colors ${
               audioEnabled
                 ? 'bg-[#60a5fa] text-white hover:bg-[#3b82f6]'
                 : 'bg-[#212124] text-[#ef4444] hover:bg-[#2a2a2e] ring-1 ring-white/5'
-            }`}
+            } disabled:opacity-40`}
           >
             {audioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
           </button>
           <button
             type="button"
             onClick={toggleVideo}
+            disabled={!!mediaError}
             className={`h-12 w-12 rounded-full flex items-center justify-center transition-colors ${
               videoEnabled
                 ? 'bg-[#60a5fa] text-white hover:bg-[#3b82f6]'
                 : 'bg-[#212124] text-[#ef4444] hover:bg-[#2a2a2e] ring-1 ring-white/5'
-            }`}
+            } disabled:opacity-40`}
           >
             {videoEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
           </button>
@@ -225,16 +274,42 @@ export function MeetingSetupState({
 
         {/* Action area */}
         <div className="space-y-3">
+          {wsState === 'error' && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-center">
+              <p className="text-sm text-red-400 mb-3">
+                Connection lost. Please reconnect to continue.
+              </p>
+              <button
+                type="button"
+                onClick={onReconnect}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-[#f4f4f5] text-sm transition-colors"
+              >
+                <Wifi className="h-4 w-4" />
+                Reconnect
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
-            onClick={handleJoin}
-            disabled={isJoining || isWaiting}
+            onClick={onJoin}
+            disabled={isWaiting || !mediaReady || (!authToken && isReturningUser) || wsState === 'error'}
             className="w-full h-12 rounded-lg bg-[#60a5fa] hover:bg-[#3b82f6] disabled:opacity-50 text-white font-medium text-sm flex items-center justify-center gap-2 transition-colors"
           >
-            {isJoining || isWaiting ? (
+            {!authToken && isReturningUser ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                {isJoining ? 'Joining...' : 'Waiting for host...'}
+                Connecting to room...
+              </>
+            ) : !mediaReady ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Starting camera...
+              </>
+            ) : isWaiting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Waiting for host...
               </>
             ) : (
               <>
@@ -249,12 +324,6 @@ export function MeetingSetupState({
               <p className="text-sm text-red-400">
                 The host declined your request. You can try again.
               </p>
-            </div>
-          )}
-
-          {joinError && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-center">
-              <p className="text-sm text-red-400">{joinError}</p>
             </div>
           )}
         </div>

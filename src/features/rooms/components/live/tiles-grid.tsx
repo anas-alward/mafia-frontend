@@ -1,5 +1,5 @@
 import { useRealtimeKitMeeting, useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
-import CustomParticipantTile from '#/features/rooms/components/participant-tile.tsx'
+import CustomParticipantTile from '#/features/rooms/components/live/participant-tile'
 
 export function getColumns(count: number) {
   if (count <= 1) return 1
