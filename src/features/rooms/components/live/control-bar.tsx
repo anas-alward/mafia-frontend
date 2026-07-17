@@ -1,12 +1,13 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import {
   RtkFullscreenToggle,
   RtkMicToggle,
   RtkCameraToggle,
   RtkStageToggle,
-  RtkLeaveButton,
 } from '@cloudflare/realtimekit-react-ui'
-import { Users, Check, X } from 'lucide-react'
+import { useRealtimeKitMeeting } from '@cloudflare/realtimekit-react'
+import { Users, Check, X, PhoneOff } from 'lucide-react'
 import { useJoinRequests } from '#/features/rooms/hooks/use-join-requests'
 import { useRoomContext } from '#/features/rooms/context/room-context'
 
@@ -15,6 +16,8 @@ interface ControlBarProps {
 }
 
 export default function ControlBar({ fullScreenRef }: ControlBarProps) {
+  const { meeting } = useRealtimeKitMeeting()
+  const navigate = useNavigate()
   const ctx = useRoomContext()
   const { joinRequests, acceptJoinRequest, rejectJoinRequest } = useJoinRequests({
     joinRequests: ctx.joinRequests,
@@ -56,7 +59,17 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
         <RtkMicToggle />
         <RtkCameraToggle />
         <RtkStageToggle />
-        <RtkLeaveButton />
+        <button
+          type="button"
+          onClick={async () => {
+            await meeting.leave()
+            navigate({ to: '/' })
+          }}
+          className="p-3 rounded-full bg-red-600 hover:bg-red-500 text-white transition-colors"
+          aria-label="Leave meeting"
+        >
+          <PhoneOff className="h-5 w-5" />
+        </button>
       </div>
 
       {/* Right: join requests + tooltip */}

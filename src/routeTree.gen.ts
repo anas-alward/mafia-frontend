@@ -9,18 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedChangePasswordRouteImport } from './routes/_authenticated/change-password'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
-import { Route as AuthenticatedRoomsRoomIdRouteImport } from './routes/_authenticated/rooms.$roomId'
+import { Route as RoomsRoomIdRouteRouteImport } from './routes/rooms/$roomId/route'
+import { Route as RoomsRoomIdLiveRouteImport } from './routes/rooms/$roomId/live'
+import { Route as RoomsRoomIdJoinRouteImport } from './routes/rooms/$roomId/join'
+import { Route as RoomsRoomIdEndedRouteImport } from './routes/rooms/$roomId/ended'
 
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const ChangePasswordRoute = ChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -28,12 +31,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedChangePasswordRoute =
-  AuthenticatedChangePasswordRouteImport.update({
-    id: '/change-password',
-    path: '/change-password',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
   id: '/(auth)/verify-email',
   path: '/verify-email',
@@ -59,82 +56,113 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoomsRoomIdRoute =
-  AuthenticatedRoomsRoomIdRouteImport.update({
-    id: '/rooms/$roomId',
-    path: '/rooms/$roomId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
+const RoomsRoomIdRouteRoute = RoomsRoomIdRouteRouteImport.update({
+  id: '/rooms/$roomId',
+  path: '/rooms/$roomId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RoomsRoomIdLiveRoute = RoomsRoomIdLiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => RoomsRoomIdRouteRoute,
+} as any)
+const RoomsRoomIdJoinRoute = RoomsRoomIdJoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => RoomsRoomIdRouteRoute,
+} as any)
+const RoomsRoomIdEndedRoute = RoomsRoomIdEndedRouteImport.update({
+  id: '/ended',
+  path: '/ended',
+  getParentRoute: () => RoomsRoomIdRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/reset-password': typeof authResetPasswordRoute
   '/signup': typeof authSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
-  '/change-password': typeof AuthenticatedChangePasswordRoute
-  '/rooms/$roomId': typeof AuthenticatedRoomsRoomIdRoute
+  '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
+  '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
+  '/rooms/$roomId/live': typeof RoomsRoomIdLiveRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/reset-password': typeof authResetPasswordRoute
   '/signup': typeof authSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
-  '/change-password': typeof AuthenticatedChangePasswordRoute
-  '/rooms/$roomId': typeof AuthenticatedRoomsRoomIdRoute
+  '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
+  '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
+  '/rooms/$roomId/live': typeof RoomsRoomIdLiveRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/change-password': typeof ChangePasswordRoute
+  '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/signup': typeof authSignupRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
-  '/_authenticated/change-password': typeof AuthenticatedChangePasswordRoute
-  '/_authenticated/rooms/$roomId': typeof AuthenticatedRoomsRoomIdRoute
+  '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
+  '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
+  '/rooms/$roomId/live': typeof RoomsRoomIdLiveRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/change-password'
+    | '/rooms/$roomId'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/verify-email'
-    | '/change-password'
-    | '/rooms/$roomId'
+    | '/rooms/$roomId/ended'
+    | '/rooms/$roomId/join'
+    | '/rooms/$roomId/live'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/change-password'
+    | '/rooms/$roomId'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/verify-email'
-    | '/change-password'
-    | '/rooms/$roomId'
+    | '/rooms/$roomId/ended'
+    | '/rooms/$roomId/join'
+    | '/rooms/$roomId/live'
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
+    | '/change-password'
+    | '/rooms/$roomId'
     | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/reset-password'
     | '/(auth)/signup'
     | '/(auth)/verify-email'
-    | '/_authenticated/change-password'
-    | '/_authenticated/rooms/$roomId'
+    | '/rooms/$roomId/ended'
+    | '/rooms/$roomId/join'
+    | '/rooms/$roomId/live'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ChangePasswordRoute: typeof ChangePasswordRoute
+  RoomsRoomIdRouteRoute: typeof RoomsRoomIdRouteRouteWithChildren
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authResetPasswordRoute: typeof authResetPasswordRoute
@@ -144,11 +172,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+    '/change-password': {
+      id: '/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof ChangePasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -157,13 +185,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/change-password': {
-      id: '/_authenticated/change-password'
-      path: '/change-password'
-      fullPath: '/change-password'
-      preLoaderRoute: typeof AuthenticatedChangePasswordRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/(auth)/verify-email': {
       id: '/(auth)/verify-email'
@@ -200,32 +221,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/rooms/$roomId': {
-      id: '/_authenticated/rooms/$roomId'
+    '/rooms/$roomId': {
+      id: '/rooms/$roomId'
       path: '/rooms/$roomId'
       fullPath: '/rooms/$roomId'
-      preLoaderRoute: typeof AuthenticatedRoomsRoomIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      preLoaderRoute: typeof RoomsRoomIdRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rooms/$roomId/live': {
+      id: '/rooms/$roomId/live'
+      path: '/live'
+      fullPath: '/rooms/$roomId/live'
+      preLoaderRoute: typeof RoomsRoomIdLiveRouteImport
+      parentRoute: typeof RoomsRoomIdRouteRoute
+    }
+    '/rooms/$roomId/join': {
+      id: '/rooms/$roomId/join'
+      path: '/join'
+      fullPath: '/rooms/$roomId/join'
+      preLoaderRoute: typeof RoomsRoomIdJoinRouteImport
+      parentRoute: typeof RoomsRoomIdRouteRoute
+    }
+    '/rooms/$roomId/ended': {
+      id: '/rooms/$roomId/ended'
+      path: '/ended'
+      fullPath: '/rooms/$roomId/ended'
+      preLoaderRoute: typeof RoomsRoomIdEndedRouteImport
+      parentRoute: typeof RoomsRoomIdRouteRoute
     }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedChangePasswordRoute: typeof AuthenticatedChangePasswordRoute
-  AuthenticatedRoomsRoomIdRoute: typeof AuthenticatedRoomsRoomIdRoute
+interface RoomsRoomIdRouteRouteChildren {
+  RoomsRoomIdEndedRoute: typeof RoomsRoomIdEndedRoute
+  RoomsRoomIdJoinRoute: typeof RoomsRoomIdJoinRoute
+  RoomsRoomIdLiveRoute: typeof RoomsRoomIdLiveRoute
 }
 
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedChangePasswordRoute: AuthenticatedChangePasswordRoute,
-  AuthenticatedRoomsRoomIdRoute: AuthenticatedRoomsRoomIdRoute,
+const RoomsRoomIdRouteRouteChildren: RoomsRoomIdRouteRouteChildren = {
+  RoomsRoomIdEndedRoute: RoomsRoomIdEndedRoute,
+  RoomsRoomIdJoinRoute: RoomsRoomIdJoinRoute,
+  RoomsRoomIdLiveRoute: RoomsRoomIdLiveRoute,
 }
 
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+const RoomsRoomIdRouteRouteWithChildren =
+  RoomsRoomIdRouteRoute._addFileChildren(RoomsRoomIdRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ChangePasswordRoute: ChangePasswordRoute,
+  RoomsRoomIdRouteRoute: RoomsRoomIdRouteRouteWithChildren,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authResetPasswordRoute: authResetPasswordRoute,

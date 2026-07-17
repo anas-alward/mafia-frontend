@@ -2,7 +2,9 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  redirect,
 } from '@tanstack/react-router'
+import { useAuthStore } from '#/features/auth/store/auth-store'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
@@ -20,6 +22,18 @@ interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
+  beforeLoad: ({ location }) => {
+    const publicPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email']
+    if (publicPaths.includes(location.pathname)) return
+
+    const { isAuthenticated, isLoading } = useAuthStore.getState()
+    if (!isAuthenticated && !isLoading) {
+      throw redirect({
+        to: '/login',
+        search: { redirect: location.href },
+      })
+    }
+  },
   head: () => ({
     meta: [
       {

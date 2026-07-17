@@ -1,18 +1,18 @@
 import { useNavigate } from '@tanstack/react-router'
-import { Video } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 
 export function MeetingEndedState() {
   const navigate = useNavigate()
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-[#161618]">
-      <div className="bg-[#212124] border border-white/5 rounded-2xl px-10 py-10 text-center space-y-6 max-w-sm w-full shadow-2xl">
-        <div className="h-16 w-16 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto">
-          <Video className="h-8 w-8 text-amber-500" />
+      <div className="text-center space-y-6">
+        <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto">
+          <LogOut className="h-5 w-5 text-[#71717a]" />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1">
           <h2 className="text-lg font-semibold text-[#f4f4f5]">Meeting ended</h2>
-          <p className="text-sm text-[#a1a1aa]">Thanks for joining.</p>
+          <p className="text-sm text-[#71717a]">Thanks for joining.</p>
         </div>
         <button
           type="button"
