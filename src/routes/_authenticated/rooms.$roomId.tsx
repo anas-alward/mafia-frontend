@@ -57,9 +57,10 @@ function MeetingRoomPage() {
 
   const authToken = roomState?.credentials.token ?? null
 
-  // For new users: when host accepts join request AND we have credentials, init + join
+  // For new users: when host accepts join request AND we have credentials, init + join.
+  // Skip returning users — they must click "Join meeting" explicitly.
   useEffect(() => {
-    if (joinRequestStatus !== 'accepted' || !authToken || meetingInstance || initError) return
+    if (joinRequestStatus !== 'accepted' || !authToken || meetingInstance || initError || isReturningUser) return
 
     initMeeting({ authToken })
       .then((result) => {
@@ -76,7 +77,7 @@ function MeetingRoomPage() {
           err instanceof Error ? err.message : 'Failed to connect to meeting.',
         )
       })
-  }, [joinRequestStatus, authToken, meetingInstance, initError, initMeeting])
+  }, [joinRequestStatus, authToken, meetingInstance, initError, initMeeting, isReturningUser])
 
   const handleJoin = useCallback(async () => {
     console.log('[handleJoin] CALLED', {
@@ -90,7 +91,7 @@ function MeetingRoomPage() {
     })
     setInitError(null)
 
-    if (isReturningUser || wasEverOpen) {
+    if (isReturningUser) {
       if (!authToken) {
         console.log('[handleJoin] EXIT early — no authToken')
         return
@@ -217,7 +218,7 @@ function MeetingRoomPage() {
     <div className="h-screen bg-[#161618]">
       <MeetingSetupState
         roomId={roomId}
-        isReturningUser={isReturningUser || wasEverOpen}
+        isReturningUser={isReturningUser}
         joinRequestStatus={joinRequestStatus}
         wsState={wsState}
         onReconnect={reconnect}
