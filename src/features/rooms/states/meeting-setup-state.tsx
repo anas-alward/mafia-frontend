@@ -9,6 +9,7 @@ interface MeetingSetupStateProps {
   onReconnect: () => void
   authToken: string | null
   onJoin: () => void
+  isJoining?: boolean
 }
 
 export function MeetingSetupState({
@@ -19,6 +20,7 @@ export function MeetingSetupState({
   onReconnect,
   authToken,
   onJoin,
+  isJoining = false,
 }: MeetingSetupStateProps) {
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
   const [videoEnabled, setVideoEnabled] = useState(true)
@@ -293,10 +295,15 @@ export function MeetingSetupState({
           <button
             type="button"
             onClick={onJoin}
-            disabled={isWaiting || !mediaReady || (!authToken && isReturningUser) || wsState === 'error'}
+            disabled={isWaiting || !mediaReady || (!authToken && isReturningUser) || wsState === 'error' || isJoining}
             className="w-full h-12 rounded-lg bg-[#60a5fa] hover:bg-[#3b82f6] disabled:opacity-50 text-white font-medium text-sm flex items-center justify-center gap-2 transition-colors"
           >
-            {!authToken && isReturningUser ? (
+            {isJoining ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Joining...
+              </>
+            ) : !authToken && isReturningUser ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Connecting to room...

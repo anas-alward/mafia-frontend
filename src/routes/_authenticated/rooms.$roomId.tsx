@@ -48,6 +48,7 @@ function MeetingRoomPage() {
   const [meetingInstance, setMeetingInstance] = useState<RTKClient | null>(null)
   const [initError, setInitError] = useState<string | null>(null)
   const [meetingState, setMeetingState] = useState('idle')
+  const [isJoining, setIsJoining] = useState(false)
   const fullScreenRef = useRef<HTMLDivElement>(null)
 
   const isReturningUser =
@@ -96,6 +97,7 @@ function MeetingRoomPage() {
         console.log('[handleJoin] EXIT early — no authToken')
         return
       }
+      setIsJoining(true)
       try {
         console.log('[handleJoin] calling initMeeting with authToken...')
         const result = await initMeeting({ authToken })
@@ -114,6 +116,8 @@ function MeetingRoomPage() {
         setInitError(
           err instanceof Error ? err.message : 'Failed to connect to meeting.',
         )
+      } finally {
+        setIsJoining(false)
       }
     } else {
       console.log('[handleJoin] sending join request...')
@@ -224,6 +228,7 @@ function MeetingRoomPage() {
         onReconnect={reconnect}
         authToken={authToken}
         onJoin={handleJoin}
+        isJoining={isJoining}
       />
     </div>
   )
