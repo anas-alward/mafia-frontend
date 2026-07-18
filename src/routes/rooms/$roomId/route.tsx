@@ -6,7 +6,11 @@ import { useRoomWebSocket } from '#/features/rooms/hooks/use-room-websocket'
 import { useRoomState } from '#/features/rooms/hooks/use-room-state'
 import { RoomClosedState } from '#/features/rooms/states/room-closed-state'
 import { MeetingContextProvider } from '#/features/rooms/context/meeting-context'
+import { GameContextProvider } from '#/features/rooms/context/game-context'
+import { useGameState } from '#/features/rooms/hooks/use-game-state'
+import { useGameActions } from '#/features/rooms/hooks/use-game-actions'
 import type { MeetingContextValue } from '#/features/rooms/context/meeting-context'
+import type { GameContextValue } from '#/features/rooms/context/game-context'
 
 export const Route = createFileRoute('/rooms/$roomId')({
   beforeLoad: ({ location, params }) => {
@@ -27,6 +31,7 @@ function RoomLayout() {
   const {
     state: wsState,
     lastMessage,
+    send,
     reconnect,
     acceptJoinRequest,
     rejectJoinRequest,
@@ -40,7 +45,12 @@ function RoomLayout() {
     joinRequestStatus,
     setJoinRequestStatus,
     currentUser,
+    participants,
+    isHost,
   } = useRoomState(lastMessage)
+
+  const gameState = useGameState(lastMessage)
+  const gameActions = useGameActions({ send })
 
   const [meeting, initMeeting] = useRealtimeKitClient()
   const [meetingInstance, setMeetingInstance] = useState<RTKClient | null>(null)
@@ -74,11 +84,20 @@ function RoomLayout() {
     setMeetingInstance,
     authToken,
     isReturningUser,
+    participants,
+    isHost,
+  }
+
+  const gameCtx: GameContextValue = {
+    ...gameState,
+    ...gameActions,
   }
 
   return (
     <MeetingContextProvider value={ctx}>
-      <Outlet />
+      <GameContextProvider value={gameCtx}>
+        <Outlet />
+      </GameContextProvider>
     </MeetingContextProvider>
   )
 }

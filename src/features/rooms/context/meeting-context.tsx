@@ -3,6 +3,7 @@ import type RTKClient from '@cloudflare/realtimekit'
 import type { WsState } from '../hooks/use-room-websocket'
 import type { RoomStateEvent } from '../events'
 import type { JoinRequest } from '../hooks/use-room-state'
+import type { Participant } from '../components/participant-list'
 
 export interface MeetingContextValue {
   roomId: string
@@ -22,6 +23,8 @@ export interface MeetingContextValue {
   setMeetingInstance: React.Dispatch<React.SetStateAction<RTKClient | null>>
   authToken: string | null
   isReturningUser: boolean
+  participants: Participant[]
+  isHost: boolean
 }
 
 const MeetingContext = createContext<MeetingContextValue | null>(null)

@@ -11,6 +11,12 @@ import type {
   JoinRequestReceivedEvent,
   JoinRequestAcceptedEvent,
   JoinRequestRejectedEvent,
+  GameStartedEvent,
+  RoleAssignedEvent,
+  SunRiseEvent,
+  SunSetEvent,
+  VoteCastEvent,
+  VoteResultStartedEvent,
 } from '../events'
 
 // ── WebSocket message union ──
@@ -25,6 +31,12 @@ export type WsMessage =
   | JoinRequestReceivedEvent
   | JoinRequestAcceptedEvent
   | JoinRequestRejectedEvent
+  | GameStartedEvent
+  | RoleAssignedEvent
+  | SunRiseEvent
+  | SunSetEvent
+  | VoteCastEvent
+  | VoteResultStartedEvent
   | { type: string; [key: string]: unknown }
 
 export type WsState = 'connecting' | 'open' | 'closed' | 'error'

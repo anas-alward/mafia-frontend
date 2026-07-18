@@ -26,6 +26,8 @@ function LiveRoute() {
     dismissJoinRequest,
     acceptJoinRequest,
     rejectJoinRequest,
+    participants,
+    isHost,
   } = useMeetingContext()
 
   const navigate = useNavigate()
@@ -54,6 +56,8 @@ function LiveRoute() {
     dismissJoinRequest,
     acceptJoinRequest,
     rejectJoinRequest,
+    participants,
+    isHost,
   }
 
   return (

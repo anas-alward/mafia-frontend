@@ -1,11 +1,14 @@
 import { createContext, useContext } from 'react'
 import type { JoinRequest } from '../hooks/use-room-state'
+import type { Participant } from '../components/participant-list'
 
 interface RoomContextValue {
   joinRequests: JoinRequest[]
   dismissJoinRequest: (userId: number) => void
   acceptJoinRequest: (userId: number) => void
   rejectJoinRequest: (userId: number) => void
+  participants: Participant[]
+  isHost: boolean
 }
 
 const RoomContext = createContext<RoomContextValue | null>(null)

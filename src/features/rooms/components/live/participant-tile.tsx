@@ -4,6 +4,15 @@ import {
   RtkAudioVisualizer,
   RtkNameTag,
 } from '@cloudflare/realtimekit-react-ui'
+import { Eye, Skull, Crosshair, Stethoscope, User } from 'lucide-react'
+import { useGameContext } from '#/features/rooms/context/game-context'
+
+const ROLE_ICONS: Record<string, typeof Eye> = {
+  mafia: Skull,
+  gunner: Crosshair,
+  doctor: Stethoscope,
+  cop: Eye,
+}
 
 interface CustomParticipantTileProps {
   participant: any
@@ -29,13 +38,37 @@ export default function CustomParticipantTile({ participant }: CustomParticipant
 
   const initial = (name ?? '?').charAt(0).toUpperCase()
 
+  const { gameStarted, myRoleType, mafiaIds, myRole } = useGameContext()
+  const isMafia = myRoleType === 'mafia'
+
+  let ringClass = 'ring-1 ring-white/5 hover:ring-white/10'
+  if (isSpeaking) {
+    ringClass = 'ring-2 ring-[#60a5fa] ring-offset-1 ring-offset-[#161618]'
+  } else if (gameStarted && isMafia) {
+    const tileUserId = participant.userId
+    if (tileUserId != null && mafiaIds.has(tileUserId)) {
+      ringClass = 'ring-1 ring-gray-700 hover:ring-gray-600'
+    } else if (tileUserId != null && !isLocal) {
+      ringClass = 'ring-1 ring-red-500/40 hover:ring-red-500/60'
+    }
+  }
+
+  let roleIcon: React.ReactNode = null
+  if (gameStarted) {
+    if (isLocal && myRole) {
+      const Icon = ROLE_ICONS[myRoleType ?? ''] ?? User
+      roleIcon = <Icon className="h-3.5 w-3.5" />
+    } else if (isMafia) {
+      const tileUserId = participant.userId
+      if (tileUserId != null && mafiaIds.has(tileUserId)) {
+        roleIcon = <Skull className="h-3.5 w-3.5" />
+      }
+    }
+  }
+
   return (
     <div
-      className={`group relative w-full h-full rounded-lg overflow-hidden transition-all duration-200 ${
-        isSpeaking
-          ? 'ring-2 ring-[#60a5fa] ring-offset-1 ring-offset-[#161618]'
-          : 'ring-1 ring-white/5 hover:ring-white/10'
-      }`}
+      className={`group relative w-full h-full rounded-lg overflow-hidden transition-all duration-200 ${ringClass}`}
     >
       {videoEnabled ? (
         <video
@@ -64,6 +97,13 @@ export default function CustomParticipantTile({ participant }: CustomParticipant
           <RtkAudioVisualizer />
         </RtkNameTag>
       </div>
+
+      {/* Role icon */}
+      {roleIcon && (
+        <div className="absolute top-3 left-3 w-6 h-6 rounded-md bg-black/60 border border-white/10 flex items-center justify-center text-[#f4f4f5]">
+          {roleIcon}
+        </div>
+      )}
 
       {/* Local indicator */}
       {isLocal && !videoEnabled && (
