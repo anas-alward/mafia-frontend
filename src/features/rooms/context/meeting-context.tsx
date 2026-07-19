@@ -25,6 +25,7 @@ export interface MeetingContextValue {
   isReturningUser: boolean
   participants: Participant[]
   isHost: boolean
+  sendError: string | null
 }
 
 const MeetingContext = createContext<MeetingContextValue | null>(null)

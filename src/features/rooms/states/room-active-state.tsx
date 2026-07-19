@@ -4,13 +4,14 @@ import { RtkStage } from '@cloudflare/realtimekit-react-ui'
 import { Users, Copy, Check, ScrollText } from 'lucide-react'
 import TilesGrid from '#/features/rooms/components/live/tiles-grid.tsx'
 import ControlBar from '#/features/rooms/components/live/control-bar.tsx'
-import { useGameContext } from '#/features/rooms/context/game-context'
-import { GamePhaseIndicator } from '#/features/rooms/components/game/game-phase-indicator'
-import { GameRoleBadge } from '#/features/rooms/components/game/game-role-badge'
-import { GameLog } from '#/features/rooms/components/game/game-log'
-import { GameVotePanel } from '#/features/rooms/components/game/game-vote-panel'
-import { GameNightPanel } from '#/features/rooms/components/game/game-night-panel'
-import { GameStartPrompt } from '#/features/rooms/components/game/game-start-prompt'
+import CustomParticipantTile from '#/features/rooms/components/live/participant-tile'
+import GameActionBar from '#/features/game/components/game-action-bar'
+import { useGameContext } from '#/features/game/context/game-context'
+import { useRoomContext } from '#/features/rooms/context/room-context'
+import { useAuthStore } from '#/features/auth/store/auth-store'
+import { GamePhaseIndicator } from '#/features/game/components/game-phase-indicator'
+import { GameRoleBadge } from '#/features/game/components/game-role-badge'
+import { GameLog } from '#/features/game/components/game-log'
 
 interface RoomActiveStateProps {
   fullScreenRef: React.RefObject<HTMLDivElement | null>
@@ -22,7 +23,37 @@ export function RoomActiveState({ fullScreenRef, roomId }: RoomActiveStateProps)
   const participantCount = useRealtimeKitSelector(
     () => meeting.participants.joined.size + 1,
   )
-  const { gameStarted, phase } = useGameContext()
+  const { gameStarted, startGame } = useGameContext()
+  const { isHost } = useRoomContext()
+
+  const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null)
+  const [preGameSelectedIds, setPreGameSelectedIds] = useState<Set<number>>(new Set())
+
+  const onTogglePreGamePlayer = useCallback((userId: number) => {
+    console.log("userId", userId)
+    setPreGameSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(userId)) {
+        next.delete(userId)
+      } else {
+        next.add(userId)
+      }
+      return next
+    })
+  }, [])
+
+  const selfParticipant = useRealtimeKitSelector(() => meeting.self)
+  const currentUser = useAuthStore((s) => s.user)
+  const currentUserId = currentUser ? Number(currentUser.id) : null
+  const isPreGameHost = isHost && !gameStarted
+
+  // Self-view corner tile selectability
+  let selfSelectable = false
+  let selfSelected = false
+  if (isPreGameHost) {
+    selfSelectable = true
+    selfSelected = currentUserId != null && preGameSelectedIds.has(currentUserId)
+  }
 
   const [copied, setCopied] = useState(false)
   const copyRoomCode = useCallback(async () => {
@@ -110,6 +141,16 @@ export function RoomActiveState({ fullScreenRef, roomId }: RoomActiveStateProps)
       {/* Phase indicator */}
       <GamePhaseIndicator />
 
+      {/* Game action bar — sticky to left middle */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2">
+        <GameActionBar
+          selectedPlayerId={selectedPlayerId}
+          preGameSelectedIds={preGameSelectedIds}
+          isPreGameHost={isPreGameHost}
+          onStartGame={startGame}
+        />
+      </div>
+
       {/* Stage — wrapped in a plain div so flex constraints are enforced */}
       <div className="flex-1 min-h-0 relative overflow-hidden">
         <RtkStage
@@ -118,18 +159,28 @@ export function RoomActiveState({ fullScreenRef, roomId }: RoomActiveStateProps)
             inset: 0,
           }}
         >
-          <TilesGrid />
+          <TilesGrid
+            selectedPlayerId={selectedPlayerId}
+            onSelectPlayer={setSelectedPlayerId}
+            preGameSelectedIds={preGameSelectedIds}
+            onTogglePreGamePlayer={onTogglePreGamePlayer}
+            isPreGameHost={isPreGameHost}
+          />
         </RtkStage>
+
+        {/* Self-view corner tile */}
+        <div className="absolute bottom-4 right-4 z-30 w-52 h-32 rounded-lg overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/10">
+          <CustomParticipantTile
+            participant={selfParticipant}
+            isSelected={selfSelected}
+            isSelectable={selfSelectable}
+            onSelect={isPreGameHost ? onTogglePreGamePlayer : () => {}}
+          />
+        </div>
 
         {/* Game overlays */}
         {gameStarted && (
           <>
-            {/* Left: action panels */}
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-40 max-w-xs w-full space-y-3">
-              {phase === 'day' && <GameVotePanel />}
-              {phase === 'night' && <GameNightPanel />}
-            </div>
-
             {/* Right: game log sidebar */}
             {logOpen && (
               <div className="absolute right-0 top-0 bottom-0 z-40 w-72 bg-[#161618] border-l border-white/5">
@@ -137,13 +188,6 @@ export function RoomActiveState({ fullScreenRef, roomId }: RoomActiveStateProps)
               </div>
             )}
           </>
-        )}
-
-        {/* Game start prompt (host only) */}
-        {!gameStarted && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-40 max-w-xs w-full">
-            <GameStartPrompt />
-          </div>
         )}
       </div>
 

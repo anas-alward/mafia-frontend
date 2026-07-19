@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
 import { useRealtimeKitClient } from '@cloudflare/realtimekit-react'
 import type RTKClient from '@cloudflare/realtimekit'
@@ -6,11 +6,11 @@ import { useRoomWebSocket } from '#/features/rooms/hooks/use-room-websocket'
 import { useRoomState } from '#/features/rooms/hooks/use-room-state'
 import { RoomClosedState } from '#/features/rooms/states/room-closed-state'
 import { MeetingContextProvider } from '#/features/rooms/context/meeting-context'
-import { GameContextProvider } from '#/features/rooms/context/game-context'
-import { useGameState } from '#/features/rooms/hooks/use-game-state'
-import { useGameActions } from '#/features/rooms/hooks/use-game-actions'
+import { GameContextProvider } from '#/features/game/context/game-context'
+import { useGameState } from '#/features/game/hooks/use-game-state'
+import { useGameActions } from '#/features/game/hooks/use-game-actions'
 import type { MeetingContextValue } from '#/features/rooms/context/meeting-context'
-import type { GameContextValue } from '#/features/rooms/context/game-context'
+import type { GameContextValue } from '#/features/game/context/game-context'
 
 export const Route = createFileRoute('/rooms/$roomId')({
   beforeLoad: ({ location, params }) => {
@@ -33,6 +33,7 @@ function RoomLayout() {
     lastMessage,
     send,
     reconnect,
+    sendError,
     acceptJoinRequest,
     rejectJoinRequest,
     sendJoinRequest,
@@ -66,9 +67,10 @@ function RoomLayout() {
     return <RoomClosedState />
   }
 
-  const ctx: MeetingContextValue = {
+  const ctx: MeetingContextValue = useMemo(() => ({
     roomId,
     wsState,
+    sendError,
     reconnect,
     sendJoinRequest,
     roomState,
@@ -86,12 +88,18 @@ function RoomLayout() {
     isReturningUser,
     participants,
     isHost,
-  }
+  }), [
+    roomId, wsState, sendError, reconnect, sendJoinRequest,
+    roomState, joinRequests, dismissJoinRequest, acceptJoinRequest, rejectJoinRequest,
+    joinRequestStatus, setJoinRequestStatus,
+    meeting, initMeeting, meetingInstance, setMeetingInstance,
+    authToken, isReturningUser, participants, isHost,
+  ])
 
-  const gameCtx: GameContextValue = {
+  const gameCtx: GameContextValue = useMemo(() => ({
     ...gameState,
     ...gameActions,
-  }
+  }), [gameState, gameActions])
 
   return (
     <MeetingContextProvider value={ctx}>

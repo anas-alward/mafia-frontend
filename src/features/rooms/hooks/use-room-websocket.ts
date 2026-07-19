@@ -17,6 +17,7 @@ import type {
   SunSetEvent,
   VoteCastEvent,
   VoteResultStartedEvent,
+  GameStateEvent,
 } from '../events'
 
 // ── WebSocket message union ──
@@ -37,6 +38,7 @@ export type WsMessage =
   | SunSetEvent
   | VoteCastEvent
   | VoteResultStartedEvent
+  | GameStateEvent
   | { type: string; [key: string]: unknown }
 
 export type WsState = 'connecting' | 'open' | 'closed' | 'error'
@@ -54,9 +56,12 @@ function getWebSocketUrl(code: string, token: string | null): string {
 export function useRoomWebSocket(code: string | undefined) {
   const wsRef = useRef<WebSocket | null>(null)
   const wasEverOpenRef = useRef(false)
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const mountedRef = useRef(true)
   const [state, setState] = useState<WsState>('connecting')
   const [lastMessage, setLastMessage] = useState<WsMessage | null>(null)
   const [wasEverOpen, setWasEverOpen] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
 
   const connect = useCallback(() => {
     if (!code) return
@@ -66,17 +71,35 @@ export function useRoomWebSocket(code: string | undefined) {
     const ws = new WebSocket(url)
 
     ws.onopen = () => {
+      if (!mountedRef.current) return
       setState('open')
+      setSendError(null)
       if (!wasEverOpenRef.current) {
         wasEverOpenRef.current = true
         setWasEverOpen(true)
       }
     }
 
-    ws.onclose = () => setState('closed')
-    ws.onerror = () => setState('error')
+    ws.onclose = () => {
+      if (!mountedRef.current) return
+      setState('closed')
+      // Auto-reconnect after 2s if the socket was ever open
+      if (wasEverOpenRef.current) {
+        reconnectTimerRef.current = setTimeout(() => {
+          if (mountedRef.current) {
+            connect()
+          }
+        }, 2000)
+      }
+    }
+
+    ws.onerror = () => {
+      if (!mountedRef.current) return
+      setState('error')
+    }
 
     ws.onmessage = (event) => {
+      if (!mountedRef.current) return
       try {
         const data = JSON.parse(event.data) as WsMessage
         setLastMessage(data)
@@ -89,11 +112,17 @@ export function useRoomWebSocket(code: string | undefined) {
   }, [code])
 
   useEffect(() => {
+    mountedRef.current = true
     wasEverOpenRef.current = false
     setWasEverOpen(false)
     connect()
 
     return () => {
+      mountedRef.current = false
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current)
+        reconnectTimerRef.current = null
+      }
       if (wsRef.current) {
         wsRef.current.onopen = null
         wsRef.current.onclose = null
@@ -106,12 +135,22 @@ export function useRoomWebSocket(code: string | undefined) {
   }, [connect])
 
   const send = useCallback((data: unknown) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
+    const readyState = wsRef.current?.readyState
+    if (readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(data))
+      setSendError(null)
+    } else {
+      const msg = `Connection lost — cannot send. State: ${readyState === WebSocket.CONNECTING ? 'connecting' : readyState === WebSocket.CLOSING ? 'closing' : 'closed'}`
+      console.warn('[WS send]', msg)
+      setSendError(msg)
     }
   }, [])
 
   const reconnect = useCallback(() => {
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current)
+      reconnectTimerRef.current = null
+    }
     if (wsRef.current) {
       wsRef.current.onopen = null
       wsRef.current.onclose = null
@@ -141,5 +180,5 @@ export function useRoomWebSocket(code: string | undefined) {
     [send, code],
   )
 
-  return { state, lastMessage, send, reconnect, wasEverOpen, acceptJoinRequest, rejectJoinRequest, closeRoom, sendJoinRequest }
+  return { state, lastMessage, send, reconnect, wasEverOpen, sendError, acceptJoinRequest, rejectJoinRequest, closeRoom, sendJoinRequest }
 }

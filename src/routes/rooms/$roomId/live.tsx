@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useMemo, useCallback } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   RealtimeKitProvider,
@@ -12,6 +12,8 @@ import {
 import { useMeetingContext } from '#/features/rooms/context/meeting-context'
 import { RoomContextProvider } from '#/features/rooms/context/room-context'
 import { RoomActiveState } from '#/features/rooms/states/room-active-state'
+import { SidebarProvider, SidebarInset } from '#/components/ui/sidebar'
+import { JoinRequestsSidebar } from '#/features/rooms/components/live/join-requests-sidebar'
 
 export const Route = createFileRoute('/rooms/$roomId/live')({
   component: LiveRoute,
@@ -28,6 +30,8 @@ function LiveRoute() {
     rejectJoinRequest,
     participants,
     isHost,
+    wsState,
+    sendError,
   } = useMeetingContext()
 
   const navigate = useNavigate()
@@ -41,49 +45,62 @@ function LiveRoute() {
     }
   }, [activeMeeting, navigate, roomId])
 
-  const handleStatesUpdate = (event: { detail: { meeting?: string } }) => {
-    if (event.detail.meeting === 'ended') {
-      navigate({ to: '/rooms/$roomId/ended', params: { roomId }, replace: true })
-    }
-  }
+  const handleStatesUpdate = useCallback(
+    (event: { detail: { meeting?: string } }) => {
+      if (event.detail.meeting === 'ended') {
+        navigate({ to: '/rooms/$roomId/ended', params: { roomId }, replace: true })
+      }
+    },
+    [navigate, roomId],
+  )
 
   if (!activeMeeting) {
     return null
   }
 
-  const roomContextValue = {
-    joinRequests,
-    dismissJoinRequest,
-    acceptJoinRequest,
-    rejectJoinRequest,
-    participants,
-    isHost,
-  }
+  const roomContextValue = useMemo(
+    () => ({
+      joinRequests,
+      dismissJoinRequest,
+      acceptJoinRequest,
+      rejectJoinRequest,
+      participants,
+      isHost,
+      wsState,
+      sendError,
+    }),
+    [joinRequests, dismissJoinRequest, acceptJoinRequest, rejectJoinRequest, participants, isHost, wsState, sendError],
+  )
 
   return (
-    <div className="flex flex-col h-screen bg-[#161618]">
-      <RealtimeKitProvider value={activeMeeting}>
-        <RoomContextProvider value={roomContextValue}>
-          <RtkUiProvider
-            ref={fullScreenRef}
-            meeting={activeMeeting}
-            showSetupScreen={false}
-            onRtkStatesUpdate={handleStatesUpdate}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-              width: '100%',
-              margin: 0,
-            }}
-          >
-            <RoomActiveState fullScreenRef={fullScreenRef} roomId={roomId} />
-            <RtkParticipantsAudio />
-            <RtkDialogManager />
-            <RtkNotifications />
-          </RtkUiProvider>
-        </RoomContextProvider>
-      </RealtimeKitProvider>
-    </div>
+    <RealtimeKitProvider value={activeMeeting}>
+      <RoomContextProvider value={roomContextValue}>
+        <SidebarProvider defaultOpen={false}>
+          <SidebarInset className="min-h-svh bg-[#161618]">
+            <div className="flex flex-col h-screen">
+              <RtkUiProvider
+                ref={fullScreenRef}
+                meeting={activeMeeting}
+                showSetupScreen={false}
+                onRtkStatesUpdate={handleStatesUpdate}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  width: '100%',
+                  margin: 0,
+                }}
+              >
+                <RoomActiveState fullScreenRef={fullScreenRef} roomId={roomId} />
+                <RtkParticipantsAudio />
+                <RtkDialogManager />
+                <RtkNotifications />
+              </RtkUiProvider>
+            </div>
+          </SidebarInset>
+          <JoinRequestsSidebar />
+        </SidebarProvider>
+      </RoomContextProvider>
+    </RealtimeKitProvider>
   )
 }

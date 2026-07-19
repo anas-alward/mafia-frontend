@@ -57,6 +57,13 @@ export function useRoomState(lastMessage: WsMessage | null) {
       case 'room_state': {
         const msg = lastMessage as RoomStateEvent
         if (msg.host_id !== null) setHostId(msg.host_id)
+        setParticipants((prev) => {
+          const existingIds = new Set(prev.map((p) => p.userId))
+          const newParticipants: Participant[] = msg.members
+            .filter((id) => !existingIds.has(id))
+            .map((id) => ({ userId: id, username: `Player ${id}` }))
+          return newParticipants.length > 0 ? [...prev, ...newParticipants] : prev
+        })
         break
       }
 

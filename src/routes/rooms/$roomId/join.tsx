@@ -26,8 +26,30 @@ function JoinRoute() {
   const [initError, setInitError] = useState<string | null>(null)
   const [isJoining, setIsJoining] = useState(false)
 
+  // Auto-join for returning users — skip the "Join meeting" button entirely.
+  useEffect(() => {
+    if (!isReturningUser || !authToken || meetingInstance || initError) return
+
+    setIsJoining(true)
+    initMeeting({ authToken })
+      .then((result) => {
+        if (result) {
+          setMeetingInstance(result)
+          return result.join()
+        }
+      })
+      .then(() => {
+        navigate({ to: '/rooms/$roomId/live', params: { roomId } })
+      })
+      .catch((err: unknown) => {
+        setInitError(
+          err instanceof Error ? err.message : 'Failed to connect to meeting.',
+        )
+        setIsJoining(false)
+      })
+  }, [isReturningUser, authToken, meetingInstance, initError, initMeeting, navigate, setMeetingInstance, roomId])
+
   // For new users: when host accepts join request AND we have credentials, init + join.
-  // Skip returning users — they must click "Join meeting" explicitly.
   useEffect(() => {
     if (joinRequestStatus !== 'accepted' || !authToken || meetingInstance || initError || isReturningUser) return
 
@@ -46,7 +68,7 @@ function JoinRoute() {
           err instanceof Error ? err.message : 'Failed to connect to meeting.',
         )
       })
-  }, [joinRequestStatus, authToken, meetingInstance, initError, initMeeting, isReturningUser, navigate, setMeetingInstance])
+  }, [joinRequestStatus, authToken, meetingInstance, initError, initMeeting, isReturningUser, navigate, setMeetingInstance, roomId])
 
   const handleJoin = useCallback(async () => {
     setInitError(null)

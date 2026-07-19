@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react'
 import type { JoinRequest } from '../hooks/use-room-state'
 import type { Participant } from '../components/participant-list'
+import type { WsState } from '../hooks/use-room-websocket'
 
 interface RoomContextValue {
   joinRequests: JoinRequest[]
@@ -9,6 +10,8 @@ interface RoomContextValue {
   rejectJoinRequest: (userId: number) => void
   participants: Participant[]
   isHost: boolean
+  wsState: WsState
+  sendError: string | null
 }
 
 const RoomContext = createContext<RoomContextValue | null>(null)

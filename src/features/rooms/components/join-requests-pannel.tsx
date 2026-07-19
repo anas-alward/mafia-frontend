@@ -15,7 +15,7 @@ export default function JoinRequestsPanel({ open, onToggle }: JoinRequestsPanelP
     acceptJoinRequest: ctx.acceptJoinRequest,
     rejectJoinRequest: ctx.rejectJoinRequest,
   })
-  const count = joinRequests?.length ?? 0
+  const count = joinRequests.length
 
   return (
     <>
@@ -63,7 +63,7 @@ export default function JoinRequestsPanel({ open, onToggle }: JoinRequestsPanelP
             </p>
           ) : (
             <ul className="divide-y divide-white/5">
-              {joinRequests!.map((req) => (
+              {joinRequests.map((req) => (
                 <li
                   key={req.userId}
                   className="px-5 py-4 flex items-center justify-between gap-3"
