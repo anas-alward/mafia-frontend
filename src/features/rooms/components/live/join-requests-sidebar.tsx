@@ -1,15 +1,7 @@
 import { Users, Check, X } from 'lucide-react'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useJoinRequests } from '#/features/rooms/hooks/use-join-requests'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-} from '#/components/ui/sidebar'
+import { useSidebar } from '#/components/ui/sidebar'
 
 export function JoinRequestsSidebar() {
   const roomJoinRequests = useMeetingStore((s) => s.joinRequests)
@@ -23,72 +15,82 @@ export function JoinRequestsSidebar() {
     rejectJoinRequest: roomRejectJoinRequest,
   })
   const count = joinRequests.length
+  const { open, setOpen } = useSidebar()
 
   return (
-    <Sidebar
-      side="right"
-      collapsible="offcanvas"
-      className="border-l border-white/5 bg-[#1a1a1d]"
+    <aside
+      className={`fixed right-4 top-20 bottom-24 z-10 w-72 bg-[#1c1c1f] border border-white/[0.06] rounded-2xl flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
+        open
+          ? 'translate-x-0 opacity-100'
+          : 'translate-x-[calc(100%+1rem)] opacity-0 pointer-events-none'
+      }`}
     >
-      <SidebarHeader className="px-4 py-3 border-b border-white/5">
-        <div className="flex items-center gap-2">
+      {/* Header */}
+      <div className="shrink-0 flex items-center justify-between px-5 pt-5 pb-3">
+        <div className="flex items-center gap-2.5">
           <Users className="h-4 w-4 text-[#a1a1aa]" />
-          <h2 className="text-sm font-semibold text-[#f4f4f5]">Join Requests</h2>
+          <h2 className="text-sm font-medium text-[#f4f4f5]">Join Requests</h2>
           {count > 0 && (
-            <span className="text-xs text-[#a1a1aa] bg-white/5 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-medium text-[#a1a1aa] bg-white/[0.06] px-1.5 py-px rounded-full leading-relaxed">
               {count}
             </span>
           )}
         </div>
-      </SidebarHeader>
-      <SidebarContent className="[&>[data-sidebar=menu]]:flex-1">
-        <SidebarGroup>
-          <SidebarGroupContent>
-            {count === 0 ? (
-              <p className="px-2 py-8 text-sm text-[#71717a] text-center">
-                No pending requests
-              </p>
-            ) : (
-              <SidebarMenu>
-                {joinRequests.map((req) => (
-                  <SidebarMenuItem key={req.userId}>
-                    <div className="flex items-center justify-between gap-3 px-2 py-2.5">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                          <span className="text-sm font-medium text-[#a1a1aa]">
-                            {req.username.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="text-sm text-[#f4f4f5] truncate">
-                          {req.username}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => acceptJoinRequest(req.userId)}
-                          className="p-1.5 rounded-lg bg-green-600/80 text-white hover:bg-green-500 transition-colors"
-                          aria-label={`Accept ${req.username}`}
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => rejectJoinRequest(req.userId)}
-                          className="p-1.5 rounded-lg bg-white/5 text-[#a1a1aa] hover:bg-white/10 hover:text-[#f4f4f5] transition-colors"
-                          aria-label={`Reject ${req.username}`}
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="p-1.5 rounded-full text-[#71717a] hover:text-[#f4f4f5] hover:bg-white/[0.06] transition-colors"
+          aria-label="Close"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {count === 0 ? (
+          <p className="px-5 py-12 text-[13px] text-[#71717a] text-center">
+            No pending requests
+          </p>
+        ) : (
+          <ul className="flex flex-col">
+            {joinRequests.map((req) => (
+              <li key={req.userId}>
+                <div className="flex items-center justify-between gap-3 px-5 py-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-full bg-white/[0.06] flex items-center justify-center shrink-0">
+                      <span className="text-[13px] font-medium text-[#d4d4d8]">
+                        {req.username.charAt(0).toUpperCase()}
+                      </span>
                     </div>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            )}
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+                    <span className="text-[13px] text-[#f4f4f5] truncate">
+                      {req.username}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => acceptJoinRequest(req.userId)}
+                      className="p-2 rounded-full text-[#a1a1aa] hover:text-[#22c55e] hover:bg-[#22c55e]/10 transition-colors"
+                      aria-label={`Accept ${req.username}`}
+                    >
+                      <Check className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => rejectJoinRequest(req.userId)}
+                      className="p-2 rounded-full text-[#a1a1aa] hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors"
+                      aria-label={`Reject ${req.username}`}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </aside>
   )
 }

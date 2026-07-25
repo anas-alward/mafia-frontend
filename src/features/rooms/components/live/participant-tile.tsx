@@ -4,7 +4,7 @@ import {
   RtkAudioVisualizer,
   RtkNameTag,
 } from '@cloudflare/realtimekit-react-ui'
-import { Eye, Skull, Crosshair, Stethoscope, User, Vote, Ban } from 'lucide-react'
+import { Eye, Skull, Crosshair, Stethoscope, User, Vote } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
 
 const ROLE_ICONS: Record<string, typeof Eye> = {
@@ -67,7 +67,7 @@ export default function CustomParticipantTile({
   // ---- Ring / border ----
   let ringClass = 'ring-1 ring-white/5'
   if (gameStarted && !isAlive) {
-    ringClass = 'ring-1 ring-red-500/30 opacity-50'
+    ringClass = 'ring-1 ring-white/5'
   } else if (isSpeaking) {
     ringClass = 'ring-2 ring-[#60a5fa] ring-offset-1 ring-offset-[#161618]'
   } else if (isSelected) {
@@ -131,14 +131,7 @@ export default function CustomParticipantTile({
 
       {/* Dead overlay */}
       {gameStarted && !isAlive && (
-        <div className="absolute inset-0 bg-red-950/40 flex items-center justify-center pointer-events-none">
-          <div className="flex flex-col items-center gap-1">
-            <Ban className="h-8 w-8 text-red-400/70" />
-            <span className="text-xs font-semibold text-red-400/80 tracking-widest uppercase">
-              Dead
-            </span>
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-[#161618]/70 pointer-events-none" />
       )}
 
       {/* Bottom gradient overlay */}

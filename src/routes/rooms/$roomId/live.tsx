@@ -11,12 +11,24 @@ import {
 } from '@cloudflare/realtimekit-react-ui'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { RoomActiveState } from '#/features/rooms/states/room-active-state'
-import { SidebarProvider, SidebarInset } from '#/components/ui/sidebar'
+import { SidebarProvider, SidebarInset, useSidebar } from '#/components/ui/sidebar'
 import { JoinRequestsSidebar } from '#/features/rooms/components/live/join-requests-sidebar'
 
 export const Route = createFileRoute('/rooms/$roomId/live')({
   component: LiveRoute,
 })
+
+function SidebarClickAway({ children }: { children: React.ReactNode }) {
+  const { open, setOpen } = useSidebar()
+  return (
+    <div
+      onClick={() => { if (open) setOpen(false) }}
+      className="h-full w-full"
+    >
+      {children}
+    </div>
+  )
+}
 
 function LiveRoute() {
   const { roomId } = Route.useParams()
@@ -59,26 +71,28 @@ function LiveRoute() {
     <RealtimeKitProvider value={activeMeeting}>
       <SidebarProvider defaultOpen={false}>
         <SidebarInset className="min-h-svh bg-[#161618]">
-          <div className="flex flex-col h-screen">
-            <RtkUiProvider
-              ref={fullScreenRef}
-              meeting={activeMeeting}
-              showSetupScreen={false}
-              onRtkStatesUpdate={handleStatesUpdate}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-                width: '100%',
-                margin: 0,
-              }}
-            >
-              <RoomActiveState fullScreenRef={fullScreenRef} roomId={roomId} />
-              <RtkParticipantsAudio />
-              <RtkDialogManager />
-              <RtkNotifications />
-            </RtkUiProvider>
-          </div>
+          <SidebarClickAway>
+            <div className="flex flex-col h-screen">
+              <RtkUiProvider
+                ref={fullScreenRef}
+                meeting={activeMeeting}
+                showSetupScreen={false}
+                onRtkStatesUpdate={handleStatesUpdate}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%',
+                  width: '100%',
+                  margin: 0,
+                }}
+              >
+                <RoomActiveState fullScreenRef={fullScreenRef} roomId={roomId} />
+                <RtkParticipantsAudio />
+                <RtkDialogManager />
+                <RtkNotifications />
+              </RtkUiProvider>
+            </div>
+          </SidebarClickAway>
         </SidebarInset>
         <JoinRequestsSidebar />
       </SidebarProvider>

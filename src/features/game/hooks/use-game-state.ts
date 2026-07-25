@@ -97,7 +97,7 @@ export function useGameState(lastMessage: WsMessage | null) {
         setCurrentVotes(new Map())
         setLynchTargetId(null)
         setLogs((prev) => [...prev, ...msg.logs])
-        setRequiredActions(msg.required_actions ?? [])
+        setRequiredActions(msg.required_actions)
         break
       }
 
@@ -111,7 +111,7 @@ export function useGameState(lastMessage: WsMessage | null) {
         setCurrentVotes(new Map())
         setLynchTargetId(null)
         setLogs((prev) => [...prev, ...msg.logs])
-        setRequiredActions(msg.required_actions ?? [])
+        setRequiredActions(msg.required_actions)
         break
       }
 
@@ -130,7 +130,7 @@ export function useGameState(lastMessage: WsMessage | null) {
         setPhase('vote_result')
         setLynchTargetId(msg.lynch_target_id)
         setLogs((prev) => [...prev, ...msg.logs])
-        setRequiredActions(msg.required_actions ?? [])
+        setRequiredActions(msg.required_actions)
         break
       }
 
