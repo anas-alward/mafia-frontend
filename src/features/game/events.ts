@@ -21,6 +21,7 @@ export interface GameStartedEvent {
   session_id: string
   host: number
   alive_ids: number[]
+  required_actions: RequiredAction[]
 }
 
 export interface RoleAssignedEvent {

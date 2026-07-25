@@ -72,7 +72,7 @@ export function useGameState(lastMessage: WsMessage | null) {
         setLogs([])
         setLynchTargetId(null)
         setMafiaIds([])
-        setRequiredActions([])
+        setRequiredActions(msg.required_actions)
         break
       }
 
