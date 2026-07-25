@@ -6,8 +6,8 @@ import TilesGrid from '#/features/rooms/components/live/tiles-grid.tsx'
 import ControlBar from '#/features/rooms/components/live/control-bar.tsx'
 import CustomParticipantTile from '#/features/rooms/components/live/participant-tile'
 import GameActionBar from '#/features/game/components/game-action-bar'
-import { useGameContext } from '#/features/game/context/game-context'
-import { useRoomContext } from '#/features/rooms/context/room-context'
+import { useGameStore } from '#/features/game/store/game-store'
+import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useAuthStore } from '#/features/auth/store/auth-store'
 import { GamePhaseIndicator } from '#/features/game/components/game-phase-indicator'
 import { GameRoleBadge } from '#/features/game/components/game-role-badge'
@@ -23,8 +23,9 @@ export function RoomActiveState({ fullScreenRef, roomId }: RoomActiveStateProps)
   const participantCount = useRealtimeKitSelector(
     () => meeting.participants.joined.size + 1,
   )
-  const { gameStarted, startGame } = useGameContext()
-  const { isHost } = useRoomContext()
+  const gameStarted = useGameStore((s) => s.gameStarted)
+  const startGame = useGameStore((s) => s.startGame)
+  const isHost = useMeetingStore((s) => s.isHost)
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null)
   const [preGameSelectedIds, setPreGameSelectedIds] = useState<Set<number>>(new Set())

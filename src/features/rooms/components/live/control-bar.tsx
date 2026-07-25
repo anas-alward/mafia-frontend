@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { RtkStageToggle } from '@cloudflare/realtimekit-react-ui'
 import { useRealtimeKitMeeting, useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
 import { Users, PhoneOff, Mic, MicOff, Video, VideoOff, Maximize, Minimize, WifiOff } from 'lucide-react'
-import { useRoomContext } from '#/features/rooms/context/room-context'
+import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useSidebar } from '#/components/ui/sidebar'
 
 interface ControlBarProps {
@@ -15,8 +15,9 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
   const audioEnabled = useRealtimeKitSelector(() => meeting.self.audioEnabled)
   const videoEnabled = useRealtimeKitSelector(() => meeting.self.videoEnabled)
   const navigate = useNavigate()
-  const ctx = useRoomContext()
-  const { wsState, sendError, joinRequests } = ctx
+  const wsState = useMeetingStore((s) => s.wsState)
+  const sendError = useMeetingStore((s) => s.sendError)
+  const joinRequests = useMeetingStore((s) => s.joinRequests)
   const count = joinRequests.length
   const { toggleSidebar, open } = useSidebar()
 

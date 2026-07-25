@@ -4,8 +4,8 @@ import {
   RtkAudioVisualizer,
   RtkNameTag,
 } from '@cloudflare/realtimekit-react-ui'
-import { Eye, Skull, Crosshair, Stethoscope, User, Vote } from 'lucide-react'
-import { useGameContext } from '#/features/game/context/game-context'
+import { Eye, Skull, Crosshair, Stethoscope, User, Vote, Ban } from 'lucide-react'
+import { useGameStore } from '#/features/game/store/game-store'
 
 const ROLE_ICONS: Record<string, typeof Eye> = {
   mafia: Skull,
@@ -46,16 +46,16 @@ export default function CustomParticipantTile({
 
   const initial = (name ?? '?').charAt(0).toUpperCase()
 
-  const {
-    gameStarted,
-    myRoleType,
-    mafiaIds,
-    myRole,
-    currentVotes,
-  } = useGameContext()
+  const gameStarted = useGameStore((s) => s.gameStarted)
+  const myRoleType = useGameStore((s) => s.myRoleType)
+  const mafiaIds = useGameStore((s) => s.mafiaIds)
+  const myRole = useGameStore((s) => s.myRole)
+  const currentVotes = useGameStore((s) => s.currentVotes)
+  const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
 
   const isMafia = myRoleType === 'mafia'
   const tileUserId = participant.customParticipantId
+  const isAlive = tileUserId != null && alivePlayerIds.includes(Number(tileUserId))
 
   // Vote count for this tile
   const voteCount = useMemo(() => {
@@ -66,14 +66,16 @@ export default function CustomParticipantTile({
 
   // ---- Ring / border ----
   let ringClass = 'ring-1 ring-white/5'
-  if (isSpeaking) {
+  if (gameStarted && !isAlive) {
+    ringClass = 'ring-1 ring-red-500/30 opacity-50'
+  } else if (isSpeaking) {
     ringClass = 'ring-2 ring-[#60a5fa] ring-offset-1 ring-offset-[#161618]'
   } else if (isSelected) {
     ringClass = 'ring-2 ring-amber-500 ring-offset-1 ring-offset-[#161618]'
   } else if (isSelectable) {
     ringClass = 'ring-1 ring-white/20 hover:ring-white/40 cursor-pointer'
   } else if (gameStarted && isMafia) {
-    if (tileUserId != null && mafiaIds.has(Number(tileUserId))) {
+    if (tileUserId != null && mafiaIds.includes(Number(tileUserId))) {
       ringClass = 'ring-1 ring-gray-700'
     } else if (tileUserId != null && !isLocal) {
       ringClass = 'ring-1 ring-red-500/40'
@@ -87,7 +89,7 @@ export default function CustomParticipantTile({
       const Icon = ROLE_ICONS[myRoleType ?? ''] ?? User
       roleIcon = <Icon className="h-3.5 w-3.5" />
     } else if (isMafia) {
-      if (tileUserId != null && mafiaIds.has(Number(tileUserId))) {
+      if (tileUserId != null && mafiaIds.includes(Number(tileUserId))) {
         roleIcon = <Skull className="h-3.5 w-3.5" />
       }
     }
@@ -125,6 +127,18 @@ export default function CustomParticipantTile({
       {/* Selection overlay */}
       {isSelected && (
         <div className="absolute inset-0 bg-amber-500/10 pointer-events-none" />
+      )}
+
+      {/* Dead overlay */}
+      {gameStarted && !isAlive && (
+        <div className="absolute inset-0 bg-red-950/40 flex items-center justify-center pointer-events-none">
+          <div className="flex flex-col items-center gap-1">
+            <Ban className="h-8 w-8 text-red-400/70" />
+            <span className="text-xs font-semibold text-red-400/80 tracking-widest uppercase">
+              Dead
+            </span>
+          </div>
+        </div>
       )}
 
       {/* Bottom gradient overlay */}

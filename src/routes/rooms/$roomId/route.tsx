@@ -1,16 +1,14 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
 import { useRealtimeKitClient } from '@cloudflare/realtimekit-react'
 import type RTKClient from '@cloudflare/realtimekit'
 import { useRoomWebSocket } from '#/features/rooms/hooks/use-room-websocket'
 import { useRoomState } from '#/features/rooms/hooks/use-room-state'
 import { RoomClosedState } from '#/features/rooms/states/room-closed-state'
-import { MeetingContextProvider } from '#/features/rooms/context/meeting-context'
-import { GameContextProvider } from '#/features/game/context/game-context'
+import { useMeetingStore } from '#/features/rooms/store/meeting-store'
+import { useGameStore } from '#/features/game/store/game-store'
 import { useGameState } from '#/features/game/hooks/use-game-state'
 import { useGameActions } from '#/features/game/hooks/use-game-actions'
-import type { MeetingContextValue } from '#/features/rooms/context/meeting-context'
-import type { GameContextValue } from '#/features/game/context/game-context'
 
 export const Route = createFileRoute('/rooms/$roomId')({
   beforeLoad: ({ location, params }) => {
@@ -63,49 +61,43 @@ function RoomLayout() {
       ? roomState.members.includes(Number(currentUser.id))
       : false
 
+  // Sync meeting store
+  useEffect(() => {
+    useMeetingStore.setState({
+      roomId,
+      wsState,
+      sendError,
+      reconnect,
+      sendJoinRequest,
+      roomState,
+      joinRequests,
+      dismissJoinRequest,
+      acceptJoinRequest,
+      rejectJoinRequest,
+      joinRequestStatus,
+      setJoinRequestStatus,
+      meeting,
+      initMeeting,
+      meetingInstance,
+      setMeetingInstance,
+      authToken,
+      isReturningUser,
+      participants,
+      isHost,
+    })
+  })
+
+  // Sync game store
+  useEffect(() => {
+    useGameStore.setState({
+      ...gameState,
+      ...gameActions,
+    })
+  })
+
   if (roomClosed) {
     return <RoomClosedState />
   }
 
-  const ctx: MeetingContextValue = useMemo(() => ({
-    roomId,
-    wsState,
-    sendError,
-    reconnect,
-    sendJoinRequest,
-    roomState,
-    joinRequests,
-    dismissJoinRequest,
-    acceptJoinRequest,
-    rejectJoinRequest,
-    joinRequestStatus,
-    setJoinRequestStatus,
-    meeting,
-    initMeeting,
-    meetingInstance,
-    setMeetingInstance,
-    authToken,
-    isReturningUser,
-    participants,
-    isHost,
-  }), [
-    roomId, wsState, sendError, reconnect, sendJoinRequest,
-    roomState, joinRequests, dismissJoinRequest, acceptJoinRequest, rejectJoinRequest,
-    joinRequestStatus, setJoinRequestStatus,
-    meeting, initMeeting, meetingInstance, setMeetingInstance,
-    authToken, isReturningUser, participants, isHost,
-  ])
-
-  const gameCtx: GameContextValue = useMemo(() => ({
-    ...gameState,
-    ...gameActions,
-  }), [gameState, gameActions])
-
-  return (
-    <MeetingContextProvider value={ctx}>
-      <GameContextProvider value={gameCtx}>
-        <Outlet />
-      </GameContextProvider>
-    </MeetingContextProvider>
-  )
+  return <Outlet />
 }

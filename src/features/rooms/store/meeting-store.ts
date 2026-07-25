@@ -1,13 +1,14 @@
-import { createContext, useContext } from 'react'
+import { create } from 'zustand'
 import type RTKClient from '@cloudflare/realtimekit'
 import type { WsState } from '../hooks/use-room-websocket'
 import type { RoomStateEvent } from '../events'
 import type { JoinRequest } from '../hooks/use-room-state'
 import type { Participant } from '../components/participant-list'
 
-export interface MeetingContextValue {
+interface MeetingStore {
   roomId: string
   wsState: WsState
+  sendError: string | null
   reconnect: () => void
   sendJoinRequest: () => void
   roomState: RoomStateEvent | null
@@ -16,32 +17,36 @@ export interface MeetingContextValue {
   acceptJoinRequest: (userId: number) => void
   rejectJoinRequest: (userId: number) => void
   joinRequestStatus: 'idle' | 'requested' | 'accepted' | 'rejected'
-  setJoinRequestStatus: React.Dispatch<React.SetStateAction<'idle' | 'requested' | 'accepted' | 'rejected'>>
+  setJoinRequestStatus: (status: 'idle' | 'requested' | 'accepted' | 'rejected') => void
   meeting: RTKClient | undefined
   initMeeting: (options: { authToken: string }) => Promise<RTKClient | undefined>
   meetingInstance: RTKClient | null
-  setMeetingInstance: React.Dispatch<React.SetStateAction<RTKClient | null>>
+  setMeetingInstance: (instance: RTKClient | null) => void
   authToken: string | null
   isReturningUser: boolean
   participants: Participant[]
   isHost: boolean
-  sendError: string | null
 }
 
-const MeetingContext = createContext<MeetingContextValue | null>(null)
-
-export function MeetingContextProvider({
-  children,
-  value,
-}: {
-  children: React.ReactNode
-  value: MeetingContextValue
-}) {
-  return <MeetingContext.Provider value={value}>{children}</MeetingContext.Provider>
-}
-
-export function useMeetingContext() {
-  const ctx = useContext(MeetingContext)
-  if (!ctx) throw new Error('useMeetingContext must be used within MeetingContextProvider')
-  return ctx
-}
+export const useMeetingStore = create<MeetingStore>(() => ({
+  roomId: '',
+  wsState: 'connecting',
+  sendError: null,
+  reconnect: () => {},
+  sendJoinRequest: () => {},
+  roomState: null,
+  joinRequests: [],
+  dismissJoinRequest: () => {},
+  acceptJoinRequest: () => {},
+  rejectJoinRequest: () => {},
+  joinRequestStatus: 'idle',
+  setJoinRequestStatus: () => {},
+  meeting: undefined,
+  initMeeting: async () => undefined,
+  meetingInstance: null,
+  setMeetingInstance: () => {},
+  authToken: null,
+  isReturningUser: false,
+  participants: [],
+  isHost: false,
+}))

@@ -1,6 +1,6 @@
 import { useRealtimeKitMeeting, useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
 import CustomParticipantTile from '#/features/rooms/components/live/participant-tile'
-import { useGameContext } from '#/features/game/context/game-context'
+import { useGameStore } from '#/features/game/store/game-store'
 import { useAuthStore } from '#/features/auth/store/auth-store'
 
 export function getColumns(count: number) {
@@ -46,8 +46,11 @@ export default function TilesGrid({
 
   const currentUser = useAuthStore((s) => s.user)
   const currentUserId = currentUser ? Number(currentUser.id) : null
-  const { gameStarted, alivePlayerIds } = useGameContext()
+  const gameStarted = useGameStore((s) => s.gameStarted)
+  const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
+  const requiredActions = useGameStore((s) => s.requiredActions)
   const myAlive = currentUserId != null && alivePlayerIds.includes(currentUserId)
+  const validTargets = new Set(requiredActions.flatMap((a) => a.target_options))
 
   return (
     <div className="flex flex-wrap content-center justify-center h-full w-full gap-4 p-5">
@@ -67,7 +70,7 @@ export default function TilesGrid({
           isSelected = !Number.isNaN(numUserId) && preGameSelectedIds.has(numUserId)
           onSelect = onTogglePreGamePlayer
         } else {
-          isSelectable = gameStarted && isAlive && myAlive && !isSelf
+          isSelectable = gameStarted && isAlive && myAlive && !isSelf && validTargets.has(numUserId)
           isSelected = !Number.isNaN(numUserId) && numUserId === selectedPlayerId
           onSelect = onSelectPlayer
         }

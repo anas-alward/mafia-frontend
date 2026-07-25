@@ -94,6 +94,7 @@ export interface ChatSend {
 export type {
   GamePhase,
   GameLogEntry,
+  RequiredAction,
   GameStartedEvent,
   RoleAssignedEvent,
   SunRiseEvent,
@@ -110,6 +111,7 @@ export type {
   ShootMessage,
   RevengeMessage,
   SilentMessage,
+  RoleblockMessage,
   SubmitVotesMessage,
   SubmitVoteResultMessage,
 } from '#/features/game/events'

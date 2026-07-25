@@ -8,5 +8,5 @@
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
   },
-  "cSpell.words": ["realtimekit"]
+  "cSpell.words": ["realtimekit", "roleblock", "Roleblocker"]
 }

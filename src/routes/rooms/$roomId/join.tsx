@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useMeetingContext } from '#/features/rooms/context/meeting-context'
+import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { MeetingSetupState } from '#/features/rooms/states/meeting-setup-state'
 
 export const Route = createFileRoute('/rooms/$roomId/join')({
@@ -9,19 +9,17 @@ export const Route = createFileRoute('/rooms/$roomId/join')({
 
 function JoinRoute() {
   const navigate = useNavigate()
-  const {
-    roomId,
-    wsState,
-    reconnect,
-    sendJoinRequest,
-    joinRequestStatus,
-    setJoinRequestStatus,
-    meetingInstance,
-    setMeetingInstance,
-    initMeeting,
-    authToken,
-    isReturningUser,
-  } = useMeetingContext()
+  const roomId = useMeetingStore((s) => s.roomId)
+  const wsState = useMeetingStore((s) => s.wsState)
+  const reconnect = useMeetingStore((s) => s.reconnect)
+  const sendJoinRequest = useMeetingStore((s) => s.sendJoinRequest)
+  const joinRequestStatus = useMeetingStore((s) => s.joinRequestStatus)
+  const setJoinRequestStatus = useMeetingStore((s) => s.setJoinRequestStatus)
+  const meetingInstance = useMeetingStore((s) => s.meetingInstance)
+  const setMeetingInstance = useMeetingStore((s) => s.setMeetingInstance)
+  const initMeeting = useMeetingStore((s) => s.initMeeting)
+  const authToken = useMeetingStore((s) => s.authToken)
+  const isReturningUser = useMeetingStore((s) => s.isReturningUser)
 
   const [initError, setInitError] = useState<string | null>(null)
   const [isJoining, setIsJoining] = useState(false)

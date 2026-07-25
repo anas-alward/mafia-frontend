@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo, useCallback } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   RealtimeKitProvider,
@@ -9,8 +9,7 @@ import {
   RtkDialogManager,
   RtkNotifications,
 } from '@cloudflare/realtimekit-react-ui'
-import { useMeetingContext } from '#/features/rooms/context/meeting-context'
-import { RoomContextProvider } from '#/features/rooms/context/room-context'
+import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { RoomActiveState } from '#/features/rooms/states/room-active-state'
 import { SidebarProvider, SidebarInset } from '#/components/ui/sidebar'
 import { JoinRequestsSidebar } from '#/features/rooms/components/live/join-requests-sidebar'
@@ -21,18 +20,16 @@ export const Route = createFileRoute('/rooms/$roomId/live')({
 
 function LiveRoute() {
   const { roomId } = Route.useParams()
-  const {
-    meeting,
-    meetingInstance,
-    joinRequests,
-    dismissJoinRequest,
-    acceptJoinRequest,
-    rejectJoinRequest,
-    participants,
-    isHost,
-    wsState,
-    sendError,
-  } = useMeetingContext()
+  const meeting = useMeetingStore((s) => s.meeting)
+  const meetingInstance = useMeetingStore((s) => s.meetingInstance)
+  const joinRequests = useMeetingStore((s) => s.joinRequests)
+  const dismissJoinRequest = useMeetingStore((s) => s.dismissJoinRequest)
+  const acceptJoinRequest = useMeetingStore((s) => s.acceptJoinRequest)
+  const rejectJoinRequest = useMeetingStore((s) => s.rejectJoinRequest)
+  const participants = useMeetingStore((s) => s.participants)
+  const isHost = useMeetingStore((s) => s.isHost)
+  const wsState = useMeetingStore((s) => s.wsState)
+  const sendError = useMeetingStore((s) => s.sendError)
 
   const navigate = useNavigate()
   const fullScreenRef = useRef<HTMLDivElement>(null)
@@ -58,49 +55,33 @@ function LiveRoute() {
     return null
   }
 
-  const roomContextValue = useMemo(
-    () => ({
-      joinRequests,
-      dismissJoinRequest,
-      acceptJoinRequest,
-      rejectJoinRequest,
-      participants,
-      isHost,
-      wsState,
-      sendError,
-    }),
-    [joinRequests, dismissJoinRequest, acceptJoinRequest, rejectJoinRequest, participants, isHost, wsState, sendError],
-  )
-
   return (
     <RealtimeKitProvider value={activeMeeting}>
-      <RoomContextProvider value={roomContextValue}>
-        <SidebarProvider defaultOpen={false}>
-          <SidebarInset className="min-h-svh bg-[#161618]">
-            <div className="flex flex-col h-screen">
-              <RtkUiProvider
-                ref={fullScreenRef}
-                meeting={activeMeeting}
-                showSetupScreen={false}
-                onRtkStatesUpdate={handleStatesUpdate}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  height: '100%',
-                  width: '100%',
-                  margin: 0,
-                }}
-              >
-                <RoomActiveState fullScreenRef={fullScreenRef} roomId={roomId} />
-                <RtkParticipantsAudio />
-                <RtkDialogManager />
-                <RtkNotifications />
-              </RtkUiProvider>
-            </div>
-          </SidebarInset>
-          <JoinRequestsSidebar />
-        </SidebarProvider>
-      </RoomContextProvider>
+      <SidebarProvider defaultOpen={false}>
+        <SidebarInset className="min-h-svh bg-[#161618]">
+          <div className="flex flex-col h-screen">
+            <RtkUiProvider
+              ref={fullScreenRef}
+              meeting={activeMeeting}
+              showSetupScreen={false}
+              onRtkStatesUpdate={handleStatesUpdate}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                width: '100%',
+                margin: 0,
+              }}
+            >
+              <RoomActiveState fullScreenRef={fullScreenRef} roomId={roomId} />
+              <RtkParticipantsAudio />
+              <RtkDialogManager />
+              <RtkNotifications />
+            </RtkUiProvider>
+          </div>
+        </SidebarInset>
+        <JoinRequestsSidebar />
+      </SidebarProvider>
     </RealtimeKitProvider>
   )
 }
