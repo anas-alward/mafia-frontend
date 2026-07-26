@@ -13,6 +13,7 @@ import type {
   VoteCastEvent,
   VoteResultStartedEvent,
   GameStateEvent,
+  GameResetEvent,
 } from '#/features/game/events'
 
 export interface GameState {
@@ -160,6 +161,26 @@ export function useGameState(lastMessage: WsMessage | null) {
 
           setCurrentVotes(new Map())
         }
+        break
+      }
+
+      case 'game_reset': {
+        const msg = lastMessage as GameResetEvent
+        setSessionId(msg.session_id)
+        setPlayerIds(msg.player_ids)
+        setAlivePlayerIds(msg.alive_ids)
+        setDeadPlayerIds([])
+        setPhase('day')
+        setCurrentVotes(new Map())
+        setLogs([])
+        setLynchTargetId(null)
+        setMafiaIds([])
+        setRequiredActions(msg.required_actions)
+        break
+      }
+
+      case 'game_canceled': {
+        resetGame()
         break
       }
     }

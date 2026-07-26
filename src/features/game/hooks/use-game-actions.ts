@@ -11,6 +11,8 @@ import type {
   RoleblockMessage,
   SubmitVotesMessage,
   SubmitVoteResultMessage,
+  ResetGameMessage,
+  CancelGameMessage,
 } from '#/features/game/events'
 
 interface UseGameActionsOptions {
@@ -101,6 +103,16 @@ export function useGameActions({ send }: UseGameActionsOptions) {
     send(msg)
   }, [send])
 
+  const resetGame = useCallback(() => {
+    const msg: ResetGameMessage = { type: 'reset' }
+    send(msg)
+  }, [send])
+
+  const cancelGame = useCallback(() => {
+    const msg: CancelGameMessage = { type: 'cancel' }
+    send(msg)
+  }, [send])
+
   return {
     startGame,
     castVote,
@@ -113,5 +125,7 @@ export function useGameActions({ send }: UseGameActionsOptions) {
     roleblockPlayer,
     submitVotes,
     submitVoteResult,
+    resetGame,
+    cancelGame,
   }
 }

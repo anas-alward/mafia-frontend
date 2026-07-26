@@ -20,6 +20,7 @@ interface GameStore {
   roundNumber: number | null
   requiredActions: RequiredAction[]
   resetGame: () => void
+  cancelGame: () => void
   startGame: (playerIds: number[]) => void
   castVote: (targetId: number) => void
   killPlayer: (targetId: number) => void
@@ -52,6 +53,7 @@ export const useGameStore = create<GameStore>(() => ({
   roundNumber: null,
   requiredActions: [],
   resetGame: () => {},
+  cancelGame: () => {},
   startGame: () => {},
   castVote: () => {},
   killPlayer: () => {},

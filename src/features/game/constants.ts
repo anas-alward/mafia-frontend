@@ -1,3 +1,18 @@
+import type { LucideIcon } from 'lucide-react'
+import {
+  HeartPulse,
+  Search,
+  Crosshair,
+  Bomb,
+  User,
+  Crown,
+  Ban,
+  Skull,
+  Sun,
+  Moon,
+  Gavel,
+} from 'lucide-react'
+
 // ── Core Enums ──
 
 export enum PlayerStatus {
@@ -188,6 +203,57 @@ export const ROLES: RoleDefinition[] = [
 export const ROLE_REGISTRY: Record<string, RoleDefinition> = Object.fromEntries(
   ROLES.map((role) => [role.name, role]),
 )
+
+// ── Icon Map ──
+// Maps RoleDefinition.icon strings to Lucide components for dynamic rendering.
+
+export const ROLE_ICON_MAP: Record<string, LucideIcon> = {
+  'heart-pulse': HeartPulse,
+  search: Search,
+  crosshair: Crosshair,
+  bomb: Bomb,
+  user: User,
+  crown: Crown,
+  ban: Ban,
+  skull: Skull,
+}
+
+// ── Team Colors ──
+
+export const TEAM_COLORS: Record<Team, string> = {
+  [Team.TOWN]: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  [Team.MAFIA]: 'bg-red-500/10 text-red-400 border-red-500/20',
+}
+
+// ── Phase Display Config ──
+
+export interface PhaseDisplayConfig {
+  label: string
+  Icon: LucideIcon
+  color: string
+  glow: string
+}
+
+export const PHASE_META: Record<Phase, PhaseDisplayConfig> = {
+  [Phase.DAY]: {
+    label: 'Day',
+    Icon: Sun,
+    color: 'text-amber-400',
+    glow: 'rgba(251, 191, 36, 0.15)',
+  },
+  [Phase.NIGHT]: {
+    label: 'Night',
+    Icon: Moon,
+    color: 'text-indigo-400',
+    glow: 'rgba(129, 140, 248, 0.15)',
+  },
+  [Phase.VOTE_RESULT]: {
+    label: 'Vote Result',
+    Icon: Gavel,
+    color: 'text-orange-400',
+    glow: 'rgba(251, 146, 60, 0.15)',
+  },
+}
 
 // ── Timing ──
 // Mirrors backend: apps/game/engine/round.py GRACE_SECONDS

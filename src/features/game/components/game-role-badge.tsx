@@ -1,19 +1,7 @@
-import type { Shield } from 'lucide-react'
-import { Eye, Skull, Crosshair, Stethoscope, User } from 'lucide-react'
+import { User } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
-
-const ROLE_ICONS: Record<string, typeof Shield> = {
-  mafia: Skull,
-  gunner: Crosshair,
-  doctor: Stethoscope,
-  cop: Eye,
-}
-
-const ROLE_COLORS: Record<string, string> = {
-  town: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  mafia: 'bg-red-500/10 text-red-400 border-red-500/20',
-  neutral: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-}
+import { ROLE_REGISTRY, ROLE_ICON_MAP, TEAM_COLORS } from '#/features/game/constants'
+import { Team } from '#/features/game/constants'
 
 export function GameRoleBadge() {
   const gameStarted = useGameStore((s) => s.gameStarted)
@@ -22,9 +10,10 @@ export function GameRoleBadge() {
 
   if (!gameStarted || !myRole) return null
 
-  const colorClass =
-    ROLE_COLORS[myRoleType ?? ''] ?? ROLE_COLORS.neutral
-  const Icon = ROLE_ICONS[myRoleType ?? ''] ?? User
+  const roleDef = ROLE_REGISTRY[myRole]
+  const team = (myRoleType as Team) ?? (roleDef?.role_type)
+  const colorClass = TEAM_COLORS[team] ?? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+  const Icon = roleDef ? ROLE_ICON_MAP[roleDef.icon] ?? User : User
 
   return (
     <div

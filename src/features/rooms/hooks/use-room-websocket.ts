@@ -18,6 +18,8 @@ import type {
   VoteCastEvent,
   VoteResultStartedEvent,
   GameStateEvent,
+  GameResetEvent,
+  GameCanceledEvent,
 } from '../events'
 
 // ── WebSocket message union ──
@@ -39,6 +41,8 @@ export type WsMessage =
   | VoteCastEvent
   | VoteResultStartedEvent
   | GameStateEvent
+  | GameResetEvent
+  | GameCanceledEvent
   | { type: string; [key: string]: unknown }
 
 export type WsState = 'connecting' | 'open' | 'closed' | 'error'

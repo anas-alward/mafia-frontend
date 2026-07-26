@@ -12,6 +12,7 @@ import { useAuthStore } from '#/features/auth/store/auth-store'
 import { GamePhaseIndicator } from '#/features/game/components/game-phase-indicator'
 import { GameRoleBadge } from '#/features/game/components/game-role-badge'
 import { GameLog } from '#/features/game/components/game-log'
+import { PhaseTransition } from '#/features/game/components/phase-transition'
 
 interface RoomActiveStateProps {
   fullScreenRef: React.RefObject<HTMLDivElement | null>
@@ -24,11 +25,17 @@ export function RoomActiveState({ fullScreenRef, roomId }: RoomActiveStateProps)
     () => meeting.participants.joined.size + 1,
   )
   const gameStarted = useGameStore((s) => s.gameStarted)
+  const phase = useGameStore((s) => s.phase)
   const startGame = useGameStore((s) => s.startGame)
   const isHost = useMeetingStore((s) => s.isHost)
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null)
   const [preGameSelectedIds, setPreGameSelectedIds] = useState<Set<number>>(new Set())
+
+  // Reset selection when phase changes
+  useEffect(() => {
+    setSelectedPlayerId(null)
+  }, [phase])
 
   const onTogglePreGamePlayer = useCallback((userId: number) => {
     console.log("userId", userId)
@@ -91,6 +98,7 @@ export function RoomActiveState({ fullScreenRef, roomId }: RoomActiveStateProps)
 
   return (
     <div className="relative flex flex-col h-full w-full bg-[#161618]">
+      <PhaseTransition />
       {/* Top bar */}
       <div
         className={`absolute top-0 left-0 right-0 z-50 flex items-center justify-between h-16 px-6 transition-opacity duration-300 ${

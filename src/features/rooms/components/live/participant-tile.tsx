@@ -4,15 +4,9 @@ import {
   RtkAudioVisualizer,
   RtkNameTag,
 } from '@cloudflare/realtimekit-react-ui'
-import { Eye, Skull, Crosshair, Stethoscope, User, Vote } from 'lucide-react'
+import { User, Vote, Skull } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
-
-const ROLE_ICONS: Record<string, typeof Eye> = {
-  mafia: Skull,
-  gunner: Crosshair,
-  doctor: Stethoscope,
-  cop: Eye,
-}
+import { ROLE_REGISTRY, ROLE_ICON_MAP, Team } from '#/features/game/constants'
 
 interface CustomParticipantTileProps {
   participant: any
@@ -53,7 +47,7 @@ export default function CustomParticipantTile({
   const currentVotes = useGameStore((s) => s.currentVotes)
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
 
-  const isMafia = myRoleType === 'mafia'
+  const isMafia = myRoleType === Team.MAFIA
   const tileUserId = participant.customParticipantId
   const isAlive = tileUserId != null && alivePlayerIds.includes(Number(tileUserId))
 
@@ -86,7 +80,8 @@ export default function CustomParticipantTile({
   let roleIcon: React.ReactNode = null
   if (gameStarted) {
     if (isLocal && myRole) {
-      const Icon = ROLE_ICONS[myRoleType ?? ''] ?? User
+      const roleDef = ROLE_REGISTRY[myRole]
+      const Icon = roleDef ? (ROLE_ICON_MAP[roleDef.icon] ?? User) : User
       roleIcon = <Icon className="h-3.5 w-3.5" />
     } else if (isMafia) {
       if (tileUserId != null && mafiaIds.includes(Number(tileUserId))) {

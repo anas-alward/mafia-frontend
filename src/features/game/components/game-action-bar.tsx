@@ -10,6 +10,8 @@ import {
   Ban,
   Moon,
   Bomb,
+  RotateCcw,
+  X,
   type LucideIcon,
 } from 'lucide-react'
 import { ActionType, Phase } from '#/features/game/constants'
@@ -105,6 +107,8 @@ export default function GameActionBar({
   const roleblockPlayer = useGameStore((s) => s.roleblockPlayer)
   const submitVotes = useGameStore((s) => s.submitVotes)
   const submitVoteResult = useGameStore((s) => s.submitVoteResult)
+  const resetGame = useGameStore((s) => s.resetGame)
+  const cancelGame = useGameStore((s) => s.cancelGame)
   const isHost = useMeetingStore((s) => s.isHost)
 
   const allVoted = useMemo(
@@ -230,6 +234,35 @@ export default function GameActionBar({
           className="relative flex items-center justify-center h-10 w-10 rounded-xl border text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 border-orange-500/30 transition-colors cursor-pointer"
         >
           <Send className="h-4 w-4" />
+        </button>
+      )}
+
+      {/* Separator before game management */}
+      {gameStarted && isHost && (
+        <div className="my-1 border-t border-white/5" />
+      )}
+
+      {/* Host: Reset game */}
+      {gameStarted && isHost && (
+        <button
+          type="button"
+          onClick={resetGame}
+          title="Reset Game"
+          className="relative flex items-center justify-center h-10 w-10 rounded-xl border text-[#a1a1aa] hover:bg-white/10 hover:text-[#f4f4f5] border-white/10 transition-colors cursor-pointer"
+        >
+          <RotateCcw className="h-4 w-4" />
+        </button>
+      )}
+
+      {/* Host: Cancel game */}
+      {gameStarted && isHost && (
+        <button
+          type="button"
+          onClick={cancelGame}
+          title="Cancel Game"
+          className="relative flex items-center justify-center h-10 w-10 rounded-xl border text-red-400 hover:bg-red-500/20 hover:text-red-300 border-red-500/30 transition-colors cursor-pointer"
+        >
+          <X className="h-4 w-4" />
         </button>
       )}
     </div>

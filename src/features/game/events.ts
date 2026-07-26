@@ -65,6 +65,19 @@ export interface GameStatePlayer {
   status: 'alive' | 'dead'
 }
 
+export interface GameResetEvent {
+  type: 'game_reset'
+  player_ids: number[]
+  session_id: string
+  host: number
+  alive_ids: number[]
+  required_actions: RequiredAction[]
+}
+
+export interface GameCanceledEvent {
+  type: 'game_canceled'
+}
+
 export interface GameStateEvent {
   type: 'game_state'
   session_id: string | null
@@ -135,4 +148,12 @@ export interface SubmitVotesMessage {
 
 export interface SubmitVoteResultMessage {
   type: 'submit_vote_result'
+}
+
+export interface ResetGameMessage {
+  type: 'reset'
+}
+
+export interface CancelGameMessage {
+  type: 'cancel'
 }
