@@ -260,7 +260,7 @@ export function PhaseTransition() {
                       {evt.type === 'heal'
                         ? `${evt.targetCode} was saved`
                         : `${evt.targetCode} was killed`}
-                    </span>
+                    </p>
                   ))
                 )}
               </div>
