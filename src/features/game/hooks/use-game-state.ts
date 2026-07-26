@@ -52,6 +52,7 @@ export function useGameState(lastMessage: WsMessage | null) {
   const [currentVotes, setCurrentVotes] = useState<Map<number, number>>(new Map())
   const [lynchTargetId, setLynchTargetId] = useState<number | null>(null)
   const [mafiaIds, setMafiaIds] = useState<number[]>([])
+  const [mafiaMemberRoles, setMafiaMemberRoles] = useState<Record<number, string>>({})
   const [roundNumber, setRoundNumber] = useState<number | null>(null)
   const [requiredActions, setRequiredActions] = useState<RequiredAction[]>([])
   const prevPhaseRef = useRef<GamePhase>('lobby')
@@ -73,6 +74,7 @@ export function useGameState(lastMessage: WsMessage | null) {
         setLogs([])
         setLynchTargetId(null)
         setMafiaIds([])
+        setMafiaMemberRoles({})
         setRequiredActions(msg.required_actions)
         break
       }
@@ -84,6 +86,13 @@ export function useGameState(lastMessage: WsMessage | null) {
         setMyRoleType(msg.role_type)
         if (msg.mafia_ids && msg.mafia_ids.length > 0) {
           setMafiaIds(msg.mafia_ids)
+        }
+        if (msg.mafia_members && msg.mafia_members.length > 0) {
+          const map: Record<number, string> = {}
+          for (const m of msg.mafia_members) {
+            map[m.id] = m.role_name
+          }
+          setMafiaMemberRoles(map)
         }
         break
       }
@@ -175,6 +184,7 @@ export function useGameState(lastMessage: WsMessage | null) {
         setLogs([])
         setLynchTargetId(null)
         setMafiaIds([])
+        setMafiaMemberRoles({})
         setRequiredActions(msg.required_actions)
         break
       }
@@ -208,6 +218,7 @@ export function useGameState(lastMessage: WsMessage | null) {
     setCurrentVotes(new Map())
     setLynchTargetId(null)
     setMafiaIds([])
+    setMafiaMemberRoles({})
     setRoundNumber(null)
     setRequiredActions([])
   }, [])
@@ -228,6 +239,7 @@ export function useGameState(lastMessage: WsMessage | null) {
     lynchTargetId,
     hasVotedThisPhase,
     mafiaIds,
+    mafiaMemberRoles,
     roundNumber,
     requiredActions,
     resetGame,

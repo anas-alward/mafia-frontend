@@ -30,6 +30,7 @@ export interface RoleAssignedEvent {
   description: string
   role_type: string
   mafia_ids?: number[]
+  mafia_members?: { id: number; role_name: string }[]
 }
 
 export interface SunRiseEvent {

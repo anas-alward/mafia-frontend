@@ -17,6 +17,7 @@ interface GameStore {
   lynchTargetId: number | null
   hasVotedThisPhase: boolean
   mafiaIds: number[]
+  mafiaMemberRoles: Record<number, string>
   roundNumber: number | null
   requiredActions: RequiredAction[]
   resetGame: () => void
@@ -50,6 +51,7 @@ export const useGameStore = create<GameStore>(() => ({
   lynchTargetId: null,
   hasVotedThisPhase: false,
   mafiaIds: [],
+  mafiaMemberRoles: {},
   roundNumber: null,
   requiredActions: [],
   resetGame: () => {},

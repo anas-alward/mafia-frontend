@@ -4,7 +4,7 @@ import {
   RtkAudioVisualizer,
   RtkNameTag,
 } from '@cloudflare/realtimekit-react-ui'
-import { User, Vote, Skull } from 'lucide-react'
+import { User, Vote } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { ROLE_REGISTRY, ROLE_ICON_MAP, Team } from '#/features/game/constants'
 
@@ -43,6 +43,7 @@ export default function CustomParticipantTile({
   const gameStarted = useGameStore((s) => s.gameStarted)
   const myRoleType = useGameStore((s) => s.myRoleType)
   const mafiaIds = useGameStore((s) => s.mafiaIds)
+  const mafiaMemberRoles = useGameStore((s) => s.mafiaMemberRoles)
   const myRole = useGameStore((s) => s.myRole)
   const currentVotes = useGameStore((s) => s.currentVotes)
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
@@ -83,9 +84,12 @@ export default function CustomParticipantTile({
       const roleDef = ROLE_REGISTRY[myRole]
       const Icon = roleDef ? (ROLE_ICON_MAP[roleDef.icon] ?? User) : User
       roleIcon = <Icon className="h-3.5 w-3.5" />
-    } else if (isMafia) {
-      if (tileUserId != null && mafiaIds.includes(Number(tileUserId))) {
-        roleIcon = <Skull className="h-3.5 w-3.5" />
+    } else if (isMafia && tileUserId != null) {
+      const roleName = mafiaMemberRoles[Number(tileUserId)]
+      if (roleName) {
+        const roleDef = ROLE_REGISTRY[roleName]
+        const Icon = roleDef ? (ROLE_ICON_MAP[roleDef.icon] ?? User) : User
+        roleIcon = <Icon className="h-3.5 w-3.5" />
       }
     }
   }

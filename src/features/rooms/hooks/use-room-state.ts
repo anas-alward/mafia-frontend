@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useAuthStore } from '#/features/auth/store/auth-store'
 import type {
@@ -27,6 +27,9 @@ export function useRoomState(lastMessage: WsMessage | null) {
   const navigate = useNavigate()
   const currentUser = useAuthStore((s) => s.user)
   const [participants, setParticipants] = useState<Participant[]>([])
+  const participantsRef = useRef<Participant[]>([])
+  // Keep ref in sync so the join_request_received handler can read latest participants
+  participantsRef.current = participants
   const [roomClosed, setRoomClosed] = useState(false)
   const [hostId, setHostId] = useState<number | null>(null)
   const [chatMessages, setChatMessages] = useState<ChatEntry[]>([])
@@ -77,6 +80,8 @@ export function useRoomState(lastMessage: WsMessage | null) {
           }
           return [...prev, { userId: msg.user_id, username: msg.username }]
         })
+        // Remove any pending join request from this user since they've joined
+        setJoinRequests((prev) => prev.filter((r) => r.userId !== msg.user_id))
         break
       }
 
@@ -109,6 +114,8 @@ export function useRoomState(lastMessage: WsMessage | null) {
 
       case 'join_request_received': {
         const msg = lastMessage as JoinRequestReceivedEvent
+        // Ignore if the requesting user is already in the room
+        if (participantsRef.current.some((p) => p.userId === msg.user_id)) break
         setJoinRequests((prev) => {
           if (prev.some((r) => r.userId === msg.user_id)) return prev
           return [...prev, { userId: msg.user_id, username: msg.username }]
