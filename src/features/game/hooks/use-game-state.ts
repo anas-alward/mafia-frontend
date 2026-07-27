@@ -25,6 +25,7 @@ export interface GameState {
   deadPlayerIds: number[]
   players: GameStatePlayer[]
   myRole: string | null
+  myRoleCode: string | null
   myRoleDescription: string | null
   myRoleType: string | null
   logs: GameLogEntry[]
@@ -46,6 +47,7 @@ export function useGameState(lastMessage: WsMessage | null) {
   const [deadPlayerIds, setDeadPlayerIds] = useState<number[]>([])
   const [players, setPlayers] = useState<GameStatePlayer[]>([])
   const [myRole, setMyRole] = useState<string | null>(null)
+  const [myRoleCode, setMyRoleCode] = useState<string | null>(null)
   const [myRoleDescription, setMyRoleDescription] = useState<string | null>(null)
   const [myRoleType, setMyRoleType] = useState<string | null>(null)
   const [logs, setLogs] = useState<GameLogEntry[]>([])
@@ -82,6 +84,7 @@ export function useGameState(lastMessage: WsMessage | null) {
       case 'role_assigned': {
         const msg = lastMessage as RoleAssignedEvent
         setMyRole(msg.role_name)
+        setMyRoleCode(msg.role_code)
         setMyRoleDescription(msg.description)
         setMyRoleType(msg.role_type)
         if (msg.mafia_ids && msg.mafia_ids.length > 0) {
@@ -90,7 +93,7 @@ export function useGameState(lastMessage: WsMessage | null) {
         if (msg.mafia_members && msg.mafia_members.length > 0) {
           const map: Record<number, string> = {}
           for (const m of msg.mafia_members) {
-            map[m.id] = m.role_name
+            map[m.id] = m.role_code
           }
           setMafiaMemberRoles(map)
         }
@@ -159,8 +162,9 @@ export function useGameState(lastMessage: WsMessage | null) {
           setRequiredActions(msg.required_actions)
 
           // Use backend-provided role info directly.
-          if (msg.role_name) {
+          if (msg.role_code) {
             setMyRole(msg.role_name)
+            setMyRoleCode(msg.role_code)
             setMyRoleDescription(msg.role_description)
             setMyRoleType(msg.role_type)
           }
@@ -212,6 +216,7 @@ export function useGameState(lastMessage: WsMessage | null) {
     setDeadPlayerIds([])
     setPlayers([])
     setMyRole(null)
+    setMyRoleCode(null)
     setMyRoleDescription(null)
     setMyRoleType(null)
     setLogs([])
@@ -232,6 +237,7 @@ export function useGameState(lastMessage: WsMessage | null) {
     deadPlayerIds,
     players,
     myRole,
+    myRoleCode,
     myRoleDescription,
     myRoleType,
     logs,

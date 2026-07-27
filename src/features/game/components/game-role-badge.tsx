@@ -6,11 +6,12 @@ import { Team } from '#/features/game/constants'
 export function GameRoleBadge() {
   const gameStarted = useGameStore((s) => s.gameStarted)
   const myRole = useGameStore((s) => s.myRole)
+  const myRoleCode = useGameStore((s) => s.myRoleCode)
   const myRoleType = useGameStore((s) => s.myRoleType)
 
-  if (!gameStarted || !myRole) return null
+  if (!gameStarted || !myRoleCode) return null
 
-  const roleDef = ROLE_REGISTRY[myRole]
+  const roleDef = ROLE_REGISTRY[myRoleCode]
   const team = (myRoleType as Team) ?? (roleDef?.role_type)
   const colorClass = TEAM_COLORS[team] ?? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
   const Icon = roleDef ? ROLE_ICON_MAP[roleDef.icon] ?? User : User

@@ -26,11 +26,12 @@ export interface GameStartedEvent {
 
 export interface RoleAssignedEvent {
   type: 'role_assigned'
+  role_code: string
   role_name: string
   description: string
   role_type: string
   mafia_ids?: number[]
-  mafia_members?: { id: number; role_name: string }[]
+  mafia_members?: { id: number; role_code: string; role_name: string }[]
 }
 
 export interface SunRiseEvent {
@@ -89,6 +90,7 @@ export interface GameStateEvent {
   round_number: number | null
   lynch_target_id: number | null
   logs: GameLogEntry[]
+  role_code: string | null
   role_name: string | null
   role_type: string | null
   role_description: string | null

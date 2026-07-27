@@ -56,6 +56,7 @@ export interface ActionConfig {
 // Mirrors backend: apps/game/engine/roles/type.py BaseRole
 
 export interface RoleDefinition {
+  code: string
   role_type: Team
   name: string
   description: string
@@ -67,6 +68,7 @@ export interface RoleDefinition {
 // Mirrors backend: apps/game/engine/roles/type.py
 
 export const TownDoctor: RoleDefinition = {
+  code: 'doctor',
   role_type: Team.TOWN,
   name: 'Doctor',
   description: 'Protects one player from being eliminated each night.',
@@ -82,6 +84,7 @@ export const TownDoctor: RoleDefinition = {
 }
 
 export const TownCop: RoleDefinition = {
+  code: 'detective',
   role_type: Team.TOWN,
   name: 'Detective',
   description: 'Investigates one player each night to learn their alignment.',
@@ -97,6 +100,7 @@ export const TownCop: RoleDefinition = {
 }
 
 export const TownVigilante: RoleDefinition = {
+  code: 'vigilante',
   role_type: Team.TOWN,
   name: 'Azure Vigilante',
   description: 'Can choose to eliminate a player at night, but has limited ammo.',
@@ -112,6 +116,7 @@ export const TownVigilante: RoleDefinition = {
 }
 
 export const TownBomb: RoleDefinition = {
+  code: 'bomb',
   role_type: Team.TOWN,
   name: 'Crimson Kamikaze',
   description: 'Explodes upon death, eliminating whoever was responsible for killing them.',
@@ -127,6 +132,7 @@ export const TownBomb: RoleDefinition = {
 }
 
 export const TownVanilla: RoleDefinition = {
+  code: 'vanilla',
   role_type: Team.TOWN,
   name: 'Vanilla Townie',
   description: 'Has no special ability. Uses vote power during the day.',
@@ -141,6 +147,7 @@ export const TownVanilla: RoleDefinition = {
 // ── Mafia Roles ──
 
 export const MafiaGodfather: RoleDefinition = {
+  code: 'godfather',
   role_type: Team.MAFIA,
   name: 'Mafia King',
   description: "The leader of the Mafia. Appears as 'Town' if investigated by the Cop.",
@@ -156,6 +163,7 @@ export const MafiaGodfather: RoleDefinition = {
 }
 
 export const MafiaRoleblocker: RoleDefinition = {
+  code: 'roleblocker',
   role_type: Team.MAFIA,
   name: 'Mafia Silencer',
   description: 'Blocks one player each night, preventing them from using their action.',
@@ -172,6 +180,7 @@ export const MafiaRoleblocker: RoleDefinition = {
 }
 
 export const MafiaMember: RoleDefinition = {
+  code: 'mafia_member',
   role_type: Team.MAFIA,
   name: 'Black Hand',
   description: 'Basic Mafia member who participates in night kills.',
@@ -201,7 +210,7 @@ export const ROLES: RoleDefinition[] = [
 ]
 
 export const ROLE_REGISTRY: Record<string, RoleDefinition> = Object.fromEntries(
-  ROLES.map((role) => [role.name, role]),
+  ROLES.map((role) => [role.code, role]),
 )
 
 // ── Icon Map ──

@@ -44,7 +44,7 @@ export default function CustomParticipantTile({
   const myRoleType = useGameStore((s) => s.myRoleType)
   const mafiaIds = useGameStore((s) => s.mafiaIds)
   const mafiaMemberRoles = useGameStore((s) => s.mafiaMemberRoles)
-  const myRole = useGameStore((s) => s.myRole)
+  const myRoleCode = useGameStore((s) => s.myRoleCode)
   const currentVotes = useGameStore((s) => s.currentVotes)
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
 
@@ -80,14 +80,14 @@ export default function CustomParticipantTile({
   // ---- Role icon (top-left) ----
   let roleIcon: React.ReactNode = null
   if (gameStarted) {
-    if (isLocal && myRole) {
-      const roleDef = ROLE_REGISTRY[myRole]
+    if (isLocal && myRoleCode) {
+      const roleDef = ROLE_REGISTRY[myRoleCode]
       const Icon = roleDef ? (ROLE_ICON_MAP[roleDef.icon] ?? User) : User
       roleIcon = <Icon className="h-3.5 w-3.5" />
     } else if (isMafia && tileUserId != null) {
-      const roleName = mafiaMemberRoles[Number(tileUserId)]
-      if (roleName) {
-        const roleDef = ROLE_REGISTRY[roleName]
+      const roleCode = mafiaMemberRoles[Number(tileUserId)]
+      if (roleCode) {
+        const roleDef = ROLE_REGISTRY[roleCode]
         const Icon = roleDef ? (ROLE_ICON_MAP[roleDef.icon] ?? User) : User
         roleIcon = <Icon className="h-3.5 w-3.5" />
       }

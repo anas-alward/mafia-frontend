@@ -10,6 +10,7 @@ interface GameStore {
   deadPlayerIds: number[]
   players: GameStatePlayer[]
   myRole: string | null
+  myRoleCode: string | null
   myRoleDescription: string | null
   myRoleType: string | null
   logs: GameLogEntry[]
@@ -44,6 +45,7 @@ export const useGameStore = create<GameStore>(() => ({
   deadPlayerIds: [],
   players: [],
   myRole: null,
+  myRoleCode: null,
   myRoleDescription: null,
   myRoleType: null,
   logs: [],
