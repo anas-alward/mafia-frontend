@@ -32,7 +32,7 @@ function toGameRole(
   nightAction: string,
 ): GameRole {
   return {
-    id: role.code,
+    id: role.name,
     name: role.name,
     alignment: role.role_type,
     description: role.description,

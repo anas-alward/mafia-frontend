@@ -6,17 +6,10 @@ import {
   CardTitle,
 } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import { Skull, Users, Search, Shield } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { User } from 'lucide-react'
 import type { GameRole } from '../data/roles'
 import { getAlignmentLabel } from '../data/roles'
-
-const iconMap: Record<string, LucideIcon> = {
-  skull: Skull,
-  users: Users,
-  search: Search,
-  shield: Shield,
-}
+import { ROLE_ICON_MAP } from '#/features/game/constants'
 
 interface HowToPlaySectionProps {
   title: string
@@ -25,7 +18,7 @@ interface HowToPlaySectionProps {
 }
 
 function RoleCard({ role }: { role: GameRole }) {
-  const Icon = iconMap[role.icon]
+  const Icon = ROLE_ICON_MAP[role.icon] ?? User
 
   return (
     <Card className="feature-card transition-colors group">
