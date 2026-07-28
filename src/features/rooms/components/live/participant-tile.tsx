@@ -6,6 +6,7 @@ import {
 } from '@cloudflare/realtimekit-react-ui'
 import { User, Vote } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
+import { useAuthStore } from '#/features/auth/store/auth-store'
 import { ROLE_REGISTRY, ROLE_ICON_MAP, Team } from '#/features/game/constants'
 
 interface CustomParticipantTileProps {
@@ -25,7 +26,6 @@ export default function CustomParticipantTile({
   const videoEnabled = useRealtimeKitSelector(() => participant.videoEnabled)
   const videoTrack = useRealtimeKitSelector(() => participant.videoTrack)
   const isSpeaking = useRealtimeKitSelector(() => participant.isSpeaking)
-  const isLocal = useRealtimeKitSelector(() => participant.isLocal)
   const name = useRealtimeKitSelector(() => participant.name)
 
   useEffect(() => {
@@ -49,14 +49,16 @@ export default function CustomParticipantTile({
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
 
   const isMafia = myRoleType === Team.MAFIA
-  const tileUserId = participant.customParticipantId
-  const isAlive = tileUserId != null && alivePlayerIds.includes(Number(tileUserId))
+  const tileUserId: number | null = participant.customParticipantId != null ? Number(participant.customParticipantId) : null
+  const isAlive = tileUserId != null && alivePlayerIds.includes(tileUserId)
+
+  const currentUser = useAuthStore((s) => s.user)
+  const isLocal = tileUserId != null && currentUser != null && tileUserId === Number(currentUser.id)
 
   // Vote count for this tile
   const voteCount = useMemo(() => {
     if (!gameStarted || tileUserId == null) return 0
-    const numId = Number(tileUserId)
-    return Array.from(currentVotes.values()).filter((id) => id === numId).length
+    return Array.from(currentVotes.values()).filter((id) => id === tileUserId).length
   }, [gameStarted, tileUserId, currentVotes])
 
   // ---- Ring / border ----
@@ -70,7 +72,7 @@ export default function CustomParticipantTile({
   } else if (isSelectable) {
     ringClass = 'ring-1 ring-white/20 hover:ring-white/40 cursor-pointer'
   } else if (gameStarted && isMafia) {
-    if (tileUserId != null && mafiaIds.includes(Number(tileUserId))) {
+    if (tileUserId != null && mafiaIds.includes(tileUserId)) {
       ringClass = 'ring-1 ring-gray-700'
     } else if (tileUserId != null && !isLocal) {
       ringClass = 'ring-1 ring-red-500/40'
@@ -85,7 +87,7 @@ export default function CustomParticipantTile({
       const Icon = roleDef ? (ROLE_ICON_MAP[roleDef.icon] ?? User) : User
       roleIcon = <Icon className="h-3.5 w-3.5" />
     } else if (isMafia && tileUserId != null) {
-      const roleCode = mafiaMemberRoles[Number(tileUserId)]
+      const roleCode = mafiaMemberRoles[tileUserId]
       if (roleCode) {
         const roleDef = ROLE_REGISTRY[roleCode]
         const Icon = roleDef ? (ROLE_ICON_MAP[roleDef.icon] ?? User) : User
@@ -96,7 +98,7 @@ export default function CustomParticipantTile({
 
   const handleClick = () => {
     if (isSelectable && tileUserId != null) {
-      onSelect(Number(tileUserId))
+      onSelect(tileUserId)
     }
   }
 
