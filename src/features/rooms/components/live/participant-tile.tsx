@@ -41,13 +41,13 @@ export default function CustomParticipantTile({
   const initial = (name ?? '?').charAt(0).toUpperCase()
 
   const gameStarted = useGameStore((s) => s.gameStarted)
-  const myRoleType = useGameStore((s) => s.myRoleType)
   const mafiaIds = useGameStore((s) => s.mafiaIds)
   const mafiaMemberRoles = useGameStore((s) => s.mafiaMemberRoles)
   const myRoleCode = useGameStore((s) => s.myRoleCode)
   const currentVotes = useGameStore((s) => s.currentVotes)
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
 
+  const myRoleType = myRoleCode ? ROLE_REGISTRY[myRoleCode].role_type : undefined
   const isMafia = myRoleType === Team.MAFIA
   const tileUserId: number | null = participant.customParticipantId != null ? Number(participant.customParticipantId) : null
   const isAlive = tileUserId != null && alivePlayerIds.includes(tileUserId)
@@ -116,7 +116,7 @@ export default function CustomParticipantTile({
           className="w-full h-full object-cover pointer-events-none"
         />
       ) : (
-        <div className="w-full h-full bg-gradient-to-b from-[#212124] to-[#161618] flex items-center justify-center">
+        <div className="w-full h-full bg-linear-to-b from-[#212124] to-[#161618] flex items-center justify-center">
           <div className="h-20 w-20 rounded-full bg-white/5 flex items-center justify-center">
             <span className="text-4xl font-semibold text-[#a1a1aa] select-none">
               {initial}
@@ -136,7 +136,7 @@ export default function CustomParticipantTile({
       )}
 
       {/* Bottom gradient overlay */}
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-20 bg-linear-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
 
       {/* Name tag */}
       <div className="absolute bottom-3 left-3 z-20">

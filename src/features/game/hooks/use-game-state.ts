@@ -24,10 +24,7 @@ export interface GameState {
   alivePlayerIds: number[]
   deadPlayerIds: number[]
   players: GameStatePlayer[]
-  myRole: string | null
   myRoleCode: string | null
-  myRoleDescription: string | null
-  myRoleType: string | null
   logs: GameLogEntry[]
   currentVotes: Map<number, number>
   lynchTargetId: number | null
@@ -46,10 +43,7 @@ export function useGameState(lastMessage: WsMessage | null) {
   const [alivePlayerIds, setAlivePlayerIds] = useState<number[]>([])
   const [deadPlayerIds, setDeadPlayerIds] = useState<number[]>([])
   const [players, setPlayers] = useState<GameStatePlayer[]>([])
-  const [myRole, setMyRole] = useState<string | null>(null)
   const [myRoleCode, setMyRoleCode] = useState<string | null>(null)
-  const [myRoleDescription, setMyRoleDescription] = useState<string | null>(null)
-  const [myRoleType, setMyRoleType] = useState<string | null>(null)
   const [logs, setLogs] = useState<GameLogEntry[]>([])
   const [currentVotes, setCurrentVotes] = useState<Map<number, number>>(new Map())
   const [lynchTargetId, setLynchTargetId] = useState<number | null>(null)
@@ -83,10 +77,7 @@ export function useGameState(lastMessage: WsMessage | null) {
 
       case 'role_assigned': {
         const msg = lastMessage as RoleAssignedEvent
-        setMyRole(msg.role_name)
         setMyRoleCode(msg.role_code)
-        setMyRoleDescription(msg.description)
-        setMyRoleType(msg.role_type)
         if (msg.mafia_ids && msg.mafia_ids.length > 0) {
           setMafiaIds(msg.mafia_ids)
         }
@@ -161,12 +152,8 @@ export function useGameState(lastMessage: WsMessage | null) {
           setLynchTargetId(msg.lynch_target_id)
           setRequiredActions(msg.required_actions)
 
-          // Use backend-provided role info directly.
           if (msg.role_code) {
-            setMyRole(msg.role_name)
             setMyRoleCode(msg.role_code)
-            setMyRoleDescription(msg.role_description)
-            setMyRoleType(msg.role_type)
           }
           if (msg.mafia_ids) {
             setMafiaIds(msg.mafia_ids)
@@ -183,12 +170,15 @@ export function useGameState(lastMessage: WsMessage | null) {
         setPlayerIds(msg.player_ids)
         setAlivePlayerIds(msg.alive_ids)
         setDeadPlayerIds([])
+        setPlayers([])
         setPhase('day')
+        setMyRoleCode(null)
         setCurrentVotes(new Map())
         setLogs([])
         setLynchTargetId(null)
         setMafiaIds([])
         setMafiaMemberRoles({})
+        setRoundNumber(null)
         setRequiredActions(msg.required_actions)
         break
       }
@@ -215,10 +205,7 @@ export function useGameState(lastMessage: WsMessage | null) {
     setAlivePlayerIds([])
     setDeadPlayerIds([])
     setPlayers([])
-    setMyRole(null)
     setMyRoleCode(null)
-    setMyRoleDescription(null)
-    setMyRoleType(null)
     setLogs([])
     setCurrentVotes(new Map())
     setLynchTargetId(null)
@@ -236,10 +223,7 @@ export function useGameState(lastMessage: WsMessage | null) {
     alivePlayerIds,
     deadPlayerIds,
     players,
-    myRole,
     myRoleCode,
-    myRoleDescription,
-    myRoleType,
     logs,
     currentVotes,
     lynchTargetId,

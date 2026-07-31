@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type { GamePhase, GameLogEntry, RequiredAction, GameStatePlayer } from '#/features/game/events'
 
 interface GameStore {
@@ -9,10 +10,7 @@ interface GameStore {
   alivePlayerIds: number[]
   deadPlayerIds: number[]
   players: GameStatePlayer[]
-  myRole: string | null
   myRoleCode: string | null
-  myRoleDescription: string | null
-  myRoleType: string | null
   logs: GameLogEntry[]
   currentVotes: Map<number, number>
   lynchTargetId: number | null
@@ -36,37 +34,73 @@ interface GameStore {
   submitVoteResult: () => void
 }
 
-export const useGameStore = create<GameStore>(() => ({
-  phase: 'lobby',
-  sessionId: null,
-  gameStarted: false,
-  playerIds: [],
-  alivePlayerIds: [],
-  deadPlayerIds: [],
-  players: [],
-  myRole: null,
-  myRoleCode: null,
-  myRoleDescription: null,
-  myRoleType: null,
-  logs: [],
-  currentVotes: new Map(),
-  lynchTargetId: null,
-  hasVotedThisPhase: false,
-  mafiaIds: [],
-  mafiaMemberRoles: {},
-  roundNumber: null,
-  requiredActions: [],
-  resetGame: () => {},
-  cancelGame: () => {},
-  startGame: () => {},
-  castVote: () => {},
-  killPlayer: () => {},
-  healPlayer: () => {},
-  detectPlayer: () => {},
-  shootPlayer: () => {},
-  revengeKill: () => {},
-  silentAction: () => {},
-  roleblockPlayer: () => {},
-  submitVotes: () => {},
-  submitVoteResult: () => {},
-}))
+const STORE_NAME = 'mafia-game'
+
+export const useGameStore = create<GameStore>()(
+  persist(
+    (): GameStore => ({
+      phase: 'lobby',
+      sessionId: null,
+      gameStarted: false,
+      playerIds: [],
+      alivePlayerIds: [],
+      deadPlayerIds: [],
+      players: [],
+      myRoleCode: null,
+      logs: [],
+      currentVotes: new Map(),
+      lynchTargetId: null,
+      hasVotedThisPhase: false,
+      mafiaIds: [],
+      mafiaMemberRoles: {},
+      roundNumber: null,
+      requiredActions: [],
+      resetGame: () => {},
+      cancelGame: () => {},
+      startGame: () => {},
+      castVote: () => {},
+      killPlayer: () => {},
+      healPlayer: () => {},
+      detectPlayer: () => {},
+      shootPlayer: () => {},
+      revengeKill: () => {},
+      silentAction: () => {},
+      roleblockPlayer: () => {},
+      submitVotes: () => {},
+      submitVoteResult: () => {},
+    }),
+    {
+      name: STORE_NAME,
+      partialize: (state) => {
+        const {
+          resetGame,
+          cancelGame,
+          startGame,
+          castVote,
+          killPlayer,
+          healPlayer,
+          detectPlayer,
+          shootPlayer,
+          revengeKill,
+          silentAction,
+          roleblockPlayer,
+          submitVotes,
+          submitVoteResult,
+          ...data
+        } = state
+        return {
+          ...data,
+          currentVotes: Array.from(data.currentVotes.entries()),
+        }
+      },
+      merge: (persisted, current) => {
+        const p = persisted as Record<string, unknown>
+        return {
+          ...current,
+          ...p,
+          currentVotes: new Map(p.currentVotes as Iterable<[number, number]> | undefined ?? []),
+        }
+      },
+    },
+  ),
+)
