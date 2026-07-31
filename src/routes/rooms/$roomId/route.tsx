@@ -7,8 +7,6 @@ import { useRoomState } from '#/features/rooms/hooks/use-room-state'
 import { RoomClosedState } from '#/features/rooms/states/room-closed-state'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
-import { useGameState } from '#/features/game/hooks/use-game-state'
-import { useGameActions } from '#/features/game/hooks/use-game-actions'
 
 export const Route = createFileRoute('/rooms/$roomId')({
   beforeLoad: ({ location, params }) => {
@@ -35,7 +33,7 @@ function RoomLayout() {
     acceptJoinRequest,
     rejectJoinRequest,
     sendJoinRequest,
-  } = useRoomWebSocket(roomId)
+  } = useRoomWebSocket(roomId, useGameStore.getState().processMessage)
   const {
     roomState,
     roomClosed,
@@ -47,9 +45,6 @@ function RoomLayout() {
     participants,
     isHost,
   } = useRoomState(lastMessage)
-
-  const gameState = useGameState(lastMessage)
-  const gameActions = useGameActions({ send })
 
   const [meeting, initMeeting] = useRealtimeKitClient()
   const [meetingInstance, setMeetingInstance] = useState<RTKClient | null>(null)
@@ -87,13 +82,11 @@ function RoomLayout() {
     })
   })
 
-  // Sync game store
+  // Wire game store
   useEffect(() => {
-    useGameStore.setState({
-      ...gameState,
-      ...gameActions,
-    })
-  })
+    useGameStore.getState().setSend(send)
+  }, [send])
+
 
   if (roomClosed) {
     return <RoomClosedState />

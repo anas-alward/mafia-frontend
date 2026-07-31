@@ -57,11 +57,16 @@ function getWebSocketUrl(code: string, token: string | null): string {
   return wsUrl
 }
 
-export function useRoomWebSocket(code: string | undefined) {
+export function useRoomWebSocket(
+  code: string | undefined,
+  onMessage?: (msg: WsMessage) => void,
+) {
   const wsRef = useRef<WebSocket | null>(null)
   const wasEverOpenRef = useRef(false)
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout>>(null)
   const mountedRef = useRef(true)
+  const onMessageRef = useRef(onMessage)
+  onMessageRef.current = onMessage
   const [state, setState] = useState<WsState>('connecting')
   const [lastMessage, setLastMessage] = useState<WsMessage | null>(null)
   const [wasEverOpen, setWasEverOpen] = useState(false)
@@ -106,6 +111,7 @@ export function useRoomWebSocket(code: string | undefined) {
       if (!mountedRef.current) return
       try {
         const data = JSON.parse(event.data) as WsMessage
+        onMessageRef.current?.(data)
         setLastMessage(data)
       } catch {
         // Ignore non-JSON messages
