@@ -39,8 +39,8 @@ export default function TilesGrid({
   )
   const cols = getColumns(allParticipants.length)
   const rows = Math.ceil(allParticipants.length / cols)
-  const pad = '2.5rem'
-  const gap = '1rem'
+  const pad = '1.5rem'
+  const gap = '0.75rem'
   const itemW = `calc((100% - ${pad} - (${cols} - 1) * ${gap}) / ${cols})`
   const itemH = `calc((100% - ${pad} - (${rows} - 1) * ${gap}) / ${rows})`
 
@@ -53,7 +53,7 @@ export default function TilesGrid({
   const validTargets = new Set(requiredActions.flatMap((a) => a.target_options))
 
   return (
-    <div className="flex flex-wrap content-center justify-center h-full w-full gap-4 p-5">
+    <div className="flex flex-wrap content-center justify-center h-full w-full gap-3 p-4">
       {allParticipants.map((participant) => {
 
         const rawUserId = participant.customParticipantId

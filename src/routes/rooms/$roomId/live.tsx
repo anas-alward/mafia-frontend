@@ -70,7 +70,7 @@ function LiveRoute() {
   return (
     <RealtimeKitProvider value={activeMeeting}>
       <SidebarProvider defaultOpen={false}>
-        <SidebarInset className="min-h-svh bg-[#161618]">
+        <SidebarInset className="min-h-svh" style={{ backgroundColor: 'var(--game-bg-deep)' }}>
           <SidebarClickAway>
             <div className="flex flex-col h-screen">
               <RtkUiProvider

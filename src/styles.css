@@ -327,3 +327,79 @@ a {
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
+
+/* ── Game theme — "Smoke & Brass" ── */
+:root {
+  --game-bg-deep: #131314;
+  --game-bg-surface: #2D2A38;
+  --game-bg-elevated: #3C3849;
+  --game-gold: #EDB83A;
+  --game-crimson: #F0606B;
+  --game-periwinkle: #8FA0F5;
+  --game-mint: #4DE8A0;
+  --game-text-primary: #F3F0E8;
+  --game-text-muted: #A49FB0;
+  --game-border: rgba(243, 240, 232, 0.1);
+}
+
+/* ── Game ambient animations ── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(237, 184, 58, 0.25); }
+  50% { box-shadow: 0 0 24px rgba(237, 184, 58, 0.5); }
+}
+
+@keyframes pulse-crimson {
+  0%, 100% { box-shadow: 0 0 6px rgba(240, 96, 107, 0.15); }
+  50% { box-shadow: 0 0 16px rgba(240, 96, 107, 0.4); }
+}
+
+@keyframes vignette-pulse {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.40; }
+}
+
+@keyframes ability-ready {
+  0%, 100% { box-shadow: 0 0 8px currentColor; }
+  50% { box-shadow: 0 0 22px currentColor, 0 0 36px currentColor; }
+}
+
+@keyframes death-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes phase-glow-day {
+  0%, 100% { box-shadow: 0 0 8px rgba(237, 184, 58, 0.15); }
+  50% { box-shadow: 0 0 18px rgba(237, 184, 58, 0.35); }
+}
+
+@keyframes phase-glow-night {
+  0%, 100% { box-shadow: 0 0 8px rgba(143, 160, 245, 0.15); }
+  50% { box-shadow: 0 0 18px rgba(143, 160, 245, 0.35); }
+}
+
+.ability-pulse {
+  animation: ability-ready 2.2s ease-in-out infinite;
+}
+
+.mafia-glow {
+  animation: pulse-crimson 3s ease-in-out infinite;
+}
+
+/* ── Game vignette overlay ── */
+.game-vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(27, 25, 34, 0.65) 100%);
+  animation: vignette-pulse 10s ease-in-out infinite;
+}
+
+/* ── Game glass surface ── */
+.game-glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(27, 25, 34, 0.85);
+  border-bottom: 1px solid var(--game-border);
+}

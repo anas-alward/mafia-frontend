@@ -23,57 +23,58 @@ import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 interface ActionVisual {
   Icon: LucideIcon
   label: string
-  colorClasses: string
+  color: string
+  glow: string
 }
 
 const ACTION_VISUAL: Record<string, ActionVisual> = {
   [ActionType.VOTE]: {
     Icon: Vote,
     label: 'Vote',
-    colorClasses:
-      'text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 border-amber-500/30 data-[active=true]:bg-amber-500/20 data-[active=true]:text-amber-300',
+    color: 'var(--game-gold)',
+    glow: 'rgba(237, 184, 58, 0.3)',
   },
   [ActionType.KILL]: {
     Icon: Skull,
     label: 'Kill',
-    colorClasses:
-      'text-red-400 hover:bg-red-500/20 hover:text-red-300 border-red-500/30 data-[active=true]:bg-red-500/20 data-[active=true]:text-red-300',
+    color: 'var(--game-crimson)',
+    glow: 'rgba(240, 96, 107, 0.3)',
   },
   [ActionType.HEAL]: {
     Icon: HeartPulse,
     label: 'Heal',
-    colorClasses:
-      'text-green-400 hover:bg-green-500/20 hover:text-green-300 border-green-500/30 data-[active=true]:bg-green-500/20 data-[active=true]:text-green-300',
+    color: 'var(--game-mint)',
+    glow: 'rgba(77, 232, 160, 0.3)',
   },
   [ActionType.DETECT]: {
     Icon: Search,
     label: 'Detect',
-    colorClasses:
-      'text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 border-blue-500/30 data-[active=true]:bg-blue-500/20 data-[active=true]:text-blue-300',
+    color: 'var(--game-periwinkle)',
+    glow: 'rgba(143, 160, 245, 0.3)',
   },
   [ActionType.SHOOT]: {
     Icon: Crosshair,
     label: 'Shoot',
-    colorClasses:
-      'text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 border-orange-500/30 data-[active=true]:bg-orange-500/20 data-[active=true]:text-orange-300',
+    color: '#F5925E',
+    glow: 'rgba(245, 146, 94, 0.3)',
   },
   [ActionType.REVENGE]: {
     Icon: Bomb,
     label: 'Revenge',
-    colorClasses:
-      'text-red-400 hover:bg-red-500/20 hover:text-red-300 border-red-500/30 data-[active=true]:bg-red-500/20 data-[active=true]:text-red-300',
+    color: 'var(--game-crimson)',
+    glow: 'rgba(240, 96, 107, 0.3)',
   },
   [ActionType.ROLEBLOCK]: {
     Icon: Ban,
     label: 'Block',
-    colorClasses:
-      'text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 border-purple-500/30 data-[active=true]:bg-purple-500/20 data-[active=true]:text-purple-300',
+    color: '#C49EF0',
+    glow: 'rgba(196, 158, 240, 0.3)',
   },
   [ActionType.SILENT]: {
     Icon: Moon,
     label: 'Skip',
-    colorClasses:
-      'text-[#a1a1aa] hover:bg-white/10 hover:text-[#f4f4f5] border-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-[#f4f4f5]',
+    color: 'var(--game-text-muted)',
+    glow: 'rgba(243, 240, 232, 0.1)',
   },
 }
 
@@ -151,6 +152,9 @@ export default function GameActionBar({
     }
   }
 
+  const orbBase =
+    'relative flex items-center justify-center h-10 w-10 rounded-xl border transition-all duration-300'
+
   return (
     <div className="flex flex-col gap-1.5">
       {/* Pre-game: Start Game (host only) */}
@@ -163,17 +167,20 @@ export default function GameActionBar({
             if (playerIds.length >= 6) onStartGame(playerIds)
           }}
           title={`Start Game (${totalPlayers}/6)`}
-          className={`relative flex items-center justify-center h-10 w-10 rounded-xl border transition-colors ${
-            canStart
-              ? 'text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 border-amber-500/30 cursor-pointer'
-              : 'text-[#71717a] border-white/5 cursor-not-allowed'
+          className={`${orbBase} ${
+            canStart ? 'cursor-pointer' : 'cursor-not-allowed'
           }`}
+          style={{
+            color: canStart ? 'var(--game-gold)' : 'var(--game-text-muted)',
+            backgroundColor: canStart ? 'rgba(237, 184, 58, 0.1)' : 'transparent',
+            borderColor: canStart ? 'rgba(237, 184, 58, 0.3)' : 'var(--game-border)',
+          }}
         >
           <Play className="h-4 w-4" />
         </button>
       )}
 
-      {/* In-game: required actions as icon buttons */}
+      {/* In-game: required actions as ability orbs */}
       {gameStarted &&
         requiredActions.map((action) => {
           const visual = ACTION_VISUAL[action.action_type]
@@ -192,11 +199,12 @@ export default function GameActionBar({
               disabled={disabled}
               onClick={() => handleAction(action.action_type)}
               title={`${visual.label}${needsTarget && !hasValidTarget ? ' (select a valid target)' : ''}`}
-              className={`relative flex items-center justify-center h-10 w-10 rounded-xl border transition-colors ${
-                disabled
-                  ? 'text-[#71717a] border-white/5 cursor-not-allowed'
-                  : `cursor-pointer ${visual.colorClasses}`
-              }`}
+              className={`${orbBase} ${!disabled ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+              style={{
+                color: disabled ? 'var(--game-text-muted)' : visual.color,
+                backgroundColor: disabled ? 'transparent' : `${visual.glow.replace('0.25', '0.07')}`,
+                borderColor: disabled ? 'var(--game-border)' : visual.glow.replace('0.25', '0.25'),
+              }}
             >
               <visual.Icon className="h-4 w-4" />
             </button>
@@ -205,7 +213,7 @@ export default function GameActionBar({
 
       {/* Separator before host actions */}
       {gameStarted && isHost && (phase === Phase.DAY || phase === Phase.VOTE_RESULT) && (
-        <div className="my-1 border-t border-white/5" />
+        <div className="my-1 border-t" style={{ borderColor: 'var(--game-border)' }} />
       )}
 
       {/* Host: Submit votes */}
@@ -215,11 +223,14 @@ export default function GameActionBar({
           disabled={!allVoted}
           onClick={submitVotes}
           title={`Submit Votes${alivePlayerIds.length > 0 ? ` (${currentVotes.size}/${alivePlayerIds.length})` : ''}`}
-          className={`relative flex items-center justify-center h-10 w-10 rounded-xl border transition-colors ${
-            allVoted
-              ? 'text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 border-amber-500/30 cursor-pointer'
-              : 'text-[#71717a] border-white/5 cursor-not-allowed'
+          className={`${orbBase} ${
+            allVoted ? 'cursor-pointer' : 'cursor-not-allowed'
           }`}
+          style={{
+            color: allVoted ? 'var(--game-gold)' : 'var(--game-text-muted)',
+            backgroundColor: allVoted ? 'rgba(237, 184, 58, 0.08)' : 'transparent',
+            borderColor: allVoted ? 'rgba(237, 184, 58, 0.3)' : 'var(--game-border)',
+          }}
         >
           <Send className="h-4 w-4" />
         </button>
@@ -231,7 +242,12 @@ export default function GameActionBar({
           type="button"
           onClick={submitVoteResult}
           title="Resolve"
-          className="relative flex items-center justify-center h-10 w-10 rounded-xl border text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 border-orange-500/30 transition-colors cursor-pointer"
+          className={`${orbBase} cursor-pointer`}
+          style={{
+            color: '#F5925E',
+            backgroundColor: 'rgba(245, 146, 94, 0.08)',
+            borderColor: 'rgba(245, 146, 94, 0.3)',
+          }}
         >
           <Send className="h-4 w-4" />
         </button>
@@ -239,7 +255,7 @@ export default function GameActionBar({
 
       {/* Separator before game management */}
       {gameStarted && isHost && (
-        <div className="my-1 border-t border-white/5" />
+        <div className="my-1 border-t" style={{ borderColor: 'var(--game-border)' }} />
       )}
 
       {/* Host: Reset game */}
@@ -248,7 +264,20 @@ export default function GameActionBar({
           type="button"
           onClick={resetGame}
           title="Reset Game"
-          className="relative flex items-center justify-center h-10 w-10 rounded-xl border text-[#a1a1aa] hover:bg-white/10 hover:text-[#f4f4f5] border-white/10 transition-colors cursor-pointer"
+          className={`${orbBase} cursor-pointer`}
+          style={{
+            color: 'var(--game-text-muted)',
+            backgroundColor: 'transparent',
+            borderColor: 'var(--game-border)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--game-text-primary)'
+            e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--game-text-muted)'
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
         >
           <RotateCcw className="h-4 w-4" />
         </button>
@@ -260,7 +289,18 @@ export default function GameActionBar({
           type="button"
           onClick={cancelGame}
           title="Cancel Game"
-          className="relative flex items-center justify-center h-10 w-10 rounded-xl border text-red-400 hover:bg-red-500/20 hover:text-red-300 border-red-500/30 transition-colors cursor-pointer"
+          className={`${orbBase} cursor-pointer`}
+          style={{
+            color: 'var(--game-crimson)',
+            backgroundColor: 'transparent',
+            borderColor: 'rgba(240, 96, 107, 0.2)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(240, 96, 107, 0.12)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+          }}
         >
           <X className="h-4 w-4" />
         </button>
