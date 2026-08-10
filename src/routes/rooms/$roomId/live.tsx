@@ -14,7 +14,7 @@ import {
 } from '@cloudflare/realtimekit-react-ui'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
-import { useAuthStore } from '#/features/auth/store/auth-store'
+
 import TilesGrid from '#/features/rooms/components/live/tiles-grid'
 import ControlBar from '#/features/rooms/components/live/control-bar'
 import LiveParticipantTile from '#/features/rooms/components/live/participant-tile'
@@ -111,9 +111,6 @@ function LiveRoom({
 
   const { meeting } = useRealtimeKitMeeting()
   const selfParticipant = useRealtimeKitSelector(() => meeting.self)
-  const currentUser = useAuthStore((s) => s.user)
-
-  const currentUserId = currentUser ? Number(currentUser.id) : null
   const isPreGameHost = isHost && !gameStarted
 
   return (
