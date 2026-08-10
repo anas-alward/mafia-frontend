@@ -30,14 +30,12 @@ import { ActionType, Phase } from '#/features/game/constants'
 interface ControlBarProps {
   fullScreenRef: React.RefObject<HTMLDivElement | null>
   isPreGameHost: boolean
-  preGameSelectedIds: Set<number>
   onStartGame: (playerIds: number[]) => void
 }
 
 export default function ControlBar({
   fullScreenRef,
   isPreGameHost,
-  preGameSelectedIds,
   onStartGame,
 }: ControlBarProps) {
   const { meeting } = useRealtimeKitMeeting()
