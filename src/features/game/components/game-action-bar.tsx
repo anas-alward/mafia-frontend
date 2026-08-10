@@ -6,7 +6,6 @@ import {
   Search,
   HeartPulse,
   Send,
-  Play,
   Ban,
   Moon,
   Bomb,
@@ -82,16 +81,10 @@ const ACTION_VISUAL: Record<string, ActionVisual> = {
 
 interface GameActionBarProps {
   selectedPlayerId: number | null
-  preGameSelectedIds: Set<number>
-  isPreGameHost: boolean
-  onStartGame: (playerIds: number[]) => void
 }
 
 export default function GameActionBar({
   selectedPlayerId,
-  preGameSelectedIds,
-  isPreGameHost,
-  onStartGame,
 }: GameActionBarProps) {
   const gameStarted = useGameStore((s) => s.gameStarted)
   const phase = useGameStore((s) => s.phase)
@@ -116,9 +109,6 @@ export default function GameActionBar({
     () => alivePlayerIds.every((id) => currentVotes.has(id)),
     [alivePlayerIds, currentVotes],
   )
-
-  const totalPlayers = preGameSelectedIds.size
-  const canStart = totalPlayers >= 6
 
   const handleAction = (actionType: string) => {
     if (actionType === ActionType.SILENT) {
@@ -157,33 +147,6 @@ export default function GameActionBar({
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* Pre-game: Start Game (host only) */}
-      {!gameStarted && isPreGameHost && (
-        <button
-          type="button"
-          disabled={!canStart}
-          onClick={() => {
-            const playerIds = Array.from(preGameSelectedIds).map(Number)
-            if (playerIds.length >= 6) onStartGame(playerIds)
-          }}
-          title={`Start Game (${totalPlayers}/6)`}
-          className={`${orbBase} ${
-            canStart ? 'cursor-pointer' : 'cursor-not-allowed'
-          }`}
-          style={{
-            color: canStart ? 'var(--game-gold)' : 'var(--game-text-muted)',
-            backgroundColor: canStart
-              ? 'rgba(237, 184, 58, 0.1)'
-              : 'transparent',
-            borderColor: canStart
-              ? 'rgba(237, 184, 58, 0.3)'
-              : 'var(--game-border)',
-          }}
-        >
-          <Play className="h-4 w-4" />
-        </button>
-      )}
-
       {/* In-game: required actions as ability orbs */}
       {gameStarted &&
         requiredActions.map((action) => {
