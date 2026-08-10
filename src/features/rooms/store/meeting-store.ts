@@ -17,9 +17,13 @@ interface MeetingStore {
   acceptJoinRequest: (userId: number) => void
   rejectJoinRequest: (userId: number) => void
   joinRequestStatus: 'idle' | 'requested' | 'accepted' | 'rejected'
-  setJoinRequestStatus: (status: 'idle' | 'requested' | 'accepted' | 'rejected') => void
+  setJoinRequestStatus: (
+    status: 'idle' | 'requested' | 'accepted' | 'rejected',
+  ) => void
   meeting: RTKClient | undefined
-  initMeeting: (options: { authToken: string }) => Promise<RTKClient | undefined>
+  initMeeting: (options: {
+    authToken: string
+  }) => Promise<RTKClient | undefined>
   meetingInstance: RTKClient | null
   setMeetingInstance: (instance: RTKClient | null) => void
   authToken: string | null

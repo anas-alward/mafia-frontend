@@ -74,12 +74,8 @@ export const TownDoctor: RoleDefinition = {
   description: 'Protects one player from being eliminated each night.',
   icon: 'heart-pulse',
   actions: {
-    [Phase.NIGHT]: [
-      { action_type: ActionType.HEAL, required: true },
-    ],
-    [Phase.DAY]: [
-      { action_type: ActionType.VOTE, required: true },
-    ],
+    [Phase.NIGHT]: [{ action_type: ActionType.HEAL, required: true }],
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
 }
 
@@ -90,12 +86,8 @@ export const TownCop: RoleDefinition = {
   description: 'Investigates one player each night to learn their alignment.',
   icon: 'search',
   actions: {
-    [Phase.NIGHT]: [
-      { action_type: ActionType.DETECT, required: true },
-    ],
-    [Phase.DAY]: [
-      { action_type: ActionType.VOTE, required: true },
-    ],
+    [Phase.NIGHT]: [{ action_type: ActionType.DETECT, required: true }],
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
 }
 
@@ -103,15 +95,12 @@ export const TownVigilante: RoleDefinition = {
   code: 'vigilante',
   role_type: Team.TOWN,
   name: 'Azure Vigilante',
-  description: 'Can choose to eliminate a player at night, but has limited ammo.',
+  description:
+    'Can choose to eliminate a player at night, but has limited ammo.',
   icon: 'crosshair',
   actions: {
-    [Phase.NIGHT]: [
-      { action_type: ActionType.SHOOT, required: false },
-    ],
-    [Phase.DAY]: [
-      { action_type: ActionType.VOTE, required: true },
-    ],
+    [Phase.NIGHT]: [{ action_type: ActionType.SHOOT, required: false }],
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
 }
 
@@ -119,15 +108,12 @@ export const TownBomb: RoleDefinition = {
   code: 'bomb',
   role_type: Team.TOWN,
   name: 'Crimson Kamikaze',
-  description: 'Explodes upon death, eliminating whoever was responsible for killing them.',
+  description:
+    'Explodes upon death, eliminating whoever was responsible for killing them.',
   icon: 'bomb',
   actions: {
-    [Phase.VOTE_RESULT]: [
-      { action_type: ActionType.REVENGE, required: true },
-    ],
-    [Phase.DAY]: [
-      { action_type: ActionType.VOTE, required: true },
-    ],
+    [Phase.VOTE_RESULT]: [{ action_type: ActionType.REVENGE, required: true }],
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
 }
 
@@ -138,9 +124,7 @@ export const TownVanilla: RoleDefinition = {
   description: 'Has no special ability. Uses vote power during the day.',
   icon: 'user',
   actions: {
-    [Phase.DAY]: [
-      { action_type: ActionType.VOTE, required: true },
-    ],
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
 }
 
@@ -150,15 +134,14 @@ export const MafiaGodfather: RoleDefinition = {
   code: 'godfather',
   role_type: Team.MAFIA,
   name: 'Mafia King',
-  description: "The leader of the Mafia. Appears as 'Town' if investigated by the Cop.",
+  description:
+    "The leader of the Mafia. Appears as 'Town' if investigated by the Cop.",
   icon: 'crown',
   actions: {
     [Phase.NIGHT]: [
       { action_type: ActionType.KILL, required: true, priority: 1 },
     ],
-    [Phase.DAY]: [
-      { action_type: ActionType.VOTE, required: true },
-    ],
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
 }
 
@@ -166,16 +149,15 @@ export const MafiaRoleblocker: RoleDefinition = {
   code: 'roleblocker',
   role_type: Team.MAFIA,
   name: 'Mafia Silencer',
-  description: 'Blocks one player each night, preventing them from using their action.',
+  description:
+    'Blocks one player each night, preventing them from using their action.',
   icon: 'ban',
   actions: {
     [Phase.NIGHT]: [
       { action_type: ActionType.KILL, required: true, priority: 2 },
       { action_type: ActionType.ROLEBLOCK, required: true },
     ],
-    [Phase.DAY]: [
-      { action_type: ActionType.VOTE, required: true },
-    ],
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
 }
 
@@ -189,9 +171,7 @@ export const MafiaMember: RoleDefinition = {
     [Phase.NIGHT]: [
       { action_type: ActionType.KILL, required: true, priority: 3 },
     ],
-    [Phase.DAY]: [
-      { action_type: ActionType.VOTE, required: true },
-    ],
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
 }
 

@@ -42,7 +42,10 @@ export function ParticipantList({
           <span className="text-xs">{participants.length}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-72 p-0 flex flex-col bg-neutral-950 border-l border-neutral-800 text-neutral-200">
+      <SheetContent
+        side="right"
+        className="w-72 p-0 flex flex-col bg-neutral-950 border-l border-neutral-800 text-neutral-200"
+      >
         <SheetHeader className="px-4 py-3 border-b border-neutral-800">
           <SheetTitle className="text-sm font-medium text-neutral-200">
             Participants ({participants.length})
@@ -68,7 +71,9 @@ export function ParticipantList({
                   </div>
                   <span className="text-sm truncate text-neutral-200">
                     {p.username}
-                    {isSelf && <span className="text-neutral-500 ml-1">(You)</span>}
+                    {isSelf && (
+                      <span className="text-neutral-500 ml-1">(You)</span>
+                    )}
                   </span>
                   {isParticipantHost && (
                     <Crown className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />

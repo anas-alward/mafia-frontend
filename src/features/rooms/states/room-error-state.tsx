@@ -26,8 +26,12 @@ export function RoomErrorState({ onReconnect }: RoomErrorStateProps) {
           <AlertTriangle className="h-8 w-8 text-red-500" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-[#f4f4f5]">Connection error</h2>
-          <p className="text-sm text-[#a1a1aa]">Could not connect to the meeting server.</p>
+          <h2 className="text-lg font-semibold text-[#f4f4f5]">
+            Connection error
+          </h2>
+          <p className="text-sm text-[#a1a1aa]">
+            Could not connect to the meeting server.
+          </p>
         </div>
         <button
           type="button"

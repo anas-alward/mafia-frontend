@@ -19,10 +19,19 @@ export function CtaSection({ title, description }: CtaSectionProps) {
           </p>
 
           <div className="mt-8 flex items-center justify-center gap-4">
-            <Button asChild variant="outline" size="lg" className="text-base px-8 py-6 rounded-xl">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="text-base px-8 py-6 rounded-xl"
+            >
               <Link to="/login">Log in</Link>
             </Button>
-            <Button asChild size="lg" className="cta-glow text-white text-base px-8 py-6 rounded-xl shadow-none">
+            <Button
+              asChild
+              size="lg"
+              className="cta-glow text-white text-base px-8 py-6 rounded-xl shadow-none"
+            >
               <Link to="/signup">Sign up</Link>
             </Button>
           </div>

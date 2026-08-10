@@ -30,8 +30,12 @@ function ChangePasswordPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="display-title text-3xl text-neutral-900">Change password</h1>
-          <p className="mt-2 text-sm text-neutral-600">Enter your current and new password</p>
+          <h1 className="display-title text-3xl text-neutral-900">
+            Change password
+          </h1>
+          <p className="mt-2 text-sm text-neutral-600">
+            Enter your current and new password
+          </p>
         </div>
         <ChangePasswordForm onSubmit={handleSubmit} />
       </div>

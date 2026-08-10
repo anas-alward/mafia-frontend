@@ -7,17 +7,21 @@ interface JoinRequestsPanelProps {
   onToggle: () => void
 }
 
-export default function JoinRequestsPanel({ open, onToggle }: JoinRequestsPanelProps) {
+export default function JoinRequestsPanel({
+  open,
+  onToggle,
+}: JoinRequestsPanelProps) {
   const roomJoinRequests = useMeetingStore((s) => s.joinRequests)
   const roomDismissJoinRequest = useMeetingStore((s) => s.dismissJoinRequest)
   const roomAcceptJoinRequest = useMeetingStore((s) => s.acceptJoinRequest)
   const roomRejectJoinRequest = useMeetingStore((s) => s.rejectJoinRequest)
-  const { joinRequests, acceptJoinRequest, rejectJoinRequest } = useJoinRequests({
-    joinRequests: roomJoinRequests,
-    dismissJoinRequest: roomDismissJoinRequest,
-    acceptJoinRequest: roomAcceptJoinRequest,
-    rejectJoinRequest: roomRejectJoinRequest,
-  })
+  const { joinRequests, acceptJoinRequest, rejectJoinRequest } =
+    useJoinRequests({
+      joinRequests: roomJoinRequests,
+      dismissJoinRequest: roomDismissJoinRequest,
+      acceptJoinRequest: roomAcceptJoinRequest,
+      rejectJoinRequest: roomRejectJoinRequest,
+    })
   const count = joinRequests.length
 
   return (

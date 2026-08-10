@@ -27,8 +27,12 @@ function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="display-title text-3xl text-neutral-900">Create an account</h1>
-          <p className="mt-2 text-sm text-neutral-600">Start your Mafia journey</p>
+          <h1 className="display-title text-3xl text-neutral-900">
+            Create an account
+          </h1>
+          <p className="mt-2 text-sm text-neutral-600">
+            Start your Mafia journey
+          </p>
         </div>
         <SignUpForm onSubmit={handleSubmit} />
       </div>

@@ -1,51 +1,41 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect, useCallback, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   RealtimeKitProvider,
+  useRealtimeKitMeeting,
+  useRealtimeKitSelector,
 } from '@cloudflare/realtimekit-react'
 import {
   RtkUiProvider,
   RtkParticipantsAudio,
   RtkDialogManager,
   RtkNotifications,
+  RtkStage,
 } from '@cloudflare/realtimekit-react-ui'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
-import { RoomActiveState } from '#/features/rooms/states/room-active-state'
-import { SidebarProvider, SidebarInset, useSidebar } from '#/components/ui/sidebar'
-import { JoinRequestsSidebar } from '#/features/rooms/components/live/join-requests-sidebar'
+import { useGameStore } from '#/features/game/store/game-store'
+import { useAuthStore } from '#/features/auth/store/auth-store'
+import TilesGrid from '#/features/rooms/components/live/tiles-grid'
+import ControlBar from '#/features/rooms/components/live/control-bar'
+import LiveParticipantTile from '#/features/rooms/components/live/participant-tile'
+import { GameHUD } from '#/features/rooms/components/live/game-hud'
+import { LiveSidebar } from '#/features/rooms/components/live/live-sidebar'
+import { PhaseTransition } from '#/features/game/components/phase-transition'
 
 export const Route = createFileRoute('/rooms/$roomId/live')({
   component: LiveRoute,
 })
 
-function SidebarClickAway({ children }: { children: React.ReactNode }) {
-  const { open, setOpen } = useSidebar()
-  return (
-    <div
-      onClick={() => { if (open) setOpen(false) }}
-      className="h-full w-full"
-    >
-      {children}
-    </div>
-  )
-}
-
 function LiveRoute() {
   const { roomId } = Route.useParams()
   const meeting = useMeetingStore((s) => s.meeting)
   const meetingInstance = useMeetingStore((s) => s.meetingInstance)
-  const joinRequests = useMeetingStore((s) => s.joinRequests)
-  const dismissJoinRequest = useMeetingStore((s) => s.dismissJoinRequest)
-  const acceptJoinRequest = useMeetingStore((s) => s.acceptJoinRequest)
-  const rejectJoinRequest = useMeetingStore((s) => s.rejectJoinRequest)
-  const participants = useMeetingStore((s) => s.participants)
-  const isHost = useMeetingStore((s) => s.isHost)
-  const wsState = useMeetingStore((s) => s.wsState)
-  const sendError = useMeetingStore((s) => s.sendError)
 
   const navigate = useNavigate()
   const fullScreenRef = useRef<HTMLDivElement>(null)
   const activeMeeting = meetingInstance || meeting
+
+  const mediaDisabled = import.meta.env.VITE_DISABLE_MEDIA === 'true'
 
   // Guard: redirect to /join if no meeting initialized (e.g. direct link to /live)
   useEffect(() => {
@@ -54,10 +44,24 @@ function LiveRoute() {
     }
   }, [activeMeeting, navigate, roomId])
 
+  // When media is disabled via env flag, keep mic/cam off after joining
+  useEffect(() => {
+    if (!mediaDisabled || !activeMeeting) return
+    const t = setTimeout(() => {
+      activeMeeting.self.disableAudio()
+      activeMeeting.self.disableVideo()
+    }, 500)
+    return () => clearTimeout(t)
+  }, [mediaDisabled, activeMeeting])
+
   const handleStatesUpdate = useCallback(
     (event: { detail: { meeting?: string } }) => {
       if (event.detail.meeting === 'ended') {
-        navigate({ to: '/rooms/$roomId/ended', params: { roomId }, replace: true })
+        navigate({
+          to: '/rooms/$roomId/ended',
+          params: { roomId },
+          replace: true,
+        })
       }
     },
     [navigate, roomId],
@@ -69,33 +73,107 @@ function LiveRoute() {
 
   return (
     <RealtimeKitProvider value={activeMeeting}>
-      <SidebarProvider defaultOpen={false}>
-        <SidebarInset className="min-h-svh" style={{ backgroundColor: 'var(--game-bg-deep)' }}>
-          <SidebarClickAway>
-            <div className="flex flex-col h-screen">
-              <RtkUiProvider
-                ref={fullScreenRef}
-                meeting={activeMeeting}
-                showSetupScreen={false}
-                onRtkStatesUpdate={handleStatesUpdate}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  height: '100%',
-                  width: '100%',
-                  margin: 0,
-                }}
-              >
-                <RoomActiveState fullScreenRef={fullScreenRef} roomId={roomId} />
-                <RtkParticipantsAudio />
-                <RtkDialogManager />
-                <RtkNotifications />
-              </RtkUiProvider>
-            </div>
-          </SidebarClickAway>
-        </SidebarInset>
-        <JoinRequestsSidebar />
-      </SidebarProvider>
+      <LiveSidebar>
+        <div className="flex flex-col h-screen">
+          <RtkUiProvider
+            ref={fullScreenRef}
+            meeting={activeMeeting}
+            showSetupScreen={false}
+            onRtkStatesUpdate={handleStatesUpdate}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              width: '100%',
+              margin: 0,
+            }}
+          >
+            <LiveRoom fullScreenRef={fullScreenRef} />
+            <RtkParticipantsAudio />
+            <RtkDialogManager />
+            <RtkNotifications />
+          </RtkUiProvider>
+        </div>
+        <LiveSidebar.Panel />
+      </LiveSidebar>
     </RealtimeKitProvider>
+  )
+}
+
+function LiveRoom({
+  fullScreenRef,
+}: {
+  fullScreenRef: React.RefObject<HTMLDivElement | null>
+}) {
+  const isHost = useMeetingStore((s) => s.isHost)
+  const gameStarted = useGameStore((s) => s.gameStarted)
+  const startGame = useGameStore((s) => s.startGame)
+
+  const { meeting } = useRealtimeKitMeeting()
+  const selfParticipant = useRealtimeKitSelector(() => meeting.self)
+  const currentUser = useAuthStore((s) => s.user)
+
+  const [preGameSelectedIds, setPreGameSelectedIds] = useState<Set<number>>(
+    new Set(),
+  )
+
+  const onTogglePreGamePlayer = useCallback((userId: number) => {
+    setPreGameSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(userId)) {
+        next.delete(userId)
+      } else {
+        next.add(userId)
+      }
+      return next
+    })
+  }, [])
+
+  const currentUserId = currentUser ? Number(currentUser.id) : null
+  const isPreGameHost = isHost && !gameStarted
+
+  let selfSelectable = false
+  let selfSelected = false
+  if (isPreGameHost) {
+    selfSelectable = true
+    selfSelected =
+      currentUserId != null && preGameSelectedIds.has(currentUserId)
+  }
+
+  return (
+    <div
+      className="relative flex flex-col h-full w-full"
+      style={{ backgroundColor: 'var(--game-bg-deep)' }}
+    >
+      <PhaseTransition />
+      <div className="game-vignette" />
+      <GameHUD />
+
+      <div className="flex-1 min-h-0 relative overflow-hidden">
+        <RtkStage style={{ position: 'absolute', inset: 0 }}>
+          <TilesGrid
+            preGameSelectedIds={preGameSelectedIds}
+            onTogglePreGamePlayer={onTogglePreGamePlayer}
+            isPreGameHost={isPreGameHost}
+          />
+        </RtkStage>
+
+        <div className="absolute bottom-4 right-4 z-30 w-60 h-36 rounded-lg overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.08]">
+          <LiveParticipantTile
+            participant={selfParticipant}
+            isSelected={selfSelected}
+            isSelectable={selfSelectable}
+            onSelect={isPreGameHost ? onTogglePreGamePlayer : () => {}}
+          />
+        </div>
+      </div>
+
+      <ControlBar
+        fullScreenRef={fullScreenRef}
+        isPreGameHost={isPreGameHost}
+        preGameSelectedIds={preGameSelectedIds}
+        onStartGame={startGame}
+      />
+    </div>
   )
 }

@@ -144,7 +144,9 @@ export const useGameStore = create<GameStore>()(
             const { playerIds } = get()
             set((s) => ({
               alivePlayerIds: m.player_ids,
-              deadPlayerIds: playerIds.filter((id) => !m.player_ids.includes(id)),
+              deadPlayerIds: playerIds.filter(
+                (id) => !m.player_ids.includes(id),
+              ),
               phase: 'day',
               currentVotes: new Map(),
               lynchTargetId: null,
@@ -160,7 +162,9 @@ export const useGameStore = create<GameStore>()(
             const { playerIds } = get()
             set((s) => ({
               alivePlayerIds: m.player_ids,
-              deadPlayerIds: playerIds.filter((id) => !m.player_ids.includes(id)),
+              deadPlayerIds: playerIds.filter(
+                (id) => !m.player_ids.includes(id),
+              ),
               phase: 'night',
               currentVotes: new Map(),
               lynchTargetId: null,
@@ -198,7 +202,8 @@ export const useGameStore = create<GameStore>()(
               const updates: Partial<GameStore> = {
                 sessionId: m.session_id,
                 phase: m.current_phase as GamePhase,
-                gameStarted: m.current_phase !== 'lobby' && m.current_phase !== 'ended',
+                gameStarted:
+                  m.current_phase !== 'lobby' && m.current_phase !== 'ended',
                 roundNumber: m.round_number,
                 players: m.players,
                 playerIds: m.players.map((p) => p.id),
@@ -216,6 +221,8 @@ export const useGameStore = create<GameStore>()(
                 updates.mafiaIds = m.mafia_ids
               }
               set(updates)
+            } else {
+              _resetToLobby()
             }
             break
           }
@@ -251,7 +258,9 @@ export const useGameStore = create<GameStore>()(
       }
 
       const send_ = (data: unknown) => {
-        get()._send?.(data)
+        const fn = get()._send
+        console.log('[GameStore] send_ called', { data, hasSend: fn != null })
+        fn?.(data)
       }
 
       return {
@@ -280,7 +289,10 @@ export const useGameStore = create<GameStore>()(
         processMessage,
 
         startGame: (playerIds) => {
-          const msg: StartGameMessage = { type: 'start_game', player_ids: playerIds }
+          const msg: StartGameMessage = {
+            type: 'start_game',
+            player_ids: playerIds,
+          }
           send_(msg)
         },
         castVote: (targetId) => {
@@ -308,11 +320,17 @@ export const useGameStore = create<GameStore>()(
           send_(msg)
         },
         silentAction: (targetId) => {
-          const msg: SilentMessage = { type: 'silent', target_id: targetId ?? null }
+          const msg: SilentMessage = {
+            type: 'silent',
+            target_id: targetId ?? null,
+          }
           send_(msg)
         },
         roleblockPlayer: (targetId) => {
-          const msg: RoleblockMessage = { type: 'roleblock', target_id: targetId }
+          const msg: RoleblockMessage = {
+            type: 'roleblock',
+            target_id: targetId,
+          }
           send_(msg)
         },
         submitVotes: () => {
@@ -366,7 +384,9 @@ export const useGameStore = create<GameStore>()(
         return {
           ...current,
           ...p,
-          currentVotes: new Map(p.currentVotes as Iterable<[number, number]> | undefined ?? []),
+          currentVotes: new Map(
+            (p.currentVotes as Iterable<[number, number]> | undefined) ?? [],
+          ),
         }
       },
     },

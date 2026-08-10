@@ -29,7 +29,9 @@ export function RoomConnectingState({ roomId }: RoomConnectingStateProps) {
 
         {/* Room code */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-[#f4f4f5]">Connecting to meeting</h2>
+          <h2 className="text-lg font-semibold text-[#f4f4f5]">
+            Connecting to meeting
+          </h2>
           <span className="inline-block font-mono text-sm text-[#a1a1aa] bg-[#161618] px-4 py-1.5 rounded-lg">
             #{roomId}
           </span>
@@ -43,9 +45,18 @@ export function RoomConnectingState({ roomId }: RoomConnectingStateProps) {
 
         {/* Animated dots */}
         <div className="flex items-center justify-center gap-1.5 pt-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#60a5fa] animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="h-1.5 w-1.5 rounded-full bg-[#60a5fa] animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="h-1.5 w-1.5 rounded-full bg-[#60a5fa] animate-bounce" style={{ animationDelay: '300ms' }} />
+          <span
+            className="h-1.5 w-1.5 rounded-full bg-[#60a5fa] animate-bounce"
+            style={{ animationDelay: '0ms' }}
+          />
+          <span
+            className="h-1.5 w-1.5 rounded-full bg-[#60a5fa] animate-bounce"
+            style={{ animationDelay: '150ms' }}
+          />
+          <span
+            className="h-1.5 w-1.5 rounded-full bg-[#60a5fa] animate-bounce"
+            style={{ animationDelay: '300ms' }}
+          />
         </div>
       </div>
     </div>

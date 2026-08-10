@@ -32,7 +32,9 @@ export function RoomWaitingState({ roomId }: RoomWaitingStateProps) {
 
         {/* Room code */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-[#f4f4f5]">Joining meeting</h2>
+          <h2 className="text-lg font-semibold text-[#f4f4f5]">
+            Joining meeting
+          </h2>
           <span className="inline-block font-mono text-sm text-[#60a5fa] bg-[#161618] px-4 py-1.5 rounded-lg">
             #{roomId}
           </span>

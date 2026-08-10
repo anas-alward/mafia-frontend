@@ -15,7 +15,9 @@ function MeetingEndedRoute() {
           <LogOut className="h-5 w-5 text-[#71717a]" />
         </div>
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-[#f4f4f5]">Meeting ended</h2>
+          <h2 className="text-lg font-semibold text-[#f4f4f5]">
+            Meeting ended
+          </h2>
           <p className="text-sm text-[#71717a]">Thanks for joining.</p>
         </div>
         <button

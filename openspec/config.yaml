@@ -1,1 +1,4 @@
 store: mafia-plan
+schema: spec-driven
+references:
+  - mafia-plan

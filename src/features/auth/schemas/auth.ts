@@ -12,9 +12,7 @@ const username = z
 
 const email = z.string().email('Please enter a valid email address')
 
-const password = z
-  .string()
-  .min(8, 'Password must be at least 8 characters')
+const password = z.string().min(8, 'Password must be at least 8 characters')
 
 // ── Sign Up ──
 export const signUpSchema = z.object({
@@ -27,7 +25,10 @@ export type SignUpInput = z.infer<typeof signUpSchema>
 
 // ── Login ──
 export const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 })
 

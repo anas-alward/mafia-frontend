@@ -34,9 +34,7 @@ function RoleCard({ role }: { role: GameRole }) {
             {getAlignmentLabel(role.alignment)}
           </Badge>
         </div>
-        <CardTitle className="text-lg text-neutral-900">
-          {role.name}
-        </CardTitle>
+        <CardTitle className="text-lg text-neutral-900">{role.name}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <CardDescription className="text-sm text-neutral-600 leading-relaxed">

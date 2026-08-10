@@ -24,14 +24,29 @@ export async function getContext(request?: Request): Promise<{
       })
 
       if (res.ok) {
-        const body = (await res.json()) as { success: boolean; data?: { user: { id: string; username: string; email: string; createdAt: string } } }
+        const body = (await res.json()) as {
+          success: boolean
+          data?: {
+            user: {
+              id: string
+              username: string
+              email: string
+              createdAt: string
+            }
+          }
+        }
         if (body.success && body.data?.user) {
           const u = body.data.user
           return {
             queryClient,
             auth: {
               isAuthenticated: true,
-              user: { id: u.id, username: u.username, email: u.email, createdAt: u.createdAt },
+              user: {
+                id: u.id,
+                username: u.username,
+                email: u.email,
+                createdAt: u.createdAt,
+              },
               isLoading: false,
             },
           }

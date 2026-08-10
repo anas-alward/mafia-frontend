@@ -20,7 +20,10 @@ export function DisconnectedOverlay({ onReconnect }: DisconnectedOverlayProps) {
             Your connection to the meeting was lost.
           </p>
         </div>
-        <Button onClick={onReconnect} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6">
+        <Button
+          onClick={onReconnect}
+          className="gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6"
+        >
           <Wifi className="h-4 w-4" />
           Reconnect
         </Button>

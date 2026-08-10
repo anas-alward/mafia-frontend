@@ -1,3 +1,5 @@
+import type { GameStateEvent } from '#/features/game/events'
+
 // ── Outbound (server → client) ──
 
 export interface RoomStateCredentials {
@@ -12,6 +14,7 @@ export interface RoomStateEvent {
   room_name: string | null
   host_id: number | null
   members: number[]
+  game_state: GameStateEvent | null
 }
 
 export interface PlayerJoinedEvent {

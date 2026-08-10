@@ -67,10 +67,18 @@ export function useRoomWebSocket(
   const mountedRef = useRef(true)
   const onMessageRef = useRef(onMessage)
   onMessageRef.current = onMessage
+  const messageQueueRef = useRef<WsMessage[]>([])
   const [state, setState] = useState<WsState>('connecting')
   const [lastMessage, setLastMessage] = useState<WsMessage | null>(null)
+  const [queueVersion, setQueueVersion] = useState(0)
   const [wasEverOpen, setWasEverOpen] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
+
+  const drainMessages = useCallback(() => {
+    const msgs = messageQueueRef.current
+    messageQueueRef.current = []
+    return msgs
+  }, [])
 
   const connect = useCallback(() => {
     if (!code) return
@@ -112,7 +120,8 @@ export function useRoomWebSocket(
       try {
         const data = JSON.parse(event.data) as WsMessage
         onMessageRef.current?.(data)
-        setLastMessage(data)
+        messageQueueRef.current.push(data)
+        setQueueVersion((v) => v + 1)
       } catch {
         // Ignore non-JSON messages
       }
@@ -120,6 +129,14 @@ export function useRoomWebSocket(
 
     wsRef.current = ws
   }, [code])
+
+  // Keep lastMessage synced to the latest queued message
+  useEffect(() => {
+    const msgs = messageQueueRef.current
+    if (msgs.length > 0) {
+      setLastMessage(msgs[msgs.length - 1])
+    }
+  }, [queueVersion])
 
   useEffect(() => {
     mountedRef.current = true
@@ -190,5 +207,18 @@ export function useRoomWebSocket(
     [send, code],
   )
 
-  return { state, lastMessage, send, reconnect, wasEverOpen, sendError, acceptJoinRequest, rejectJoinRequest, closeRoom, sendJoinRequest }
+  return {
+    state,
+    lastMessage,
+    queueVersion,
+    drainMessages,
+    send,
+    reconnect,
+    wasEverOpen,
+    sendError,
+    acceptJoinRequest,
+    rejectJoinRequest,
+    closeRoom,
+    sendJoinRequest,
+  }
 }

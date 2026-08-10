@@ -2,7 +2,8 @@
 // Every feature imports from here; domain-specific endpoint functions live in their own api/client.ts.
 
 /** Resolved from VITE_API_BASE_URL env, defaults to localhost:8000 for dev */
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+export const API_BASE =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 // ── Generic response wrappers (matches Django API conventions) ──
 
@@ -71,11 +72,9 @@ async function tryRefreshToken(): Promise<string | null> {
       if (access) {
         const user = useAuthStore.getState().user
         if (user) {
-          useAuthStore.getState().setAuth(
-            user,
-            access,
-            newRefresh ?? currentRefreshToken,
-          )
+          useAuthStore
+            .getState()
+            .setAuth(user, access, newRefresh ?? currentRefreshToken)
         }
         return access
       }

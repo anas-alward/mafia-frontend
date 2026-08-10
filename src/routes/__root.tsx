@@ -23,7 +23,13 @@ interface MyRouterContext {
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   beforeLoad: ({ location }) => {
-    const publicPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email']
+    const publicPaths = [
+      '/login',
+      '/signup',
+      '/forgot-password',
+      '/reset-password',
+      '/verify-email',
+    ]
     if (publicPaths.includes(location.pathname)) return
 
     const { isAuthenticated, isLoading } = useAuthStore.getState()

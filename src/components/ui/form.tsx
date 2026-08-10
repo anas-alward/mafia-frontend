@@ -1,14 +1,7 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
-import {
-  Controller,
-  
-  
-  
-  FormProvider,
-  useFormContext
-} from 'react-hook-form'
-import type {ControllerProps, FieldPath, FieldValues} from 'react-hook-form';
+import { Controller, FormProvider, useFormContext } from 'react-hook-form'
+import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form'
 
 import { Label } from '#/components/ui/label'
 import { cn } from '#/lib/utils'
@@ -78,7 +71,10 @@ function FormItem({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof Label>) {
+function FormLabel({
+  className,
+  ...props
+}: React.ComponentProps<typeof Label>) {
   const { formItemId } = useFormField()
 
   return <Label className={cn(className)} htmlFor={formItemId} {...props} />
@@ -91,9 +87,7 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
     <Slot
       id={formItemId}
       aria-describedby={
-        !error
-          ? formDescriptionId
-          : `${formDescriptionId} ${formMessageId}`
+        !error ? formDescriptionId : `${formDescriptionId} ${formMessageId}`
       }
       aria-invalid={!!error}
       {...props}
@@ -113,7 +107,11 @@ function FormDescription({ className, ...props }: React.ComponentProps<'p'>) {
   )
 }
 
-function FormMessage({ className, children, ...props }: React.ComponentProps<'p'>) {
+function FormMessage({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<'p'>) {
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message ?? '') : children
 

@@ -1,16 +1,44 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { RtkStageToggle } from '@cloudflare/realtimekit-react-ui'
-import { useRealtimeKitMeeting, useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
-import { Users, PhoneOff, Mic, MicOff, Video, VideoOff, Maximize, Minimize, WifiOff } from 'lucide-react'
+import {
+  useRealtimeKitMeeting,
+  useRealtimeKitSelector,
+} from '@cloudflare/realtimekit-react'
+import {
+  Users,
+  PhoneOff,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Maximize,
+  Minimize,
+  WifiOff,
+  Play,
+  Moon,
+  Send,
+  RotateCcw,
+  X,
+} from 'lucide-react'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
-import { useSidebar } from '#/components/ui/sidebar'
+import { useGameStore } from '#/features/game/store/game-store'
+import { useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
+import { ActionType, Phase } from '#/features/game/constants'
 
 interface ControlBarProps {
   fullScreenRef: React.RefObject<HTMLDivElement | null>
+  isPreGameHost: boolean
+  preGameSelectedIds: Set<number>
+  onStartGame: (playerIds: number[]) => void
 }
 
-export default function ControlBar({ fullScreenRef }: ControlBarProps) {
+export default function ControlBar({
+  fullScreenRef,
+  isPreGameHost,
+  preGameSelectedIds,
+  onStartGame,
+}: ControlBarProps) {
   const { meeting } = useRealtimeKitMeeting()
   const audioEnabled = useRealtimeKitSelector(() => meeting.self.audioEnabled)
   const videoEnabled = useRealtimeKitSelector(() => meeting.self.videoEnabled)
@@ -18,8 +46,32 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
   const wsState = useMeetingStore((s) => s.wsState)
   const sendError = useMeetingStore((s) => s.sendError)
   const joinRequests = useMeetingStore((s) => s.joinRequests)
+  const isHost = useMeetingStore((s) => s.isHost)
   const count = joinRequests.length
-  const { toggleSidebar, open } = useSidebar()
+  const { activeTab, toggle } = useLiveSidebar()
+
+  // Game state
+  const gameStarted = useGameStore((s) => s.gameStarted)
+  const phase = useGameStore((s) => s.phase)
+  const requiredActions = useGameStore((s) => s.requiredActions)
+  const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
+  const currentVotes = useGameStore((s) => s.currentVotes)
+  const silentAction = useGameStore((s) => s.silentAction)
+  const submitVotes = useGameStore((s) => s.submitVotes)
+  const submitVoteResult = useGameStore((s) => s.submitVoteResult)
+  const resetGame = useGameStore((s) => s.resetGame)
+  const cancelGame = useGameStore((s) => s.cancelGame)
+
+  const hasSilent = requiredActions.some(
+    (a) => a.action_type === ActionType.SILENT,
+  )
+  const allVoted = useMemo(
+    () => alivePlayerIds.every((id) => currentVotes.has(id)),
+    [alivePlayerIds, currentVotes],
+  )
+
+  const totalPlayers = preGameSelectedIds.size
+  const canStart = totalPlayers >= 6
 
   const [isFullscreen, setIsFullscreen] = useState(false)
 
@@ -37,10 +89,13 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
     }
   }, [fullScreenRef])
 
+  const orbBase =
+    'relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200 cursor-pointer'
+
   return (
     <div className="shrink-0 z-50 flex flex-col">
       {/* Connection error banner */}
-      {((wsState === 'closed' || wsState === 'error') || sendError) && (
+      {(wsState === 'closed' || wsState === 'error' || sendError) && (
         <div
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium"
           style={{
@@ -50,7 +105,9 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
           }}
         >
           <WifiOff className="h-3.5 w-3.5 shrink-0" />
-          <span className="text-xs">{sendError || 'Connection lost. Check your network.'}</span>
+          <span className="text-xs">
+            {sendError || 'Connection lost. Check your network.'}
+          </span>
         </div>
       )}
 
@@ -59,52 +116,224 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
         className="flex items-center justify-between h-14 px-5"
         style={{
           backgroundColor: 'var(--game-bg-deep)',
-
         }}
       >
-        {/* Left: fullscreen */}
-        <div className="flex items-center">
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer border border-transparent hover:bg-[var(--game-bg-elevated)]"
-            style={{ color: 'var(--game-text-muted)' }}
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-          >
-            {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-          </button>
+        {/* Left: game management actions */}
+        <div className="flex items-center gap-1.5">
+          {/* Start Game (pre-game host) */}
+          {!gameStarted && isPreGameHost && (
+            <button
+              type="button"
+              disabled={!canStart}
+              onClick={() => {
+                const playerIds = Array.from(preGameSelectedIds).map(Number)
+                if (playerIds.length >= 6) onStartGame(playerIds)
+              }}
+              title={`Start Game (${totalPlayers}/6)`}
+              className={`${orbBase} ${canStart ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+              style={{
+                color: canStart ? 'var(--game-gold)' : 'var(--game-text-muted)',
+                backgroundColor: canStart
+                  ? 'rgba(237, 184, 58, 0.1)'
+                  : 'transparent',
+                borderColor: canStart
+                  ? 'rgba(237, 184, 58, 0.3)'
+                  : 'var(--game-border)',
+              }}
+            >
+              <Play className="h-4 w-4" />
+            </button>
+          )}
+
+          {/* Submit Votes (host, day phase) */}
+          {gameStarted && phase === Phase.DAY && isHost && (
+            <button
+              type="button"
+              disabled={!allVoted}
+              onClick={submitVotes}
+              title={`Submit Votes${alivePlayerIds.length > 0 ? ` (${currentVotes.size}/${alivePlayerIds.length})` : ''}`}
+              className={`${orbBase} ${allVoted ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+              style={{
+                color: allVoted ? 'var(--game-gold)' : 'var(--game-text-muted)',
+                backgroundColor: allVoted
+                  ? 'rgba(237, 184, 58, 0.08)'
+                  : 'transparent',
+                borderColor: allVoted
+                  ? 'rgba(237, 184, 58, 0.3)'
+                  : 'var(--game-border)',
+              }}
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          )}
+
+          {/* Resolve vote (host, vote_result phase) */}
+          {gameStarted && phase === Phase.VOTE_RESULT && isHost && (
+            <button
+              type="button"
+              onClick={submitVoteResult}
+              title="Resolve"
+              className={`${orbBase} cursor-pointer`}
+              style={{
+                color: '#F5925E',
+                backgroundColor: 'rgba(245, 146, 94, 0.08)',
+                borderColor: 'rgba(245, 146, 94, 0.3)',
+              }}
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          )}
+
+          {/* Separator */}
+          {gameStarted && isHost && (
+            <div
+              className="w-px h-6 mx-1"
+              style={{ backgroundColor: 'var(--game-border)' }}
+            />
+          )}
+
+          {/* Reset game (host) */}
+          {gameStarted && isHost && (
+            <button
+              type="button"
+              onClick={resetGame}
+              title="Reset Game"
+              className={`${orbBase} cursor-pointer`}
+              style={{
+                color: 'var(--game-text-muted)',
+                backgroundColor: 'transparent',
+                borderColor: 'var(--game-border)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--game-text-primary)'
+                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--game-text-muted)'
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          )}
+
+          {/* Cancel game (host) */}
+          {gameStarted && isHost && (
+            <button
+              type="button"
+              onClick={cancelGame}
+              title="Cancel Game"
+              className={`${orbBase} cursor-pointer`}
+              style={{
+                color: 'var(--game-crimson)',
+                backgroundColor: 'transparent',
+                borderColor: 'rgba(240, 96, 107, 0.2)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor =
+                  'rgba(240, 96, 107, 0.12)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+
+          {/* Fullscreen (always visible, non-game) */}
+          {!gameStarted && (
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer border border-transparent hover:bg-[var(--game-bg-elevated)]"
+              style={{ color: 'var(--game-text-muted)' }}
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
+              {isFullscreen ? (
+                <Minimize className="h-4 w-4" />
+              ) : (
+                <Maximize className="h-4 w-4" />
+              )}
+            </button>
+          )}
         </div>
 
-        {/* Center: media controls */}
+        {/* Center: media controls + SILENT */}
         <div className="flex items-center gap-2">
+          {/* SILENT action */}
+          {gameStarted && hasSilent && (
+            <button
+              type="button"
+              onClick={() => silentAction()}
+              title="Skip"
+              className={`${orbBase}`}
+              style={{
+                color: 'var(--game-text-muted)',
+                backgroundColor: 'transparent',
+                borderColor: 'var(--game-border)',
+              }}
+            >
+              <Moon className="h-4 w-4" />
+            </button>
+          )}
+
           {/* Mic */}
           <button
             type="button"
-            onClick={() => audioEnabled ? meeting.self.disableAudio() : meeting.self.enableAudio()}
+            onClick={() =>
+              audioEnabled
+                ? meeting.self.disableAudio()
+                : meeting.self.enableAudio()
+            }
             className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer border"
             style={{
-              color: audioEnabled ? 'var(--game-text-primary)' : 'var(--game-crimson)',
-              backgroundColor: audioEnabled ? 'var(--game-bg-elevated)' : 'rgba(240, 96, 107, 0.12)',
-              borderColor: audioEnabled ? 'var(--game-border)' : 'rgba(240, 96, 107, 0.25)',
+              color: audioEnabled
+                ? 'var(--game-text-primary)'
+                : 'var(--game-crimson)',
+              backgroundColor: audioEnabled
+                ? 'var(--game-bg-elevated)'
+                : 'rgba(240, 96, 107, 0.12)',
+              borderColor: audioEnabled
+                ? 'var(--game-border)'
+                : 'rgba(240, 96, 107, 0.25)',
             }}
             aria-label={audioEnabled ? 'Mute microphone' : 'Unmute microphone'}
           >
-            {audioEnabled ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+            {audioEnabled ? (
+              <Mic className="h-4 w-4" />
+            ) : (
+              <MicOff className="h-4 w-4" />
+            )}
           </button>
 
           {/* Camera */}
           <button
             type="button"
-            onClick={() => videoEnabled ? meeting.self.disableVideo() : meeting.self.enableVideo()}
+            onClick={() =>
+              videoEnabled
+                ? meeting.self.disableVideo()
+                : meeting.self.enableVideo()
+            }
             className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer border"
             style={{
-              color: videoEnabled ? 'var(--game-text-primary)' : 'var(--game-crimson)',
-              backgroundColor: videoEnabled ? 'var(--game-bg-elevated)' : 'rgba(240, 96, 107, 0.12)',
-              borderColor: videoEnabled ? 'var(--game-border)' : 'rgba(240, 96, 107, 0.25)',
+              color: videoEnabled
+                ? 'var(--game-text-primary)'
+                : 'var(--game-crimson)',
+              backgroundColor: videoEnabled
+                ? 'var(--game-bg-elevated)'
+                : 'rgba(240, 96, 107, 0.12)',
+              borderColor: videoEnabled
+                ? 'var(--game-border)'
+                : 'rgba(240, 96, 107, 0.25)',
             }}
             aria-label={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
           >
-            {videoEnabled ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+            {videoEnabled ? (
+              <Video className="h-4 w-4" />
+            ) : (
+              <VideoOff className="h-4 w-4" />
+            )}
           </button>
 
           <RtkStageToggle />
@@ -128,16 +357,40 @@ export default function ControlBar({ fullScreenRef }: ControlBarProps) {
           </button>
         </div>
 
-        {/* Right: join requests */}
-        <div className="flex items-center">
+        {/* Right: fullscreen (game) + join requests */}
+        <div className="flex items-center gap-1.5">
+          {/* Fullscreen (during game) */}
+          {gameStarted && (
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer border border-transparent hover:bg-[var(--game-bg-elevated)]"
+              style={{ color: 'var(--game-text-muted)' }}
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
+              {isFullscreen ? (
+                <Minimize className="h-4 w-4" />
+              ) : (
+                <Maximize className="h-4 w-4" />
+              )}
+            </button>
+          )}
+
           <button
             type="button"
-            onClick={toggleSidebar}
+            onClick={() => toggle('requests')}
             className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all duration-200 cursor-pointer border text-xs font-semibold"
             style={{
-              color: open ? 'var(--game-text-primary)' : 'var(--game-text-muted)',
-              backgroundColor: open ? 'var(--game-bg-elevated)' : 'transparent',
-              borderColor: open ? 'var(--game-border)' : 'transparent',
+              color:
+                activeTab === 'requests'
+                  ? 'var(--game-text-primary)'
+                  : 'var(--game-text-muted)',
+              backgroundColor:
+                activeTab === 'requests'
+                  ? 'var(--game-bg-elevated)'
+                  : 'transparent',
+              borderColor:
+                activeTab === 'requests' ? 'var(--game-border)' : 'transparent',
             }}
             aria-label="Toggle join requests"
           >

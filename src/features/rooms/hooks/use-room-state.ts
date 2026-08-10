@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useAuthStore } from '#/features/auth/store/auth-store'
+import { useGameStore } from '#/features/game/store/game-store'
 import type {
   RoomStateEvent,
   PlayerJoinedEvent,
@@ -9,6 +10,7 @@ import type {
   ChatMessageEvent,
   JoinRequestReceivedEvent,
 } from '../events'
+import type { GameStateEvent } from '#/features/game/events'
 import type { WsMessage } from './use-room-websocket'
 import type { Participant } from '../components/participant-list'
 
@@ -23,7 +25,10 @@ export interface JoinRequest {
   username: string
 }
 
-export function useRoomState(lastMessage: WsMessage | null) {
+export function useRoomState(
+  queueVersion: number,
+  drainMessages: () => WsMessage[],
+) {
   const navigate = useNavigate()
   const currentUser = useAuthStore((s) => s.user)
   const [participants, setParticipants] = useState<Participant[]>([])
@@ -36,14 +41,9 @@ export function useRoomState(lastMessage: WsMessage | null) {
   const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([])
 
   const [roomState, setRoomState] = useState<RoomStateEvent | null>(null)
-  const [joinRequestStatus, setJoinRequestStatus] = useState<'idle' | 'requested' | 'accepted' | 'rejected'>('idle')
-
-  // Persist room_state across other events — only update when a new room_state arrives
-  useEffect(() => {
-    if (lastMessage?.type === 'room_state') {
-      setRoomState(lastMessage as RoomStateEvent)
-    }
-  }, [lastMessage])
+  const [joinRequestStatus, setJoinRequestStatus] = useState<
+    'idle' | 'requested' | 'accepted' | 'rejected'
+  >('idle')
 
   const roomCode = roomState?.room_name ?? ''
 
@@ -53,97 +53,120 @@ export function useRoomState(lastMessage: WsMessage | null) {
     return roomState.host_id === Number(currentUser.id)
   }, [roomState, hostId, currentUser])
 
+  // Process all queued messages — draining prevents loss when messages arrive
+  // faster than React re-renders
   useEffect(() => {
-    if (!lastMessage) return
+    const messages = drainMessages()
+    if (messages.length === 0) return
 
-    switch (lastMessage.type) {
-      case 'room_state': {
-        const msg = lastMessage as RoomStateEvent
-        if (msg.host_id !== null) setHostId(msg.host_id)
-        setParticipants((prev) => {
-          const existingIds = new Set(prev.map((p) => p.userId))
-          const newParticipants: Participant[] = msg.members
-            .filter((id) => !existingIds.has(id))
-            .map((id) => ({ userId: id, username: `Player ${id}` }))
-          return newParticipants.length > 0 ? [...prev, ...newParticipants] : prev
-        })
-        break
+    for (const msg of messages) {
+      if (msg.type === 'room_state') {
+        setRoomState(msg as RoomStateEvent)
       }
 
-      case 'player_joined': {
-        const msg = lastMessage as PlayerJoinedEvent
-        setParticipants((prev) => {
-          if (prev.some((p) => p.userId === msg.user_id)) {
-            return prev.map((p) =>
-              p.userId === msg.user_id ? { ...p, username: msg.username } : p,
-            )
+      switch (msg.type) {
+        case 'room_state': {
+          const m = msg as RoomStateEvent
+          if (m.host_id !== null) setHostId(m.host_id)
+          setParticipants((prev) => {
+            const existingIds = new Set(prev.map((p) => p.userId))
+            const newParticipants: Participant[] = m.members
+              .filter((id) => !existingIds.has(id))
+              .map((id) => ({ userId: id, username: `Player ${id}` }))
+            return newParticipants.length > 0
+              ? [...prev, ...newParticipants]
+              : prev
+          })
+          // Hydrate game store from the combined room_state payload (reconnection flow).
+          // The embedded game_state lacks the `type` discriminator, so construct one.
+          if (m.game_state) {
+            useGameStore.getState().processMessage({
+              type: 'game_state',
+              ...m.game_state,
+            })
+          } else {
+            useGameStore.getState().processMessage({
+              type: 'game_state',
+              session_id: null,
+              current_phase: null,
+            })
           }
-          return [...prev, { userId: msg.user_id, username: msg.username }]
-        })
-        // Remove any pending join request from this user since they've joined
-        setJoinRequests((prev) => prev.filter((r) => r.userId !== msg.user_id))
-        break
-      }
-
-      case 'player_left': {
-        const msg = lastMessage as PlayerLeftEvent
-        setParticipants((prev) => prev.filter((p) => p.userId !== msg.user_id))
-        break
-      }
-
-      case 'host_changed': {
-        const msg = lastMessage as HostChangedEvent
-        setHostId(msg.new_host_id)
-        break
-      }
-
-      case 'room_closed': {
-        setRoomClosed(true)
-        const timer = setTimeout(() => navigate({ to: '/rooms' }), 3000)
-        return () => clearTimeout(timer)
-      }
-
-      case 'chat_message': {
-        const msg = lastMessage as ChatMessageEvent
-        setChatMessages((prev) => [
-          ...prev,
-          { userId: msg.user_id, username: msg.username, message: msg.message },
-        ])
-        break
-      }
-
-      case 'join_request_received': {
-        const msg = lastMessage as JoinRequestReceivedEvent
-        // Ignore if the requesting user is already in the room
-        if (participantsRef.current.some((p) => p.userId === msg.user_id)) break
-        setJoinRequests((prev) => {
-          if (prev.some((r) => r.userId === msg.user_id)) return prev
-          return [...prev, { userId: msg.user_id, username: msg.username }]
-        })
-        break
-      }
-
-      case 'join_request_accepted': {
-        setJoinRequests((prev) =>
-          prev.filter((r) => r.userId !== lastMessage.user_id),
-        )
-        if (currentUser && lastMessage.user_id === Number(currentUser.id)) {
-          setJoinRequestStatus('accepted')
+          break
         }
-        break
-      }
 
-      case 'join_request_rejected': {
-        setJoinRequests((prev) =>
-          prev.filter((r) => r.userId !== lastMessage.user_id),
-        )
-        if (currentUser && lastMessage.user_id === Number(currentUser.id)) {
-          setJoinRequestStatus('rejected')
+        case 'player_joined': {
+          const m = msg as PlayerJoinedEvent
+          setParticipants((prev) => {
+            if (prev.some((p) => p.userId === m.user_id)) {
+              return prev.map((p) =>
+                p.userId === m.user_id ? { ...p, username: m.username } : p,
+              )
+            }
+            return [...prev, { userId: m.user_id, username: m.username }]
+          })
+          setJoinRequests((prev) => prev.filter((r) => r.userId !== m.user_id))
+          break
         }
-        break
+
+        case 'player_left': {
+          const m = msg as PlayerLeftEvent
+          setParticipants((prev) => prev.filter((p) => p.userId !== m.user_id))
+          break
+        }
+
+        case 'host_changed': {
+          const m = msg as HostChangedEvent
+          setHostId(m.new_host_id)
+          break
+        }
+
+        case 'room_closed': {
+          setRoomClosed(true)
+          const timer = setTimeout(() => navigate({ to: '/rooms' }), 3000)
+          return () => clearTimeout(timer)
+        }
+
+        case 'chat_message': {
+          const m = msg as ChatMessageEvent
+          setChatMessages((prev) => [
+            ...prev,
+            { userId: m.user_id, username: m.username, message: m.message },
+          ])
+          break
+        }
+
+        case 'join_request_received': {
+          const m = msg as JoinRequestReceivedEvent
+          if (participantsRef.current.some((p) => p.userId === m.user_id)) break
+          setJoinRequests((prev) => {
+            if (prev.some((r) => r.userId === m.user_id)) return prev
+            return [...prev, { userId: m.user_id, username: m.username }]
+          })
+          break
+        }
+
+        case 'join_request_accepted': {
+          setJoinRequests((prev) =>
+            prev.filter((r) => r.userId !== msg.user_id),
+          )
+          if (currentUser && msg.user_id === Number(currentUser.id)) {
+            setJoinRequestStatus('accepted')
+          }
+          break
+        }
+
+        case 'join_request_rejected': {
+          setJoinRequests((prev) =>
+            prev.filter((r) => r.userId !== msg.user_id),
+          )
+          if (currentUser && msg.user_id === Number(currentUser.id)) {
+            setJoinRequestStatus('rejected')
+          }
+          break
+        }
       }
     }
-  }, [lastMessage, navigate, currentUser])
+  }, [queueVersion, drainMessages, navigate, currentUser])
 
   const dismissJoinRequest = useCallback((userId: number) => {
     setJoinRequests((prev) => prev.filter((r) => r.userId !== userId))

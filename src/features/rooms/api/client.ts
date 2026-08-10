@@ -1,9 +1,5 @@
 import { request } from '#/lib/api-client'
-import type {
-  RoomDto,
-  CreateRoomRequest,
-  AddMemberRequest,
-} from '../types'
+import type { RoomDto, CreateRoomRequest, AddMemberRequest } from '../types'
 
 export async function getRoom(code: string) {
   return request<{ room: RoomDto }>(`/rooms/${code}/`)

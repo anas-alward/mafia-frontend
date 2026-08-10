@@ -23,8 +23,12 @@ function ResetPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-sm space-y-6 text-center">
-          <h1 className="display-title text-3xl text-neutral-900">Invalid link</h1>
-          <p className="text-sm text-neutral-600">This password reset link is missing or invalid.</p>
+          <h1 className="display-title text-3xl text-neutral-900">
+            Invalid link
+          </h1>
+          <p className="text-sm text-neutral-600">
+            This password reset link is missing or invalid.
+          </p>
           <button
             onClick={() => navigate({ to: '/forgot-password' })}
             className="text-sm text-neutral-900 underline underline-offset-2 font-medium"
@@ -52,8 +56,12 @@ function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="display-title text-3xl text-neutral-900">Set new password</h1>
-          <p className="mt-2 text-sm text-neutral-600">Choose a new password for your account</p>
+          <h1 className="display-title text-3xl text-neutral-900">
+            Set new password
+          </h1>
+          <p className="mt-2 text-sm text-neutral-600">
+            Choose a new password for your account
+          </p>
         </div>
         <ResetPasswordForm token={token} onSubmit={handleSubmit} />
       </div>

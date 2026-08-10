@@ -26,7 +26,8 @@ function RoomLayout() {
   const { roomId } = Route.useParams()
   const {
     state: wsState,
-    lastMessage,
+    queueVersion,
+    drainMessages,
     send,
     reconnect,
     sendError,
@@ -44,7 +45,7 @@ function RoomLayout() {
     currentUser,
     participants,
     isHost,
-  } = useRoomState(lastMessage)
+  } = useRoomState(queueVersion, drainMessages)
 
   const [meeting, initMeeting] = useRealtimeKitClient()
   const [meetingInstance, setMeetingInstance] = useState<RTKClient | null>(null)
@@ -86,7 +87,6 @@ function RoomLayout() {
   useEffect(() => {
     useGameStore.getState().setSend(send)
   }, [send])
-
 
   if (roomClosed) {
     return <RoomClosedState />

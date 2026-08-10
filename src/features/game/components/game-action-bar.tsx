@@ -12,8 +12,8 @@ import {
   Bomb,
   RotateCcw,
   X,
-  type LucideIcon,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { ActionType, Phase } from '#/features/game/constants'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
@@ -172,8 +172,12 @@ export default function GameActionBar({
           }`}
           style={{
             color: canStart ? 'var(--game-gold)' : 'var(--game-text-muted)',
-            backgroundColor: canStart ? 'rgba(237, 184, 58, 0.1)' : 'transparent',
-            borderColor: canStart ? 'rgba(237, 184, 58, 0.3)' : 'var(--game-border)',
+            backgroundColor: canStart
+              ? 'rgba(237, 184, 58, 0.1)'
+              : 'transparent',
+            borderColor: canStart
+              ? 'rgba(237, 184, 58, 0.3)'
+              : 'var(--game-border)',
           }}
         >
           <Play className="h-4 w-4" />
@@ -188,8 +192,11 @@ export default function GameActionBar({
 
           const needsTarget = action.action_type !== ActionType.SILENT
           const targetInOptions =
-            selectedPlayerId != null && action.target_options.includes(selectedPlayerId)
-          const hasValidTarget = needsTarget ? selectedPlayerId != null && targetInOptions : true
+            selectedPlayerId != null &&
+            action.target_options.includes(selectedPlayerId)
+          const hasValidTarget = needsTarget
+            ? selectedPlayerId != null && targetInOptions
+            : true
           const disabled = needsTarget ? !hasValidTarget : false
 
           return (
@@ -202,8 +209,12 @@ export default function GameActionBar({
               className={`${orbBase} ${!disabled ? 'cursor-pointer' : 'cursor-not-allowed'}`}
               style={{
                 color: disabled ? 'var(--game-text-muted)' : visual.color,
-                backgroundColor: disabled ? 'transparent' : `${visual.glow.replace('0.25', '0.07')}`,
-                borderColor: disabled ? 'var(--game-border)' : visual.glow.replace('0.25', '0.25'),
+                backgroundColor: disabled
+                  ? 'transparent'
+                  : `${visual.glow.replace('0.25', '0.07')}`,
+                borderColor: disabled
+                  ? 'var(--game-border)'
+                  : visual.glow.replace('0.25', '0.25'),
               }}
             >
               <visual.Icon className="h-4 w-4" />
@@ -212,9 +223,14 @@ export default function GameActionBar({
         })}
 
       {/* Separator before host actions */}
-      {gameStarted && isHost && (phase === Phase.DAY || phase === Phase.VOTE_RESULT) && (
-        <div className="my-1 border-t" style={{ borderColor: 'var(--game-border)' }} />
-      )}
+      {gameStarted &&
+        isHost &&
+        (phase === Phase.DAY || phase === Phase.VOTE_RESULT) && (
+          <div
+            className="my-1 border-t"
+            style={{ borderColor: 'var(--game-border)' }}
+          />
+        )}
 
       {/* Host: Submit votes */}
       {gameStarted && phase === Phase.DAY && isHost && (
@@ -228,8 +244,12 @@ export default function GameActionBar({
           }`}
           style={{
             color: allVoted ? 'var(--game-gold)' : 'var(--game-text-muted)',
-            backgroundColor: allVoted ? 'rgba(237, 184, 58, 0.08)' : 'transparent',
-            borderColor: allVoted ? 'rgba(237, 184, 58, 0.3)' : 'var(--game-border)',
+            backgroundColor: allVoted
+              ? 'rgba(237, 184, 58, 0.08)'
+              : 'transparent',
+            borderColor: allVoted
+              ? 'rgba(237, 184, 58, 0.3)'
+              : 'var(--game-border)',
           }}
         >
           <Send className="h-4 w-4" />
@@ -255,7 +275,10 @@ export default function GameActionBar({
 
       {/* Separator before game management */}
       {gameStarted && isHost && (
-        <div className="my-1 border-t" style={{ borderColor: 'var(--game-border)' }} />
+        <div
+          className="my-1 border-t"
+          style={{ borderColor: 'var(--game-border)' }}
+        />
       )}
 
       {/* Host: Reset game */}

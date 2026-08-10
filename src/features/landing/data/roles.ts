@@ -27,10 +27,7 @@ export function getAlignmentLabel(alignment: RoleAlignment): string {
   return alignmentLabels[alignment]
 }
 
-function toGameRole(
-  role: RoleDefinition,
-  nightAction: string,
-): GameRole {
+function toGameRole(role: RoleDefinition, nightAction: string): GameRole {
   return {
     id: role.name,
     name: role.name,
@@ -52,7 +49,7 @@ export const roles: GameRole[] = [
   ),
   toGameRole(
     TownCop,
-    "Choose a player to investigate. The moderator reveals whether that player is Mafia or not.",
+    'Choose a player to investigate. The moderator reveals whether that player is Mafia or not.',
   ),
   toGameRole(
     TownDoctor,

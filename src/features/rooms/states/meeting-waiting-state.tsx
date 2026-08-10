@@ -1,4 +1,7 @@
-import { useRealtimeKitMeeting, useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
+import {
+  useRealtimeKitMeeting,
+  useRealtimeKitSelector,
+} from '@cloudflare/realtimekit-react'
 import { Loader2 } from 'lucide-react'
 
 export function MeetingWaitingState() {
@@ -17,7 +20,9 @@ export function MeetingWaitingState() {
 
         {/* Status */}
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-[#f4f4f5]">Waiting to join</h2>
+          <h2 className="text-lg font-semibold text-[#f4f4f5]">
+            Waiting to join
+          </h2>
           <p className="text-sm text-[#a1a1aa]">
             The host will let you in shortly
           </p>

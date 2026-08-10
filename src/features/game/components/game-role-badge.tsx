@@ -1,6 +1,10 @@
 import { User } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
-import { ROLE_REGISTRY, ROLE_ICON_MAP, TEAM_COLORS } from '#/features/game/constants'
+import {
+  ROLE_REGISTRY,
+  ROLE_ICON_MAP,
+  TEAM_COLORS,
+} from '#/features/game/constants'
 
 export function GameRoleBadge() {
   const gameStarted = useGameStore((s) => s.gameStarted)
@@ -9,6 +13,8 @@ export function GameRoleBadge() {
   if (!gameStarted || !myRoleCode) return null
 
   const roleDef = ROLE_REGISTRY[myRoleCode]
+  if (!roleDef) return null
+
   const team = roleDef.role_type
   const colorClass = TEAM_COLORS[team]
   const Icon = ROLE_ICON_MAP[roleDef.icon] ?? User

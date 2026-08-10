@@ -7,7 +7,11 @@ interface HeroSectionProps {
   children?: ReactNode
 }
 
-export function HeroSection({ headline, subheadline, children }: HeroSectionProps) {
+export function HeroSection({
+  headline,
+  subheadline,
+  children,
+}: HeroSectionProps) {
   return (
     <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-4">
       <div className="rise-in max-w-3xl mx-auto">
@@ -22,10 +26,7 @@ export function HeroSection({ headline, subheadline, children }: HeroSectionProp
       </div>
 
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 motion-safe:animate-bounce">
-        <ChevronDown
-          className="w-6 h-6 text-neutral-400"
-          aria-hidden="true"
-        />
+        <ChevronDown className="w-6 h-6 text-neutral-400" aria-hidden="true" />
       </div>
     </section>
   )

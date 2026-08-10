@@ -39,7 +39,6 @@ function Home() {
         />
 
         <GameMechanicsSection title="The Game Cycle" phases={phases} />
-
       </main>
 
       <SiteFooter />

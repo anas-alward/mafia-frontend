@@ -25,7 +25,6 @@ function friendlyMessage(error: { code?: string; message: string }): string {
 }
 
 export function AuthError({ error }: AuthErrorProps) {
-
   if (!error) return null
 
   return (

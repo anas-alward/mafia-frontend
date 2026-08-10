@@ -60,7 +60,7 @@ export function PhaseTransition() {
       for (const log of recent) {
         if (log.action_type === 'kill' || log.action_type === 'died') {
           snap.nightEvents.push({
-            type: log.action_type as 'kill' | 'died',
+            type: log.action_type,
             targetCode: getPlayerCode(log.target_id),
             actorCode: getPlayerCode(log.actor_id),
           })
@@ -235,7 +235,9 @@ export function PhaseTransition() {
             {/* Separator */}
             <div
               className="w-32 h-px rounded-full"
-              style={{ background: `linear-gradient(90deg, transparent, ${glow}, transparent)` }}
+              style={{
+                background: `linear-gradient(90deg, transparent, ${glow}, transparent)`,
+              }}
             />
 
             {/* Day: night results */}
@@ -250,7 +252,9 @@ export function PhaseTransition() {
                     <p
                       key={i}
                       className="text-sm font-medium tracking-wide flex items-center gap-1.5"
-                      style={{ color: evt.type === 'heal' ? '#a3e635' : '#f87171' }}
+                      style={{
+                        color: evt.type === 'heal' ? '#a3e635' : '#f87171',
+                      }}
                     >
                       {evt.type === 'heal' ? (
                         <Heart className="h-3.5 w-3.5" />

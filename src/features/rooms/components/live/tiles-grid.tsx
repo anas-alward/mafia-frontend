@@ -1,7 +1,8 @@
-import { useRealtimeKitMeeting, useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
-import CustomParticipantTile from '#/features/rooms/components/live/participant-tile'
-import { useGameStore } from '#/features/game/store/game-store'
-import { useAuthStore } from '#/features/auth/store/auth-store'
+import {
+  useRealtimeKitMeeting,
+  useRealtimeKitSelector,
+} from '@cloudflare/realtimekit-react'
+import LiveParticipantTile from '#/features/rooms/components/live/participant-tile'
 
 export function getColumns(count: number) {
   if (count <= 1) return 1
@@ -12,16 +13,12 @@ export function getColumns(count: number) {
 }
 
 interface TilesGridProps {
-  selectedPlayerId: number | null
-  onSelectPlayer: (userId: number) => void
   preGameSelectedIds: Set<number>
   onTogglePreGamePlayer: (userId: number) => void
   isPreGameHost: boolean
 }
 
 export default function TilesGrid({
-  selectedPlayerId,
-  onSelectPlayer,
   preGameSelectedIds,
   onTogglePreGamePlayer,
   isPreGameHost,
@@ -33,9 +30,12 @@ export default function TilesGrid({
     meeting.participants.joined.toArray(),
   )
   // Only remote participants in the grid — self is rendered as a corner tile
-  const localUserId = (localParticipant as any).customParticipantId as string | undefined
+  const localUserId = (localParticipant as any).customParticipantId as
+    | string
+    | undefined
   const allParticipants = remoteParticipants.filter(
-    (p) => (p as any).customParticipantId !== localUserId || localUserId == null,
+    (p) =>
+      (p as any).customParticipantId !== localUserId || localUserId == null,
   )
   const cols = getColumns(allParticipants.length)
   const rows = Math.ceil(allParticipants.length / cols)
@@ -44,43 +44,27 @@ export default function TilesGrid({
   const itemW = `calc((100% - ${pad} - (${cols} - 1) * ${gap}) / ${cols})`
   const itemH = `calc((100% - ${pad} - (${rows} - 1) * ${gap}) / ${rows})`
 
-  const currentUser = useAuthStore((s) => s.user)
-  const currentUserId = currentUser ? Number(currentUser.id) : null
-  const gameStarted = useGameStore((s) => s.gameStarted)
-  const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
-  const requiredActions = useGameStore((s) => s.requiredActions)
-  const myAlive = currentUserId != null && alivePlayerIds.includes(currentUserId)
-  const validTargets = new Set(requiredActions.flatMap((a) => a.target_options))
-
   return (
     <div className="flex flex-wrap content-center justify-center h-full w-full gap-3 p-4">
       {allParticipants.map((participant) => {
-
         const rawUserId = participant.customParticipantId
         const numUserId = rawUserId != null ? Number(rawUserId) : NaN
-        const isSelf = !Number.isNaN(numUserId) && numUserId === currentUserId || (participant as any).isLocal
-        const isAlive = !Number.isNaN(numUserId) && alivePlayerIds.includes(numUserId)
+        const isSelf =
+          numUserId === Number(localUserId) || (participant as any).isLocal
 
-        let isSelectable: boolean
-        let isSelected: boolean
-        let onSelect: (userId: number) => void
-
-        if (isPreGameHost) {
-          isSelectable = !isSelf
-          isSelected = !Number.isNaN(numUserId) && preGameSelectedIds.has(numUserId)
-          onSelect = onTogglePreGamePlayer
-        } else {
-          isSelectable = gameStarted && isAlive && myAlive && !isSelf && validTargets.has(numUserId)
-          isSelected = !Number.isNaN(numUserId) && numUserId === selectedPlayerId
-          onSelect = onSelectPlayer
-        }
+        const isSelectable = isPreGameHost && !isSelf
+        const isSelected =
+          isPreGameHost &&
+          !Number.isNaN(numUserId) &&
+          preGameSelectedIds.has(numUserId)
+        const onSelect = isPreGameHost ? onTogglePreGamePlayer : () => {}
 
         return (
           <div
             key={participant.id || participant.userId || 'local-participant'}
             style={{ width: itemW, height: itemH }}
           >
-            <CustomParticipantTile
+            <LiveParticipantTile
               participant={participant}
               isSelected={isSelected}
               isSelectable={isSelectable}

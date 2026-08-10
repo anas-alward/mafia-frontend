@@ -3,9 +3,16 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '#/components/ui/form'
-import { forgotPasswordSchema  } from '../schemas/auth'
-import type {ForgotPasswordInput} from '../schemas/auth';
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '#/components/ui/form'
+import { forgotPasswordSchema } from '../schemas/auth'
+import type { ForgotPasswordInput } from '../schemas/auth'
 
 interface ForgotPasswordFormProps {
   onSubmit: (data: ForgotPasswordInput) => Promise<{ success: boolean }>
@@ -24,9 +31,14 @@ export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5" noValidate>
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-5"
+        noValidate
+      >
         <p className="text-sm text-neutral-600">
-          Enter your email address and we&apos;ll send you a link to reset your password.
+          Enter your email address and we&apos;ll send you a link to reset your
+          password.
         </p>
 
         <FormField
@@ -43,7 +55,11 @@ export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
           )}
         />
 
-        <Button type="submit" className="w-full text-white" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          className="w-full text-white"
+          disabled={form.formState.isSubmitting}
+        >
           {form.formState.isSubmitting ? 'Sending...' : 'Send Reset Link'}
         </Button>
 

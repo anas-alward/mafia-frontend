@@ -8,8 +8,7 @@ export function CreateMeetingButton() {
   const navigate = useNavigate()
 
   const { mutate, isPending, isError, error } = useMutation({
-    mutationFn: () =>
-      createRoom({ name: 'Instant Meeting', max_members: 25 }),
+    mutationFn: () => createRoom({ name: 'Instant Meeting', max_members: 25 }),
     onSuccess: (data) => {
       navigate({ to: '/rooms/$roomId', params: { roomId: data.room.code } })
     },
@@ -28,7 +27,8 @@ export function CreateMeetingButton() {
       </Button>
       {isError && (
         <p className="text-sm text-red-500">
-          {(error as { message?: string }).message ?? 'Failed to create meeting. Please try again.'}
+          {(error as { message?: string }).message ??
+            'Failed to create meeting. Please try again.'}
         </p>
       )}
     </div>

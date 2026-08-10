@@ -11,8 +11,12 @@ export function RoomClosedState() {
           <Video className="h-8 w-8 text-amber-500" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-[#f4f4f5]">Meeting ended by host</h2>
-          <p className="text-sm text-[#a1a1aa]">This room is no longer active.</p>
+          <h2 className="text-lg font-semibold text-[#f4f4f5]">
+            Meeting ended by host
+          </h2>
+          <p className="text-sm text-[#a1a1aa]">
+            This room is no longer active.
+          </p>
         </div>
         <button
           type="button"

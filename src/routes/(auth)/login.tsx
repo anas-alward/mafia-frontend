@@ -29,7 +29,7 @@ function LoginPage() {
       setAuth(result.user, result.access, result.refresh)
       await navigate({ to: redirect || '/' })
     } catch (err) {
-      console.log("there was an error ", err)
+      console.log('there was an error ', err)
       const apiErr = err as ApiError
       if (apiErr.errors) return { errors: apiErr.errors }
       if (apiErr.message) return { errors: [{ message: apiErr.message }] }
@@ -41,8 +41,12 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="display-title text-3xl text-neutral-900">Welcome back</h1>
-          <p className="mt-2 text-sm text-neutral-600">Log in to continue playing</p>
+          <h1 className="display-title text-3xl text-neutral-900">
+            Welcome back
+          </h1>
+          <p className="mt-2 text-sm text-neutral-600">
+            Log in to continue playing
+          </p>
         </div>
         <LoginForm onSubmit={handleSubmit} defaultEmail={email} />
       </div>

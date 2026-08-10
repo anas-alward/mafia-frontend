@@ -49,9 +49,7 @@ function PhaseCard({ phase, isLast }: { phase: GamePhase; isLast: boolean }) {
             <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
               Who Acts
             </p>
-            <p className="text-sm text-neutral-900 mt-1">
-              {phase.activeRoles}
-            </p>
+            <p className="text-sm text-neutral-900 mt-1">{phase.activeRoles}</p>
           </div>
         </CardContent>
       </Card>
