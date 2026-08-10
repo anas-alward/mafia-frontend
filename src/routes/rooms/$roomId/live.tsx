@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   RealtimeKitProvider,
@@ -113,32 +113,8 @@ function LiveRoom({
   const selfParticipant = useRealtimeKitSelector(() => meeting.self)
   const currentUser = useAuthStore((s) => s.user)
 
-  const [preGameSelectedIds, setPreGameSelectedIds] = useState<Set<number>>(
-    new Set(),
-  )
-
-  const onTogglePreGamePlayer = useCallback((userId: number) => {
-    setPreGameSelectedIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(userId)) {
-        next.delete(userId)
-      } else {
-        next.add(userId)
-      }
-      return next
-    })
-  }, [])
-
   const currentUserId = currentUser ? Number(currentUser.id) : null
   const isPreGameHost = isHost && !gameStarted
-
-  let selfSelectable = false
-  let selfSelected = false
-  if (isPreGameHost) {
-    selfSelectable = true
-    selfSelected =
-      currentUserId != null && preGameSelectedIds.has(currentUserId)
-  }
 
   return (
     <div
@@ -151,19 +127,15 @@ function LiveRoom({
 
       <div className="flex-1 min-h-0 relative overflow-hidden">
         <RtkStage style={{ position: 'absolute', inset: 0 }}>
-          <TilesGrid
-            preGameSelectedIds={preGameSelectedIds}
-            onTogglePreGamePlayer={onTogglePreGamePlayer}
-            isPreGameHost={isPreGameHost}
-          />
+          <TilesGrid />
         </RtkStage>
 
         <div className="absolute bottom-4 right-4 z-30 w-60 h-36 rounded-lg overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.08]">
           <LiveParticipantTile
             participant={selfParticipant}
-            isSelected={selfSelected}
-            isSelectable={selfSelectable}
-            onSelect={isPreGameHost ? onTogglePreGamePlayer : () => {}}
+            isSelected={false}
+            isSelectable={false}
+            onSelect={() => {}}
           />
         </div>
       </div>
@@ -171,7 +143,6 @@ function LiveRoom({
       <ControlBar
         fullScreenRef={fullScreenRef}
         isPreGameHost={isPreGameHost}
-        preGameSelectedIds={preGameSelectedIds}
         onStartGame={startGame}
       />
     </div>
