@@ -12,17 +12,7 @@ export function getColumns(count: number) {
   return 4
 }
 
-interface TilesGridProps {
-  preGameSelectedIds: Set<number>
-  onTogglePreGamePlayer: (userId: number) => void
-  isPreGameHost: boolean
-}
-
-export default function TilesGrid({
-  preGameSelectedIds,
-  onTogglePreGamePlayer,
-  isPreGameHost,
-}: TilesGridProps) {
+export default function TilesGrid() {
   const { meeting } = useRealtimeKitMeeting()
 
   const localParticipant = useRealtimeKitSelector(() => meeting.self)
@@ -47,28 +37,16 @@ export default function TilesGrid({
   return (
     <div className="flex flex-wrap content-center justify-center h-full w-full gap-3 p-4">
       {allParticipants.map((participant) => {
-        const rawUserId = participant.customParticipantId
-        const numUserId = rawUserId != null ? Number(rawUserId) : NaN
-        const isSelf =
-          numUserId === Number(localUserId) || (participant as any).isLocal
-
-        const isSelectable = isPreGameHost && !isSelf
-        const isSelected =
-          isPreGameHost &&
-          !Number.isNaN(numUserId) &&
-          preGameSelectedIds.has(numUserId)
-        const onSelect = isPreGameHost ? onTogglePreGamePlayer : () => {}
-
         return (
           <div
-            key={participant.id || participant.userId || 'local-participant'}
+            key={participant.id || participant.userId || 'participant-tile'}
             style={{ width: itemW, height: itemH }}
           >
             <LiveParticipantTile
               participant={participant}
-              isSelected={isSelected}
-              isSelectable={isSelectable}
-              onSelect={onSelect}
+              isSelected={false}
+              isSelectable={false}
+              onSelect={() => {}}
             />
           </div>
         )
