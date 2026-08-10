@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { RtkStageToggle } from '@cloudflare/realtimekit-react-ui'
 import {
@@ -24,6 +24,7 @@ import {
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
+import StartGameTooltip from '#/features/rooms/components/live/start-game-tooltip'
 import { ActionType, Phase } from '#/features/game/constants'
 
 interface ControlBarProps {
@@ -70,10 +71,13 @@ export default function ControlBar({
     [alivePlayerIds, currentVotes],
   )
 
-  const totalPlayers = preGameSelectedIds.size
-  const canStart = totalPlayers >= 6
-
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showStartTooltip, setShowStartTooltip] = useState(false)
+  const startBtnRef = useRef<HTMLButtonElement>(null)
+  const allParticipants = useRealtimeKitSelector(() => {
+    const remotes = meeting.participants.joined.toArray()
+    return [meeting.self, ...remotes]
+  })
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement)
@@ -122,27 +126,29 @@ export default function ControlBar({
         <div className="flex items-center gap-1.5">
           {/* Start Game (pre-game host) */}
           {!gameStarted && isPreGameHost && (
-            <button
-              type="button"
-              disabled={!canStart}
-              onClick={() => {
-                const playerIds = Array.from(preGameSelectedIds).map(Number)
-                if (playerIds.length >= 6) onStartGame(playerIds)
-              }}
-              title={`Start Game (${totalPlayers}/6)`}
-              className={`${orbBase} ${canStart ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-              style={{
-                color: canStart ? 'var(--game-gold)' : 'var(--game-text-muted)',
-                backgroundColor: canStart
-                  ? 'rgba(237, 184, 58, 0.1)'
-                  : 'transparent',
-                borderColor: canStart
-                  ? 'rgba(237, 184, 58, 0.3)'
-                  : 'var(--game-border)',
-              }}
-            >
-              <Play className="h-4 w-4" />
-            </button>
+            <>
+              <button
+                ref={startBtnRef}
+                type="button"
+                onClick={() => setShowStartTooltip((prev) => !prev)}
+                title="Start Game"
+                className={`${orbBase} cursor-pointer`}
+                style={{
+                  color: 'var(--game-gold)',
+                  backgroundColor: 'rgba(237, 184, 58, 0.1)',
+                  borderColor: 'rgba(237, 184, 58, 0.3)',
+                }}
+              >
+                <Play className="h-4 w-4" />
+              </button>
+              <StartGameTooltip
+                anchorRef={startBtnRef}
+                participants={allParticipants}
+                onStartGame={onStartGame}
+                isOpen={showStartTooltip}
+                onClose={() => setShowStartTooltip(false)}
+              />
+            </>
           )}
 
           {/* Submit Votes (host, day phase) */}
