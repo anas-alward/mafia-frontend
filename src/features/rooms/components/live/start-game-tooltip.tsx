@@ -126,7 +126,7 @@ export default function StartGameTooltip({
   return createPortal(
     <div
       ref={tooltipRef}
-      className="fixed z-50 w-56 rounded-xl border shadow-2xl overflow-hidden"
+      className="fixed z-50 w-56 rounded-xl border shadow-2xl"
       style={{
         top: position.top,
         left: position.left,
@@ -171,7 +171,7 @@ export default function StartGameTooltip({
 
       {/* Participant list */}
       <div
-        className="max-h-48 overflow-y-auto"
+        className="max-h-48 overflow-hidden overflow-y-auto"
         style={{
           scrollbarWidth: 'thin',
           scrollbarColor: 'var(--game-border) transparent',
