@@ -1,4 +1,5 @@
 import { Users, Check, X } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useJoinRequests } from '#/features/rooms/hooks/use-join-requests'
 import { useSidebar } from '#/components/ui/sidebar'
@@ -19,11 +20,15 @@ export function JoinRequestsSidebar() {
   const { open, setOpen } = useSidebar()
 
   return (
-    <aside
-      className={`fixed right-4 top-20 bottom-24 z-10 w-72 bg-[#1c1c1f] border border-white/[0.06] rounded-2xl flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ease-out ${
-        open
-          ? 'translate-x-0 opacity-100'
-          : 'translate-x-[calc(100%+1rem)] opacity-0 pointer-events-none'
+    <motion.aside
+      initial={false}
+      animate={{
+        x: open ? 0 : 'calc(100% + 1rem)',
+        opacity: open ? 1 : 0,
+      }}
+      transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+      className={`fixed right-4 top-20 bottom-24 z-10 w-72 bg-[#1c1c1f] border border-white/[0.06] rounded-2xl flex flex-col overflow-hidden shadow-2xl ${
+        open ? '' : 'pointer-events-none'
       }`}
     >
       {/* Header */}
@@ -92,6 +97,6 @@ export function JoinRequestsSidebar() {
           </ul>
         )}
       </div>
-    </aside>
+    </motion.aside>
   )
 }

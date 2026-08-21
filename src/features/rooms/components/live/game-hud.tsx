@@ -4,6 +4,7 @@ import {
   useRealtimeKitSelector,
 } from '@cloudflare/realtimekit-react'
 import { Users, Copy, Check, Skull } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { GameRoleBadge } from '#/features/game/components/game-role-badge'
@@ -98,7 +99,11 @@ export function GameHUD() {
           </button>
 
           {gameStarted && phaseMeta && (
-            <div
+            <motion.div
+              key={phase}
+              initial={{ scale: 0.85, opacity: 0.6 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
               className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-bold tracking-wide"
               style={{
                 color: '#1B1922',
@@ -108,7 +113,7 @@ export function GameHUD() {
             >
               {PhaseIcon && <PhaseIcon className="h-4 w-4" />}
               <span>{phaseMeta.label}</span>
-            </div>
+            </motion.div>
           )}
 
           {gameStarted && roundNumber != null && (
