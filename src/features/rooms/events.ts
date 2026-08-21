@@ -108,6 +108,7 @@ export type {
   GameStatePlayer,
   GameResetEvent,
   GameCanceledEvent,
+  DetectResultEvent,
   StartGameMessage,
   VoteMessage,
   KillMessage,

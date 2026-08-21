@@ -3,6 +3,8 @@ import {
   useRealtimeKitSelector,
 } from '@cloudflare/realtimekit-react'
 import LiveParticipantTile from '#/features/rooms/components/live/participant-tile'
+import { TileEventOverlay } from '#/features/game/components/tile-event-overlay'
+import { TileActionOverlay } from '#/features/rooms/components/live/tile-action-overlay'
 
 export function getColumns(count: number) {
   if (count <= 1) return 1
@@ -37,17 +39,23 @@ export default function TilesGrid() {
   return (
     <div className="flex flex-wrap content-center justify-center h-full w-full gap-3 p-4">
       {allParticipants.map((participant) => {
+        const rawId = (participant as any).customParticipantId
+        const userId = rawId != null ? Number(rawId) : null
         return (
           <div
             key={participant.id || participant.userId || 'participant-tile'}
             style={{ width: itemW, height: itemH }}
           >
-            <LiveParticipantTile
-              participant={participant}
-              isSelected={false}
-              isSelectable={false}
-              onSelect={() => {}}
-            />
+            <TileEventOverlay userId={userId}>
+              <TileActionOverlay participant={participant}>
+                <LiveParticipantTile
+                  participant={participant}
+                  isSelected={false}
+                  isSelectable={false}
+                  onSelect={() => {}}
+                />
+              </TileActionOverlay>
+            </TileEventOverlay>
           </div>
         )
       })}

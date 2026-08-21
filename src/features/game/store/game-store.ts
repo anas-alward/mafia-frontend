@@ -14,6 +14,8 @@ import type {
   VoteResultStartedEvent,
   GameStateEvent,
   GameResetEvent,
+  GameCanceledEvent,
+  DetectResultEvent,
   StartGameMessage,
   VoteMessage,
   KillMessage,
@@ -47,6 +49,7 @@ interface GameStore {
   mafiaMemberRoles: Record<number, string>
   roundNumber: number | null
   requiredActions: RequiredAction[]
+  detectResult: { targetId: number; roleType: string } | null
   _send: ((data: unknown) => void) | null
 
   // Internal helper
@@ -72,6 +75,7 @@ interface GameStore {
   submitVoteResult: () => void
   resetGame: () => void
   cancelGame: () => void
+  clearDetectResult: () => void
 }
 
 const STORE_NAME = 'mafia-game'
@@ -97,6 +101,7 @@ export const useGameStore = create<GameStore>()(
           mafiaMemberRoles: {},
           roundNumber: null,
           requiredActions: [],
+          detectResult: null,
         })
       }
 
@@ -254,6 +259,12 @@ export const useGameStore = create<GameStore>()(
             _resetToLobby()
             break
           }
+
+          case 'detect_result': {
+            const m = msg as DetectResultEvent
+            set({ detectResult: { targetId: m.target_id, roleType: m.role_type } })
+            break
+          }
         }
       }
 
@@ -280,6 +291,7 @@ export const useGameStore = create<GameStore>()(
         mafiaMemberRoles: {},
         roundNumber: null,
         requiredActions: [],
+        detectResult: null,
         _send: null,
 
         _resetToLobby,
@@ -349,6 +361,7 @@ export const useGameStore = create<GameStore>()(
           const msg: CancelGameMessage = { type: 'cancel' }
           send_(msg)
         },
+        clearDetectResult: () => set({ detectResult: null }),
       }
     },
     {

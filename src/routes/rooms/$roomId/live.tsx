@@ -18,9 +18,10 @@ import { useGameStore } from '#/features/game/store/game-store'
 import TilesGrid from '#/features/rooms/components/live/tiles-grid'
 import ControlBar from '#/features/rooms/components/live/control-bar'
 import LiveParticipantTile from '#/features/rooms/components/live/participant-tile'
+import { TileEventOverlay } from '#/features/game/components/tile-event-overlay'
+import { TileActionOverlay } from '#/features/rooms/components/live/tile-action-overlay'
 import { GameHUD } from '#/features/rooms/components/live/game-hud'
 import { LiveSidebar } from '#/features/rooms/components/live/live-sidebar'
-import { PhaseTransition } from '#/features/game/components/phase-transition'
 
 export const Route = createFileRoute('/rooms/$roomId/live')({
   component: LiveRoute,
@@ -112,13 +113,14 @@ function LiveRoom({
   const { meeting } = useRealtimeKitMeeting()
   const selfParticipant = useRealtimeKitSelector(() => meeting.self)
   const isPreGameHost = isHost && !gameStarted
+  const rawSelfId = (selfParticipant as any).customParticipantId
+  const selfUserId = rawSelfId != null ? Number(rawSelfId) : null
 
   return (
     <div
       className="relative flex flex-col h-full w-full"
       style={{ backgroundColor: 'var(--game-bg-deep)' }}
     >
-      <PhaseTransition />
       <div className="game-vignette" />
       <GameHUD />
 
@@ -128,12 +130,16 @@ function LiveRoom({
         </RtkStage>
 
         <div className="absolute bottom-4 right-4 z-30 w-60 h-36 rounded-lg overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.08]">
-          <LiveParticipantTile
-            participant={selfParticipant}
-            isSelected={false}
-            isSelectable={false}
-            onSelect={() => {}}
-          />
+          <TileEventOverlay userId={selfUserId}>
+            <TileActionOverlay participant={selfParticipant}>
+              <LiveParticipantTile
+                participant={selfParticipant}
+                isSelected={false}
+                isSelectable={false}
+                onSelect={() => {}}
+              />
+            </TileActionOverlay>
+          </TileEventOverlay>
         </div>
       </div>
 

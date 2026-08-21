@@ -414,6 +414,17 @@ a {
   }
 }
 
+@keyframes phase-event-enter {
+  0% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
 .ability-pulse {
   animation: ability-ready 2.2s ease-in-out infinite;
 }

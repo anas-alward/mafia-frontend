@@ -80,6 +80,12 @@ export interface GameCanceledEvent {
   type: 'game_canceled'
 }
 
+export interface DetectResultEvent {
+  type: 'detect_result'
+  target_id: number
+  role_type: string
+}
+
 export interface GameStateEvent {
   type: 'game_state'
   session_id: string | null

@@ -1,5 +1,5 @@
 // src/features/rooms/components/live/start-game-tooltip.tsx
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Play, Check } from 'lucide-react'
 
@@ -25,6 +25,7 @@ export default function StartGameTooltip({
 }: StartGameTooltipProps) {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [position, setPosition] = useState({ top: 0, left: 0 })
+  const [placement, setPlacement] = useState<'above' | 'below'>('above')
   const tooltipRef = useRef<HTMLDivElement>(null)
 
   // Reset selection when tooltip opens
@@ -34,19 +35,46 @@ export default function StartGameTooltip({
     }
   }, [isOpen])
 
-  // Calculate position above the anchor button
-  useEffect(() => {
-    if (!isOpen || !anchorRef.current) return
+  // Position tooltip with viewport boundary detection.
+  // useLayoutEffect runs after render but before paint — no visible flicker.
+  useLayoutEffect(() => {
+    if (!isOpen || !anchorRef.current || !tooltipRef.current) return
+
     const recalc = () => {
-      const rect = anchorRef.current!.getBoundingClientRect()
-      setPosition({
-        top: rect.top - 8, // gap above button
-        left: rect.left + rect.width / 2, // center of button
-      })
+      const anchorRect = anchorRef.current!.getBoundingClientRect()
+      const tooltipRect = tooltipRef.current!.getBoundingClientRect()
+      const tooltipH = tooltipRect.height
+      const tooltipW = tooltipRect.width
+      const viewportW = window.innerWidth
+      const viewportH = window.innerHeight
+      const gap = 8
+      const pad = 8
+
+      const fitsAbove = anchorRect.top - gap >= tooltipH
+      const fitsBelow = viewportH - anchorRect.bottom - gap >= tooltipH
+      const placeBelow = !fitsAbove && fitsBelow
+
+      const top = placeBelow
+        ? anchorRect.bottom + gap
+        : anchorRect.top - tooltipH - gap
+
+      let left = anchorRect.left + anchorRect.width / 2 - tooltipW / 2
+      if (left < pad) left = pad
+      if (left + tooltipW > viewportW - pad) {
+        left = viewportW - tooltipW - pad
+      }
+
+      setPosition({ top, left })
+      setPlacement(placeBelow ? 'below' : 'above')
     }
+
     recalc()
     window.addEventListener('resize', recalc)
-    return () => window.removeEventListener('resize', recalc)
+    window.addEventListener('scroll', recalc, { passive: true, capture: true })
+    return () => {
+      window.removeEventListener('resize', recalc)
+      window.removeEventListener('scroll', recalc, { capture: true })
+    }
   }, [isOpen, anchorRef])
 
   // Close on Escape
@@ -130,21 +158,26 @@ export default function StartGameTooltip({
       style={{
         top: position.top,
         left: position.left,
-        transform: 'translate(-50%, -100%)',
         backgroundColor: 'var(--game-bg-elevated)',
         borderColor: 'var(--game-border)',
         boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
       }}
     >
-      {/* Arrow pointing down at the button */}
+      {/* Arrow pointing toward the anchor button */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-full"
+        className={`absolute left-1/2 -translate-x-1/2 ${
+          placement === 'above'
+            ? 'bottom-0 translate-y-full'
+            : 'top-0 -translate-y-full'
+        }`}
         style={{
           width: 0,
           height: 0,
           borderLeft: '6px solid transparent',
           borderRight: '6px solid transparent',
-          borderTop: `6px solid var(--game-bg-elevated)`,
+          ...(placement === 'above'
+            ? { borderTop: '6px solid var(--game-bg-elevated)' }
+            : { borderBottom: '6px solid var(--game-bg-elevated)' }),
         }}
       />
 

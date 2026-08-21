@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import {
   useRealtimeKitMeeting,
   useRealtimeKitSelector,
@@ -7,7 +7,6 @@ import { Users, Copy, Check, Skull } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
-import { GameRoleBadge } from '#/features/game/components/game-role-badge'
 import { LiveSidebar } from '#/features/rooms/components/live/live-sidebar'
 import { PHASE_META, Phase as GamePhaseEnum } from '#/features/game/constants'
 import type { GamePhase } from '#/features/game/events'
@@ -31,30 +30,6 @@ export function GameHUD() {
     () => meeting.participants.joined.size + 1,
   )
 
-  const [hudVisible, setHudVisible] = useState(true)
-  const hudTimerRef = useRef<ReturnType<typeof setTimeout>>(null)
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (e.clientY < 60) {
-        setHudVisible(true)
-        if (hudTimerRef.current) {
-          clearTimeout(hudTimerRef.current)
-          hudTimerRef.current = null
-        }
-      } else {
-        if (!hudTimerRef.current) {
-          hudTimerRef.current = setTimeout(() => setHudVisible(false), 800)
-        }
-      }
-    }
-    window.addEventListener('mousemove', onMouseMove)
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove)
-      if (hudTimerRef.current) clearTimeout(hudTimerRef.current)
-    }
-  }, [])
-
   const [copied, setCopied] = useState(false)
   const copyRoomCode = async () => {
     await navigator.clipboard.writeText(roomId)
@@ -69,23 +44,20 @@ export function GameHUD() {
   const deadCount = deadPlayerIds.length
 
   return (
-    <div
-      className={`absolute top-0 left-0 right-0 z-50 transition-all duration-400 ease-out ${
-        hudVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-      }`}
-    >
-      <div className="game-glass flex items-center justify-between h-11 px-4">
+    <div className="shrink-0 z-50">
+      <div
+        className="flex items-center justify-between h-11 px-4"
+        style={{
+          backgroundColor: 'var(--game-bg-deep)',
+        }}
+      >
         {/* Left: Room code + copy */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={copyRoomCode}
-            className="group flex items-center gap-2 text-xs font-mono tracking-wider px-3 py-1.5 rounded-lg transition-all cursor-pointer"
-            style={{
-              color: 'var(--game-text-primary)',
-              backgroundColor: 'var(--game-bg-elevated)',
-              border: '1px solid var(--game-border)',
-            }}
+            className="group flex items-center gap-2 text-xs font-mono tracking-wider cursor-pointer"
+            style={{ color: 'var(--game-text-primary)' }}
           >
             #{roomId}
             {copied ? (
@@ -94,22 +66,31 @@ export function GameHUD() {
                 style={{ color: 'var(--game-mint)' }}
               />
             ) : (
-              <Copy className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Copy className="h-3.5 w-3.5" />
             )}
           </button>
+
+          {gameStarted && (
+            <span
+              className="text-xs select-none"
+              style={{ color: 'var(--game-text-muted)' }}
+            >
+              |
+            </span>
+          )}
 
           {gameStarted && phaseMeta && (
             <motion.div
               key={phase}
-              initial={{ scale: 0.85, opacity: 0.6 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
               className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-bold tracking-wide"
               style={{
                 color: '#1B1922',
                 backgroundColor: phaseMeta.textColor,
                 boxShadow: `0 0 16px ${phaseMeta.glow}`,
               }}
+              initial={{ scale: 0.85, opacity: 0.6 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
             >
               {PhaseIcon && <PhaseIcon className="h-4 w-4" />}
               <span>{phaseMeta.label}</span>
@@ -117,15 +98,23 @@ export function GameHUD() {
           )}
 
           {gameStarted && roundNumber != null && (
-            <span
-              className="text-xs font-bold font-mono tracking-wider px-2 py-1 rounded-md"
-              style={{
-                color: 'var(--game-text-primary)',
-                backgroundColor: 'var(--game-bg-elevated)',
-              }}
-            >
-              R{roundNumber}
-            </span>
+            <>
+              <span
+                className="text-xs select-none"
+                style={{ color: 'var(--game-text-muted)' }}
+              >
+                |
+              </span>
+              <span
+                className="text-xs font-bold font-mono tracking-wider px-2 py-1 rounded-md"
+                style={{
+                  color: 'var(--game-text-primary)',
+                  backgroundColor: 'var(--game-bg-elevated)',
+                }}
+              >
+                R{roundNumber}
+              </span>
+            </>
           )}
         </div>
 
@@ -157,9 +146,8 @@ export function GameHUD() {
           </div>
         )}
 
-        {/* Right: Role badge + player count + log toggle */}
+        {/* Right: player count + log toggle */}
         <div className="flex items-center gap-3">
-          <GameRoleBadge />
           <LiveSidebar.LogToggle />
           <div
             className="flex items-center gap-1.5 text-xs font-semibold"
