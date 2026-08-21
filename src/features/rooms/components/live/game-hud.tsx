@@ -4,18 +4,11 @@ import {
   useRealtimeKitSelector,
 } from '@cloudflare/realtimekit-react'
 import { Users, Copy, Check, Skull } from 'lucide-react'
-import { motion } from 'motion/react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { LiveSidebar } from '#/features/rooms/components/live/live-sidebar'
-import { PHASE_META, Phase as GamePhaseEnum } from '#/features/game/constants'
-import type { GamePhase } from '#/features/game/events'
-
-const GAMEPHASE_TO_PHASE: Partial<Record<GamePhase, GamePhaseEnum>> = {
-  day: GamePhaseEnum.DAY,
-  night: GamePhaseEnum.NIGHT,
-  vote_result: GamePhaseEnum.VOTE_RESULT,
-}
+import { PhaseBadge } from '#/features/game/components/phase-badge'
+import { RoundBadge } from '#/features/game/components/round-badge'
 
 export function GameHUD() {
   const roomId = useMeetingStore((s) => s.roomId)
@@ -37,9 +30,6 @@ export function GameHUD() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const phaseEnum = GAMEPHASE_TO_PHASE[phase]
-  const phaseMeta = phaseEnum ? PHASE_META[phaseEnum] : null
-  const PhaseIcon = phaseMeta?.Icon ?? null
   const aliveCount = alivePlayerIds.length
   const deadCount = deadPlayerIds.length
 
@@ -79,23 +69,7 @@ export function GameHUD() {
             </span>
           )}
 
-          {gameStarted && phaseMeta && (
-            <motion.div
-              key={phase}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-bold tracking-wide"
-              style={{
-                color: '#1B1922',
-                backgroundColor: phaseMeta.textColor,
-                boxShadow: `0 0 16px ${phaseMeta.glow}`,
-              }}
-              initial={{ scale: 0.85, opacity: 0.6 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
-            >
-              {PhaseIcon && <PhaseIcon className="h-4 w-4" />}
-              <span>{phaseMeta.label}</span>
-            </motion.div>
-          )}
+          {gameStarted && <PhaseBadge phase={phase} />}
 
           {gameStarted && roundNumber != null && (
             <>
@@ -105,15 +79,7 @@ export function GameHUD() {
               >
                 |
               </span>
-              <span
-                className="text-xs font-bold font-mono tracking-wider px-2 py-1 rounded-md"
-                style={{
-                  color: 'var(--game-text-primary)',
-                  backgroundColor: 'var(--game-bg-elevated)',
-                }}
-              >
-                R{roundNumber}
-              </span>
+              <RoundBadge roundNumber={roundNumber} />
             </>
           )}
         </div>
