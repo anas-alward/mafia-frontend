@@ -20,6 +20,7 @@ import type {
   GameStateEvent,
   GameResetEvent,
   GameCanceledEvent,
+  GameOverEvent,
   DetectResultEvent,
 } from '../events'
 
@@ -44,6 +45,7 @@ export type WsMessage =
   | GameStateEvent
   | GameResetEvent
   | GameCanceledEvent
+  | GameOverEvent
   | DetectResultEvent
   | { type: string; [key: string]: unknown }
 

@@ -2,6 +2,8 @@
 
 export type GamePhase = 'lobby' | 'day' | 'night' | 'vote_result' | 'ended'
 
+export type Winner = 'mafia' | 'town'
+
 export interface GameLogEntry {
   actor_id: number
   target_id: number
@@ -78,6 +80,13 @@ export interface GameResetEvent {
 
 export interface GameCanceledEvent {
   type: 'game_canceled'
+}
+
+export interface GameOverEvent {
+  type: 'game_over'
+  winner: Winner
+  player_ids: number[]
+  logs: GameLogEntry[]
 }
 
 export interface DetectResultEvent {

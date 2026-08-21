@@ -19,6 +19,7 @@ import TilesGrid from '#/features/rooms/components/live/tiles-grid'
 import ControlBar from '#/features/rooms/components/live/control-bar'
 import LiveParticipantTile from '#/features/rooms/components/live/participant-tile'
 import { TileEventOverlay } from '#/features/game/components/tile-event-overlay'
+import { GameOverOverlay } from '#/features/game/components/game-over-overlay'
 import { TileActionOverlay } from '#/features/rooms/components/live/tile-action-overlay'
 import { GameHUD } from '#/features/rooms/components/live/game-hud'
 import { LiveSidebar } from '#/features/rooms/components/live/live-sidebar'
@@ -148,6 +149,8 @@ function LiveRoom({
         isPreGameHost={isPreGameHost}
         onStartGame={startGame}
       />
+
+      <GameOverOverlay />
     </div>
   )
 }

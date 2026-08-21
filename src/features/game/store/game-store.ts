@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { WsMessage } from '#/features/rooms/hooks/use-room-websocket'
 import type {
   GamePhase,
+  Winner,
   GameLogEntry,
   RequiredAction,
   GameStatePlayer,
@@ -15,6 +16,7 @@ import type {
   GameStateEvent,
   GameResetEvent,
   GameCanceledEvent,
+  GameOverEvent,
   DetectResultEvent,
   StartGameMessage,
   VoteMessage,
@@ -50,6 +52,7 @@ interface GameStore {
   roundNumber: number | null
   requiredActions: RequiredAction[]
   detectResult: { targetId: number; roleType: string } | null
+  winner: Winner | null
   _send: ((data: unknown) => void) | null
 
   // Internal helper
@@ -102,6 +105,7 @@ export const useGameStore = create<GameStore>()(
           roundNumber: null,
           requiredActions: [],
           detectResult: null,
+          winner: null,
         })
       }
 
@@ -123,6 +127,7 @@ export const useGameStore = create<GameStore>()(
               mafiaIds: [],
               mafiaMemberRoles: {},
               requiredActions: m.required_actions,
+              winner: null,
             })
             break
           }
@@ -251,7 +256,22 @@ export const useGameStore = create<GameStore>()(
               mafiaMemberRoles: {},
               roundNumber: null,
               requiredActions: m.required_actions,
+              winner: null,
             })
+            break
+          }
+
+          case 'game_over': {
+            const m = msg as GameOverEvent
+            set((s) => ({
+              phase: 'ended',
+              winner: m.winner,
+              logs: [...s.logs, ...m.logs],
+              currentVotes: new Map(),
+              lynchTargetId: null,
+              hasVotedThisPhase: false,
+              requiredActions: [],
+            }))
             break
           }
 
@@ -292,6 +312,7 @@ export const useGameStore = create<GameStore>()(
         roundNumber: null,
         requiredActions: [],
         detectResult: null,
+        winner: null,
         _send: null,
 
         _resetToLobby,

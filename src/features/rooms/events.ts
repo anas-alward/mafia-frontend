@@ -96,6 +96,7 @@ export interface ChatSend {
 
 export type {
   GamePhase,
+  Winner,
   GameLogEntry,
   RequiredAction,
   GameStartedEvent,
@@ -108,6 +109,7 @@ export type {
   GameStatePlayer,
   GameResetEvent,
   GameCanceledEvent,
+  GameOverEvent,
   DetectResultEvent,
   StartGameMessage,
   VoteMessage,
