@@ -3,20 +3,19 @@ import {
   useRealtimeKitMeeting,
   useRealtimeKitSelector,
 } from '@cloudflare/realtimekit-react'
-import { Users, Copy, Check, Skull } from 'lucide-react'
+import { Users, Copy, Check } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { LiveSidebar } from '#/features/rooms/components/live/live-sidebar'
 import { PhaseBadge } from '#/features/game/components/phase-badge'
 import { RoundBadge } from '#/features/game/components/round-badge'
+import { PlayerCount } from '#/features/game/components/player-count'
 
 export function GameHUD() {
   const roomId = useMeetingStore((s) => s.roomId)
   const gameStarted = useGameStore((s) => s.gameStarted)
   const phase = useGameStore((s) => s.phase)
   const roundNumber = useGameStore((s) => s.roundNumber)
-  const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
-  const deadPlayerIds = useGameStore((s) => s.deadPlayerIds)
 
   const { meeting } = useRealtimeKitMeeting()
   const participantCount = useRealtimeKitSelector(
@@ -29,9 +28,6 @@ export function GameHUD() {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-
-  const aliveCount = alivePlayerIds.length
-  const deadCount = deadPlayerIds.length
 
   return (
     <div className="shrink-0 z-50">
@@ -85,32 +81,7 @@ export function GameHUD() {
         </div>
 
         {/* Center: Game stats */}
-        {gameStarted && (
-          <div className="flex items-center gap-5 text-xs font-semibold">
-            <div
-              className="flex items-center gap-2"
-              style={{ color: 'var(--game-mint)' }}
-            >
-              <div
-                className="h-2 w-2 rounded-full"
-                style={{
-                  backgroundColor: 'var(--game-mint)',
-                  boxShadow: '0 0 6px var(--game-mint)',
-                }}
-              />
-              <span>{aliveCount} alive</span>
-            </div>
-            {deadCount > 0 && (
-              <div
-                className="flex items-center gap-1.5"
-                style={{ color: 'var(--game-crimson)' }}
-              >
-                <Skull className="h-3.5 w-3.5" />
-                <span>{deadCount} dead</span>
-              </div>
-            )}
-          </div>
-        )}
+        <PlayerCount />
 
         {/* Right: player count + log toggle */}
         <div className="flex items-center gap-3">

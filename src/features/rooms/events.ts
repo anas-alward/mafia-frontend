@@ -118,8 +118,7 @@ export type {
   DetectMessage,
   ShootMessage,
   RevengeMessage,
-  SilentMessage,
-  RoleblockMessage,
+  SilenceMessage,
   SubmitVotesMessage,
   SubmitVoteResultMessage,
 } from '#/features/game/events'

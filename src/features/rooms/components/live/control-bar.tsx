@@ -16,7 +16,6 @@ import {
   Minimize,
   WifiOff,
   Play,
-  Moon,
   Send,
   RotateCcw,
   X,
@@ -25,7 +24,7 @@ import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
 import StartGameTooltip from '#/features/rooms/components/live/start-game-tooltip'
-import { ActionType, Phase } from '#/features/game/constants'
+import { Phase } from '#/features/game/constants'
 
 interface ControlBarProps {
   fullScreenRef: React.RefObject<HTMLDivElement | null>
@@ -52,18 +51,13 @@ export default function ControlBar({
   // Game state
   const gameStarted = useGameStore((s) => s.gameStarted)
   const phase = useGameStore((s) => s.phase)
-  const requiredActions = useGameStore((s) => s.requiredActions)
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
   const currentVotes = useGameStore((s) => s.currentVotes)
-  const silentAction = useGameStore((s) => s.silentAction)
   const submitVotes = useGameStore((s) => s.submitVotes)
   const submitVoteResult = useGameStore((s) => s.submitVoteResult)
   const resetGame = useGameStore((s) => s.resetGame)
   const cancelGame = useGameStore((s) => s.cancelGame)
 
-  const hasSilent = requiredActions.some(
-    (a) => a.action_type === ActionType.SILENT,
-  )
   const allVoted = useMemo(
     () => alivePlayerIds.every((id) => currentVotes.has(id)),
     [alivePlayerIds, currentVotes],
@@ -263,25 +257,8 @@ export default function ControlBar({
           )}
         </div>
 
-        {/* Center: media controls + SILENT */}
+        {/* Center: media controls */}
         <div className="flex items-center gap-2">
-          {/* SILENT action */}
-          {gameStarted && hasSilent && (
-            <button
-              type="button"
-              onClick={() => silentAction()}
-              title="Skip"
-              className={`${orbBase}`}
-              style={{
-                color: 'var(--game-text-muted)',
-                backgroundColor: 'transparent',
-                borderColor: 'var(--game-border)',
-              }}
-            >
-              <Moon className="h-4 w-4" />
-            </button>
-          )}
-
           {/* Mic */}
           <button
             type="button"

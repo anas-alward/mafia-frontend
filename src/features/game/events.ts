@@ -150,13 +150,8 @@ export interface RevengeMessage {
   target_id: number
 }
 
-export interface SilentMessage {
-  type: 'silent'
-  target_id: number | null
-}
-
-export interface RoleblockMessage {
-  type: 'roleblock'
+export interface SilenceMessage {
+  type: 'silence'
   target_id: number
 }
 

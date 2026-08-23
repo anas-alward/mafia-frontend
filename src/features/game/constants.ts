@@ -27,8 +27,7 @@ export enum ActionType {
   HEAL = 'heal',
   DETECT = 'detect',
   SHOOT = 'shoot',
-  ROLEBLOCK = 'roleblock',
-  SILENT = 'silent',
+  SILENCE = 'silence',
   LYNCH = 'lynch',
 }
 
@@ -145,17 +144,17 @@ export const MafiaGodfather: RoleDefinition = {
   },
 }
 
-export const MafiaRoleblocker: RoleDefinition = {
-  code: 'roleblocker',
+export const MafiaSilencer: RoleDefinition = {
+  code: 'silencer',
   role_type: Team.MAFIA,
-  name: 'Mafia Silencer',
+  name: 'Silencer',
   description:
     'Blocks one player each night, preventing them from using their action.',
   icon: 'ban',
   actions: {
     [Phase.NIGHT]: [
       { action_type: ActionType.KILL, required: true, priority: 2 },
-      { action_type: ActionType.ROLEBLOCK, required: true },
+      { action_type: ActionType.SILENCE, required: true },
     ],
     [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
   },
@@ -185,7 +184,7 @@ export const ROLES: RoleDefinition[] = [
   TownBomb,
   TownVanilla,
   MafiaGodfather,
-  MafiaRoleblocker,
+  MafiaSilencer,
   MafiaMember,
 ]
 

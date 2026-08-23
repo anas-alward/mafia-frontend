@@ -160,18 +160,6 @@ export default function LiveParticipantTile({
       {/* Role icon (top-left) */}
       <TileRoleBadge userId={tileUserId} isLocal={isLocal} isMafia={isMafia} />
 
-      {/* Local indicator */}
-      {isLocal && !videoEnabled && !gameStarted && (
-        <div
-          className="absolute top-3 right-3 z-20 px-2 py-0.5 rounded-md text-xs font-semibold"
-          style={{
-            backgroundColor: 'var(--game-bg-elevated)',
-            color: 'var(--game-text-primary)',
-          }}
-        >
-          You
-        </div>
-      )}
     </div>
   )
 }

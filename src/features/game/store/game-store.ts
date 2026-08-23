@@ -25,8 +25,7 @@ import type {
   DetectMessage,
   ShootMessage,
   RevengeMessage,
-  SilentMessage,
-  RoleblockMessage,
+  SilenceMessage,
   SubmitVotesMessage,
   SubmitVoteResultMessage,
   ResetGameMessage,
@@ -72,8 +71,7 @@ interface GameStore {
   detectPlayer: (targetId: number) => void
   shootPlayer: (targetId: number) => void
   revengeKill: (targetId: number) => void
-  silentAction: (targetId?: number) => void
-  roleblockPlayer: (targetId: number) => void
+  silencePlayer: (targetId: number) => void
   submitVotes: () => void
   submitVoteResult: () => void
   resetGame: () => void
@@ -352,16 +350,9 @@ export const useGameStore = create<GameStore>()(
           const msg: RevengeMessage = { type: 'revenge', target_id: targetId }
           send_(msg)
         },
-        silentAction: (targetId) => {
-          const msg: SilentMessage = {
-            type: 'silent',
-            target_id: targetId ?? null,
-          }
-          send_(msg)
-        },
-        roleblockPlayer: (targetId) => {
-          const msg: RoleblockMessage = {
-            type: 'roleblock',
+        silencePlayer: (targetId) => {
+          const msg: SilenceMessage = {
+            type: 'silence',
             target_id: targetId,
           }
           send_(msg)
@@ -375,6 +366,17 @@ export const useGameStore = create<GameStore>()(
           send_(msg)
         },
         resetGame: () => {
+          const { phase, playerIds } = get()
+          // The backend flushes the session on game over, so `reset` would
+          // fail with GAME_NOT_STARTED. Restart via start_game with the same players.
+          if (phase === 'ended') {
+            const msg: StartGameMessage = {
+              type: 'start_game',
+              player_ids: playerIds,
+            }
+            send_(msg)
+            return
+          }
           const msg: ResetGameMessage = { type: 'reset' }
           send_(msg)
         },
@@ -400,8 +402,7 @@ export const useGameStore = create<GameStore>()(
           detectPlayer,
           shootPlayer,
           revengeKill,
-          silentAction,
-          roleblockPlayer,
+          silencePlayer,
           submitVotes,
           submitVoteResult,
           resetGame,

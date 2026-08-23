@@ -58,9 +58,9 @@ const ACTION_VISUAL: Partial<Record<string, ActionVisual>> = {
     color: 'var(--game-crimson)',
     glow: 'rgba(240, 96, 107, 0.3)',
   },
-  [ActionType.ROLEBLOCK]: {
+  [ActionType.SILENCE]: {
     Icon: Ban,
-    label: 'Block',
+    label: 'Silence',
     color: '#C49EF0',
     glow: 'rgba(196, 158, 240, 0.3)',
   },
@@ -87,7 +87,7 @@ export function TileActionOverlay({
   const detectPlayer = useGameStore((s) => s.detectPlayer)
   const shootPlayer = useGameStore((s) => s.shootPlayer)
   const revengeKill = useGameStore((s) => s.revengeKill)
-  const roleblockPlayer = useGameStore((s) => s.roleblockPlayer)
+  const silencePlayer = useGameStore((s) => s.silencePlayer)
 
   const currentUser = useAuthStore((s) => s.user)
 
@@ -110,11 +110,7 @@ export function TileActionOverlay({
     }
     const result: { actionType: string; visual: ActionVisual }[] = []
     for (const a of requiredActions) {
-      if (
-        a.action_type === ActionType.SILENT ||
-        !a.target_options.includes(tileUserId)
-      )
-        continue
+      if (!a.target_options.includes(tileUserId)) continue
       const visual = ACTION_VISUAL[a.action_type]
       if (visual) result.push({ actionType: a.action_type, visual })
     }
@@ -142,8 +138,8 @@ export function TileActionOverlay({
       case ActionType.REVENGE:
         revengeKill(tileUserId)
         break
-      case ActionType.ROLEBLOCK:
-        roleblockPlayer(tileUserId)
+      case ActionType.SILENCE:
+        silencePlayer(tileUserId)
         break
     }
   }
