@@ -43,8 +43,17 @@ export const useMediaConfigStore = create<MediaConfigStore>((set, get) => ({
       })
 
       const devices = await navigator.mediaDevices.enumerateDevices()
-      const videoDevices = devices.filter((d) => d.kind === 'videoinput')
-      const audioDevices = devices.filter((d) => d.kind === 'audioinput')
+      // enumerateDevices can return duplicate deviceIds (e.g. 'default' and
+      // 'communications' pointing at the same mic) — dedupe for stable keys
+      const unique = (list: MediaDeviceInfo[]) => [
+        ...new Map(list.map((d) => [d.deviceId, d])).values(),
+      ]
+      const videoDevices = unique(
+        devices.filter((d) => d.kind === 'videoinput'),
+      )
+      const audioDevices = unique(
+        devices.filter((d) => d.kind === 'audioinput'),
+      )
 
       const videoTrack = stream.getVideoTracks()[0]
       const audioTrack = stream.getAudioTracks()[0]

@@ -1,8 +1,5 @@
 import { useState } from 'react'
-import {
-  useRealtimeKitMeeting,
-  useRealtimeKitSelector,
-} from '@cloudflare/realtimekit-react'
+import { useParticipants } from '@livekit/components-react'
 import { Users, Copy, Check } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
@@ -17,10 +14,7 @@ export function GameHUD() {
   const phase = useGameStore((s) => s.phase)
   const roundNumber = useGameStore((s) => s.roundNumber)
 
-  const { meeting } = useRealtimeKitMeeting()
-  const participantCount = useRealtimeKitSelector(
-    () => meeting.participants.joined.size + 1,
-  )
+  const participantCount = useParticipants().length
 
   const [copied, setCopied] = useState(false)
   const copyRoomCode = async () => {

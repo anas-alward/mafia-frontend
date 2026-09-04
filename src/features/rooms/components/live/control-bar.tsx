@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { RtkStageToggle } from '@cloudflare/realtimekit-react-ui'
 import {
-  useRealtimeKitMeeting,
-  useRealtimeKitSelector,
-} from '@cloudflare/realtimekit-react'
+  useLocalParticipant,
+  useParticipants,
+  useRoomContext,
+} from '@livekit/components-react'
 import {
   Users,
   PhoneOff,
@@ -37,10 +36,13 @@ export default function ControlBar({
   isPreGameHost,
   onStartGame,
 }: ControlBarProps) {
-  const { meeting } = useRealtimeKitMeeting()
-  const audioEnabled = useRealtimeKitSelector(() => meeting.self.audioEnabled)
-  const videoEnabled = useRealtimeKitSelector(() => meeting.self.videoEnabled)
-  const navigate = useNavigate()
+  const {
+    localParticipant,
+    isMicrophoneEnabled: audioEnabled,
+    isCameraEnabled: videoEnabled,
+  } = useLocalParticipant()
+  const room = useRoomContext()
+  const allParticipants = useParticipants()
   const wsState = useMeetingStore((s) => s.wsState)
   const sendError = useMeetingStore((s) => s.sendError)
   const joinRequests = useMeetingStore((s) => s.joinRequests)
@@ -66,10 +68,6 @@ export default function ControlBar({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showStartTooltip, setShowStartTooltip] = useState(false)
   const startBtnRef = useRef<HTMLButtonElement>(null)
-  const allParticipants = useRealtimeKitSelector(() => {
-    const remotes = meeting.participants.joined.toArray()
-    return [meeting.self, ...remotes]
-  })
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement)
@@ -262,11 +260,7 @@ export default function ControlBar({
           {/* Mic */}
           <button
             type="button"
-            onClick={() =>
-              audioEnabled
-                ? meeting.self.disableAudio()
-                : meeting.self.enableAudio()
-            }
+            onClick={() => localParticipant.setMicrophoneEnabled(!audioEnabled)}
             className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer border"
             style={{
               color: audioEnabled
@@ -291,11 +285,7 @@ export default function ControlBar({
           {/* Camera */}
           <button
             type="button"
-            onClick={() =>
-              videoEnabled
-                ? meeting.self.disableVideo()
-                : meeting.self.enableVideo()
-            }
+            onClick={() => localParticipant.setCameraEnabled(!videoEnabled)}
             className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer border"
             style={{
               color: videoEnabled
@@ -317,14 +307,11 @@ export default function ControlBar({
             )}
           </button>
 
-          <RtkStageToggle />
-
           {/* Leave */}
           <button
             type="button"
             onClick={async () => {
-              await meeting.leave()
-              navigate({ to: '/' })
+              await room.disconnect()
             }}
             className="p-2.5 rounded-xl transition-all duration-200 cursor-pointer border"
             style={{

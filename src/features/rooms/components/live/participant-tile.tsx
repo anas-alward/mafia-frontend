@@ -1,19 +1,21 @@
-import { useEffect, useRef } from 'react'
-import { useRealtimeKitSelector } from '@cloudflare/realtimekit-react'
 import {
-  RtkAudioVisualizer,
-  RtkNameTag,
-} from '@cloudflare/realtimekit-react-ui'
+  useIsSpeaking,
+  useParticipantTracks,
+  VideoTrack,
+} from '@livekit/components-react'
+import type { Participant } from 'livekit-client'
+import { Track } from 'livekit-client'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useAuthStore } from '#/features/auth/store/auth-store'
 import { ROLE_REGISTRY, Team } from '#/features/game/constants'
+import type { RoleDefinition } from '#/features/game/constants'
 import { TileRoleBadge } from '#/features/game/components/tile-role-badge'
 import { VoteCountBadge } from '#/features/game/components/vote-count-badge'
 
 // ── Props ──
 
 interface LiveParticipantTileProps {
-  participant: any
+  participant: Participant
   isSelected: boolean
   isSelectable: boolean
   onSelect: (userId: number) => void
@@ -25,36 +27,32 @@ export default function LiveParticipantTile({
   isSelectable,
   onSelect,
 }: LiveParticipantTileProps) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const videoEnabled = useRealtimeKitSelector(() => participant.videoEnabled)
-  const videoTrack = useRealtimeKitSelector(() => participant.videoTrack)
-  const isSpeaking = useRealtimeKitSelector(() => participant.isSpeaking)
-  const name = useRealtimeKitSelector(() => participant.name)
+  const cameraRefs = useParticipantTracks([Track.Source.Camera], {
+    participantIdentity: participant.identity,
+  })
+  const cameraRef = cameraRefs.length > 0 ? cameraRefs[0] : undefined
+  const isSpeaking = useIsSpeaking(participant)
+  const name = participant.name
 
-  useEffect(() => {
-    const el = videoRef.current
-    if (!el || !participant) return
+  const videoEnabled =
+    cameraRef != null &&
+    cameraRef.publication.isSubscribed &&
+    !cameraRef.publication.isMuted
 
-    participant.registerVideoElement(el)
-    return () => {
-      participant.deregisterVideoElement(el)
-    }
-  }, [participant, videoTrack])
-
-  const initial = (name ?? '?').charAt(0).toUpperCase()
+  const initial = name ? name.charAt(0).toUpperCase() : '?'
 
   const gameStarted = useGameStore((s) => s.gameStarted)
   const myRoleCode = useGameStore((s) => s.myRoleCode)
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
 
-  const myRoleType = myRoleCode
-    ? ROLE_REGISTRY[myRoleCode]?.role_type
+  const roleDefinition: RoleDefinition | undefined = myRoleCode
+    ? ROLE_REGISTRY[myRoleCode]
     : undefined
+  const myRoleType = roleDefinition?.role_type
   const isMafia = myRoleType === Team.MAFIA
-  const tileUserId: number | null =
-    participant.customParticipantId != null
-      ? Number(participant.customParticipantId)
-      : null
+  const tileUserId: number | null = participant.identity
+    ? Number(participant.identity)
+    : null
   const isAlive = tileUserId != null && alivePlayerIds.includes(tileUserId)
 
   const currentUser = useAuthStore((s) => s.user)
@@ -64,12 +62,30 @@ export default function LiveParticipantTile({
     tileUserId === Number(currentUser.id)
 
   const TILE_COLORS = [
-    '#2D2A38', '#2A352E', '#2E3038', '#352E2A',
-    '#2A3038', '#332C36', '#2C3230', '#36302C',
-    '#28302E', '#312A33', '#2E312A', '#342D30',
-    '#2B3035', '#302F28', '#2D2E36', '#332B2E',
-    '#29322C', '#362E32', '#2C2F34', '#312D2A',
-    '#2A2E35', '#2F2C32', '#2E332D', '#342A2E',
+    '#2D2A38',
+    '#2A352E',
+    '#2E3038',
+    '#352E2A',
+    '#2A3038',
+    '#332C36',
+    '#2C3230',
+    '#36302C',
+    '#28302E',
+    '#312A33',
+    '#2E312A',
+    '#342D30',
+    '#2B3035',
+    '#302F28',
+    '#2D2E36',
+    '#332B2E',
+    '#29322C',
+    '#362E32',
+    '#2C2F34',
+    '#312D2A',
+    '#2A2E35',
+    '#2F2C32',
+    '#2E332D',
+    '#342A2E',
   ]
 
   // Deterministic via Knuth multiplicative hash — avoids same-color
@@ -121,11 +137,8 @@ export default function LiveParticipantTile({
       style={ringStyle}
     >
       {videoEnabled ? (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted={isLocal}
+        <VideoTrack
+          trackRef={cameraRef}
           className="w-full h-full object-cover pointer-events-none"
         />
       ) : (
@@ -148,10 +161,15 @@ export default function LiveParticipantTile({
       )}
 
       {/* Name tag */}
-      <div className="absolute bottom-3 left-3 z-20">
-        <RtkNameTag participant={participant}>
-          <RtkAudioVisualizer />
-        </RtkNameTag>
+      <div className="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 rounded-md bg-black/45 px-2 py-1 backdrop-blur-sm">
+        <span
+          className={`h-1.5 w-1.5 rounded-full transition-colors duration-150 ${
+            isSpeaking ? 'bg-[#8FA0F5]' : 'bg-white/30'
+          }`}
+        />
+        <span className="text-xs font-medium text-white/90 select-none">
+          {name || 'Guest'}
+        </span>
       </div>
 
       {/* Vote count badge (bottom-right) */}
@@ -159,7 +177,6 @@ export default function LiveParticipantTile({
 
       {/* Role icon (top-left) */}
       <TileRoleBadge userId={tileUserId} isLocal={isLocal} isMafia={isMafia} />
-
     </div>
   )
 }

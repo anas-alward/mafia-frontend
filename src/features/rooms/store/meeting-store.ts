@@ -1,9 +1,9 @@
 import { create } from 'zustand'
-import type RTKClient from '@cloudflare/realtimekit'
+import type { Room } from 'livekit-client'
 import type { WsState } from '../hooks/use-room-websocket'
 import type { RoomStateEvent } from '../events'
 import type { JoinRequest } from '../hooks/use-room-state'
-import type { Participant } from '../components/participant-list'
+import type { Participant } from '../types'
 
 interface MeetingStore {
   roomId: string
@@ -20,19 +20,17 @@ interface MeetingStore {
   setJoinRequestStatus: (
     status: 'idle' | 'requested' | 'accepted' | 'rejected',
   ) => void
-  meeting: RTKClient | undefined
-  initMeeting: (options: {
-    authToken: string
-  }) => Promise<RTKClient | undefined>
-  meetingInstance: RTKClient | null
-  setMeetingInstance: (instance: RTKClient | null) => void
+  /** LiveKit room instance — set once the media connection is established. */
+  room: Room | null
+  setRoom: (room: Room | null) => void
   authToken: string | null
+  serverUrl: string | null
   isReturningUser: boolean
   participants: Participant[]
   isHost: boolean
 }
 
-export const useMeetingStore = create<MeetingStore>(() => ({
+export const useMeetingStore = create<MeetingStore>((set) => ({
   roomId: '',
   wsState: 'connecting',
   sendError: null,
@@ -45,11 +43,10 @@ export const useMeetingStore = create<MeetingStore>(() => ({
   rejectJoinRequest: () => {},
   joinRequestStatus: 'idle',
   setJoinRequestStatus: () => {},
-  meeting: undefined,
-  initMeeting: async () => undefined,
-  meetingInstance: null,
-  setMeetingInstance: () => {},
+  room: null,
+  setRoom: (room) => set({ room }),
   authToken: null,
+  serverUrl: null,
   isReturningUser: false,
   participants: [],
   isHost: false,

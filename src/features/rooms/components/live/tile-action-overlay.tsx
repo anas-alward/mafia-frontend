@@ -91,10 +91,9 @@ export function TileActionOverlay({
 
   const currentUser = useAuthStore((s) => s.user)
 
-  const tileUserId: number | null =
-    participant.customParticipantId != null
-      ? Number(participant.customParticipantId)
-      : null
+  const tileUserId: number | null = participant.identity
+    ? Number(participant.identity)
+    : null
   const isAlive = tileUserId != null && alivePlayerIds.includes(tileUserId)
   const isLocal =
     tileUserId != null &&

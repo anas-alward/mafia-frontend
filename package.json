@@ -17,11 +17,10 @@
     "deploy": "bun run build && wrangler deploy"
   },
   "dependencies": {
-    "@cloudflare/realtimekit-react": "^2.0.0",
-    "@cloudflare/realtimekit-react-ui": "^2.0.0",
     "@cloudflare/vite-plugin": "^1.26.0",
     "@cloudflare/workers-types": "^4.20260626.1",
     "@hookform/resolvers": "^5.4.0",
+    "@livekit/components-react": "^2.9.24",
     "@t3-oss/env-core": "^0.13.10",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
@@ -34,6 +33,7 @@
     "@tanstack/router-plugin": "^1.132.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "livekit-client": "2.22.1",
     "lucide-react": "^0.577.0",
     "motion": "^13.1.0",
     "radix-ui": "^1.6.0",

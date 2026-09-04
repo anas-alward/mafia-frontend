@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Room } from 'livekit-client'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useMediaConfigStore } from '#/features/rooms/store/media-config-store'
 import { JoinButton } from '#/features/rooms/components/join/join-button'
@@ -20,10 +21,9 @@ function JoinRoute() {
   const roomId = useMeetingStore((s) => s.roomId)
   const isReturningUser = useMeetingStore((s) => s.isReturningUser)
   const authToken = useMeetingStore((s) => s.authToken)
+  const serverUrl = useMeetingStore((s) => s.serverUrl)
   const joinRequestStatus = useMeetingStore((s) => s.joinRequestStatus)
-  const initMeeting = useMeetingStore((s) => s.initMeeting)
-  const meetingInstance = useMeetingStore((s) => s.meetingInstance)
-  const setMeetingInstance = useMeetingStore((s) => s.setMeetingInstance)
+  const room = useMeetingStore((s) => s.room)
 
   const mediaError = useMediaConfigStore((s) => s.mediaError)
   const startCamera = useMediaConfigStore((s) => s.startCamera)
@@ -32,56 +32,78 @@ function JoinRoute() {
   const [isJoining, setIsJoining] = useState(false)
   const [initError, setInitError] = useState<string | null>(null)
 
+  // Synchronous mutex — the async connect leaves a window where `room` is
+  // still null; without this, a re-fired effect or double click connects a
+  // second Room with the same identity and the server kills both
+  // (DUPLICATE_IDENTITY), creating an endless reconnect fight.
+  const joiningRef = useRef(false)
+
   const doJoin = useCallback(
-    (token: string) => {
+    async (token: string) => {
+      if (!serverUrl || joiningRef.current || useMeetingStore.getState().room)
+        return
+      joiningRef.current = true
       setIsJoining(true)
-      initMeeting({ authToken: token })
-        .then((result) => {
-          if (result) {
-            setMeetingInstance(result)
-            return result.join()
+
+      const media = useMediaConfigStore.getState()
+
+      const lkRoom = new Room({
+        adaptiveStream: true,
+        dynacast: true,
+        audioCaptureDefaults: {
+          deviceId: media.selectedAudioDevice || undefined,
+        },
+        videoCaptureDefaults: {
+          deviceId: media.selectedVideoDevice || undefined,
+        },
+      })
+
+      try {
+        await lkRoom.connect(serverUrl, token, { autoSubscribe: true })
+
+        if (!mediaDisabled) {
+          if (media.audioEnabled) {
+            await lkRoom.localParticipant.setMicrophoneEnabled(true)
           }
-        })
-        .then(() => {
-          navigate({ to: '/rooms/$roomId/live', params: { roomId } })
-        })
-        .catch((err: unknown) => {
-          setInitError(
-            err instanceof Error
-              ? err.message
-              : 'Failed to connect to meeting.',
-          )
-          setIsJoining(false)
-        })
+          if (media.videoEnabled) {
+            await lkRoom.localParticipant.setCameraEnabled(true)
+          }
+        }
+
+        useMeetingStore.getState().setRoom(lkRoom)
+        stopCamera()
+        navigate({ to: '/rooms/$roomId/live', params: { roomId } })
+      } catch (err: unknown) {
+        // Stop the SDK from auto-reconnecting a half-open connection
+        lkRoom.disconnect()
+        setInitError(
+          err instanceof Error ? err.message : 'Failed to connect to meeting.',
+        )
+        setIsJoining(false)
+        joiningRef.current = false
+      }
     },
-    [roomId, initMeeting, setMeetingInstance, navigate],
+    [roomId, serverUrl, stopCamera, navigate],
   )
 
   // Auto-join for returning users (room_state includes this user in members)
   useEffect(() => {
-    if (!isReturningUser || !authToken || meetingInstance || initError) return
+    if (!isReturningUser || !authToken || room || initError) return
     doJoin(authToken)
-  }, [isReturningUser, authToken, meetingInstance, initError, doJoin])
+  }, [isReturningUser, authToken, room, initError, doJoin])
 
   // Auto-join when host accepts join request
   useEffect(() => {
     if (
       joinRequestStatus !== 'accepted' ||
       !authToken ||
-      meetingInstance ||
+      room ||
       initError ||
       isReturningUser
     )
       return
     doJoin(authToken)
-  }, [
-    joinRequestStatus,
-    authToken,
-    meetingInstance,
-    initError,
-    isReturningUser,
-    doJoin,
-  ])
+  }, [joinRequestStatus, authToken, room, initError, isReturningUser, doJoin])
 
   const dismissError = useCallback(() => setInitError(null), [])
 

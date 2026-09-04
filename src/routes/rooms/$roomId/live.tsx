@@ -1,17 +1,11 @@
-import { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
-  RealtimeKitProvider,
-  useRealtimeKitMeeting,
-  useRealtimeKitSelector,
-} from '@cloudflare/realtimekit-react'
-import {
-  RtkUiProvider,
-  RtkParticipantsAudio,
-  RtkDialogManager,
-  RtkNotifications,
-  RtkStage,
-} from '@cloudflare/realtimekit-react-ui'
+  RoomContext,
+  RoomAudioRenderer,
+  useRoomContext,
+} from '@livekit/components-react'
+import { RoomEvent } from 'livekit-client'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
 
@@ -30,58 +24,52 @@ export const Route = createFileRoute('/rooms/$roomId/live')({
 
 function LiveRoute() {
   const { roomId } = Route.useParams()
-  const meeting = useMeetingStore((s) => s.meeting)
-  const meetingInstance = useMeetingStore((s) => s.meetingInstance)
+  const room = useMeetingStore((s) => s.room)
 
   const navigate = useNavigate()
   const fullScreenRef = useRef<HTMLDivElement>(null)
-  const activeMeeting = meetingInstance || meeting
 
-  const mediaDisabled = import.meta.env.VITE_DISABLE_MEDIA === 'true'
-
-  // Guard: redirect to /join if no meeting initialized (e.g. direct link to /live)
+  // Guard: redirect to /join if no media connection (e.g. direct link to /live)
   useEffect(() => {
-    if (!activeMeeting) {
+    if (!room) {
       navigate({ to: '/rooms/$roomId/join', params: { roomId }, replace: true })
     }
-  }, [activeMeeting, navigate, roomId])
+  }, [room, navigate, roomId])
 
-  // When media is disabled via env flag, keep mic/cam off after joining
+  // Navigate to the ended screen whenever the connection drops (leave,
+  // server-side disconnect). Skipped during unmount teardown below.
   useEffect(() => {
-    if (!mediaDisabled || !activeMeeting) return
-    const t = setTimeout(() => {
-      activeMeeting.self.disableAudio()
-      activeMeeting.self.disableVideo()
-    }, 500)
-    return () => clearTimeout(t)
-  }, [mediaDisabled, activeMeeting])
+    if (!room) return
+    const onDisconnected = () => {
+      // Cancel any pending auto-reconnect (e.g. after a server-side kick,
+      // the SDK would otherwise fight a duplicate identity forever).
+      room.disconnect()
+      navigate({
+        to: '/rooms/$roomId/ended',
+        params: { roomId },
+        replace: true,
+      })
+    }
+    room.on(RoomEvent.Disconnected, onDisconnected)
+    // NOTE: no disconnect on unmount here — TanStack Router can unmount and
+    // remount this route during transitions (lazy component suspension), and
+    // killing the session would end a healthy call. Teardown lives in the
+    // layout route instead.
+    return () => {
+      room.off(RoomEvent.Disconnected, onDisconnected)
+    }
+  }, [room, navigate, roomId])
 
-  const handleStatesUpdate = useCallback(
-    (event: { detail: { meeting?: string } }) => {
-      if (event.detail.meeting === 'ended') {
-        navigate({
-          to: '/rooms/$roomId/ended',
-          params: { roomId },
-          replace: true,
-        })
-      }
-    },
-    [navigate, roomId],
-  )
-
-  if (!activeMeeting) {
+  if (!room) {
     return null
   }
 
   return (
-    <RealtimeKitProvider value={activeMeeting}>
+    <RoomContext.Provider value={room}>
       <LiveSidebar>
         <div className="flex flex-col h-screen">
-          <RtkUiProvider
+          <div
             ref={fullScreenRef}
-            meeting={activeMeeting}
-            showSetupScreen={false}
-            onRtkStatesUpdate={handleStatesUpdate}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -91,14 +79,12 @@ function LiveRoute() {
             }}
           >
             <LiveRoom fullScreenRef={fullScreenRef} />
-            <RtkParticipantsAudio />
-            <RtkDialogManager />
-            <RtkNotifications />
-          </RtkUiProvider>
+          </div>
         </div>
         <LiveSidebar.Panel />
       </LiveSidebar>
-    </RealtimeKitProvider>
+      <RoomAudioRenderer />
+    </RoomContext.Provider>
   )
 }
 
@@ -111,11 +97,12 @@ function LiveRoom({
   const gameStarted = useGameStore((s) => s.gameStarted)
   const startGame = useGameStore((s) => s.startGame)
 
-  const { meeting } = useRealtimeKitMeeting()
-  const selfParticipant = useRealtimeKitSelector(() => meeting.self)
+  const room = useRoomContext()
+  const selfParticipant = room.localParticipant
   const isPreGameHost = isHost && !gameStarted
-  const rawSelfId = (selfParticipant as any).customParticipantId
-  const selfUserId = rawSelfId != null ? Number(rawSelfId) : null
+  const selfUserId = selfParticipant.identity
+    ? Number(selfParticipant.identity)
+    : null
 
   return (
     <div
@@ -126,9 +113,9 @@ function LiveRoom({
       <GameHUD />
 
       <div className="flex-1 min-h-0 relative overflow-hidden">
-        <RtkStage style={{ position: 'absolute', inset: 0 }}>
+        <div style={{ position: 'absolute', inset: 0 }}>
           <TilesGrid />
-        </RtkStage>
+        </div>
 
         <div className="absolute bottom-4 right-4 z-30 w-60 h-36 rounded-lg overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.08]">
           <TileEventOverlay userId={selfUserId}>

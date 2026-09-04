@@ -12,7 +12,7 @@ import type {
 } from '../events'
 import type { GameStateEvent } from '#/features/game/events'
 import type { WsMessage } from './use-room-websocket'
-import type { Participant } from '../components/participant-list'
+import type { Participant } from '../types'
 
 export interface ChatEntry {
   userId: number

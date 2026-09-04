@@ -70,7 +70,7 @@ Backend returns snake_case JSON (`max_members`, `host_id`). Domain types use cam
 - **Router**: TanStack Router (file-based, `src/routes/`)
 - **Styling**: Tailwind CSS v4, shadcn/ui (new-york style, zinc base), `tw-animate-css`
 - **State**: Zustand (auth), React Context (room/meeting/game)
-- **Data**: TanStack Query, WebSocket (native), RealtimeKit (WebRTC/meetings)
+- **Data**: TanStack Query, WebSocket (native), LiveKit (`livekit-client` + `@livekit/components-react`) for WebRTC media
 - **Validation**: Zod v4
 - **Icons**: Lucide React
 - **Env**: `@t3-oss/env-core` — client vars prefixed with `VITE_`

@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
-import { useRealtimeKitClient } from '@cloudflare/realtimekit-react'
-import type RTKClient from '@cloudflare/realtimekit'
+import { ConnectionState } from 'livekit-client'
 import { useRoomWebSocket } from '#/features/rooms/hooks/use-room-websocket'
 import { useRoomState } from '#/features/rooms/hooks/use-room-state'
 import { RoomClosedState } from '#/features/rooms/states/room-closed-state'
@@ -47,10 +46,8 @@ function RoomLayout() {
     isHost,
   } = useRoomState(queueVersion, drainMessages)
 
-  const [meeting, initMeeting] = useRealtimeKitClient()
-  const [meetingInstance, setMeetingInstance] = useState<RTKClient | null>(null)
-
   const authToken = roomState?.credentials.token ?? null
+  const serverUrl = roomState?.credentials.server_url ?? null
 
   const isReturningUser =
     currentUser && roomState?.members
@@ -72,11 +69,8 @@ function RoomLayout() {
       rejectJoinRequest,
       joinRequestStatus,
       setJoinRequestStatus,
-      meeting,
-      initMeeting,
-      meetingInstance,
-      setMeetingInstance,
       authToken,
+      serverUrl,
       isReturningUser,
       participants,
       isHost,
@@ -87,6 +81,18 @@ function RoomLayout() {
   useEffect(() => {
     useGameStore.getState().setSend(send)
   }, [send])
+
+  // Tear down the media session when leaving the room entirely (route
+  // layout unmount). Child route transitions (join <-> live) do not hit this.
+  useEffect(() => {
+    return () => {
+      const room = useMeetingStore.getState().room
+      if (room && room.state === ConnectionState.Connected) {
+        room.disconnect()
+      }
+      useMeetingStore.getState().setRoom(null)
+    }
+  }, [])
 
   if (roomClosed) {
     return <RoomClosedState />

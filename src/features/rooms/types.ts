@@ -59,3 +59,11 @@ export function mapRoomDto(dto: RoomDto): Room {
     updatedAt: dto.updated_at,
   }
 }
+
+// ── Participants ──
+
+/** A player in the room lobby (WebSocket-derived, not a media participant). */
+export interface Participant {
+  userId: number
+  username: string
+}

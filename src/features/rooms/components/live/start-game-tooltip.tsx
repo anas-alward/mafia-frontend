@@ -1,16 +1,22 @@
 // src/features/rooms/components/live/start-game-tooltip.tsx
-import { useState, useEffect, useLayoutEffect, useCallback, useRef } from 'react'
+import {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useRef,
+} from 'react'
 import { createPortal } from 'react-dom'
 import { Play, Check } from 'lucide-react'
 
-interface RtkParticipant {
-  customParticipantId?: unknown
+interface LiveKitParticipant {
+  identity?: string
   name?: string
 }
 
 interface StartGameTooltipProps {
   anchorRef: React.RefObject<HTMLElement | null>
-  participants: RtkParticipant[]
+  participants: LiveKitParticipant[]
   onStartGame: (playerIds: number[]) => void
   isOpen: boolean
   onClose: () => void
@@ -122,11 +128,8 @@ export default function StartGameTooltip({
   const selectAll = useCallback(() => {
     const allIds = new Set(
       participants
-        .map((p) => {
-          const id = Number(p.customParticipantId)
-          return Number.isNaN(id) ? null : id
-        })
-        .filter((id): id is number => id != null),
+        .map((p) => (p.identity ? Number(p.identity) : null))
+        .filter((id): id is number => id != null && !Number.isNaN(id)),
     )
     setSelectedIds(allIds)
   }, [participants])
@@ -142,11 +145,11 @@ export default function StartGameTooltip({
   if (!isOpen) return null
 
   const playerList = participants
-    .map((p) => {
-      const id = Number(p.customParticipantId)
-      return { id, name: p.name ?? 'Unknown', valid: !Number.isNaN(id) }
-    })
-    .filter((p) => p.valid)
+    .map((p) => ({
+      id: p.identity ? Number(p.identity) : NaN,
+      name: p.name ?? 'Unknown',
+    }))
+    .filter((p) => !Number.isNaN(p.id))
 
   const count = selectedIds.size
   const canStart = count >= 6

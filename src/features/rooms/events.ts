@@ -5,6 +5,7 @@ import type { GameStateEvent } from '#/features/game/events'
 export interface RoomStateCredentials {
   participant_id: string
   token: string
+  server_url: string
 }
 
 export interface RoomStateEvent {
