@@ -8,6 +8,9 @@ export interface GameLogEntry {
   actor_id: number
   target_id: number
   action_type: string
+  /** Set on lynch entries — the eliminated player's revealed role. */
+  role_code?: string | null
+  role_name?: string | null
 }
 
 export interface RequiredAction {

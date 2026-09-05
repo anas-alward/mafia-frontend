@@ -21,9 +21,9 @@ export function VoteCountBadge({ userId }: VoteCountBadgeProps) {
     <div
       className="absolute bottom-3 right-3 z-20 flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold border"
       style={{
-        backgroundColor: 'rgba(237, 184, 58, 0.15)',
-        borderColor: 'rgba(237, 184, 58, 0.35)',
-        color: 'var(--game-gold)',
+        backgroundColor: '#B98A1C',
+        borderColor: '#B98A1C',
+        color: '#1B1922',
       }}
     >
       <Vote className="h-3 w-3" />

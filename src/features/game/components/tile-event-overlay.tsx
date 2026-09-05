@@ -106,6 +106,14 @@ export function TileEventOverlay({ userId, children }: TileEventOverlayProps) {
               >
                 {visual.message}
               </span>
+              {event.roleName && (
+                <span
+                  className="text-xs font-semibold tracking-wide uppercase"
+                  style={{ color: 'rgba(255, 255, 255, 0.85)' }}
+                >
+                  {event.roleName}
+                </span>
+              )}
             </motion.div>
           </motion.div>
         )}

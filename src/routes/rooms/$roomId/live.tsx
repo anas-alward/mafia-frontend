@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   RoomContext,
@@ -6,6 +6,8 @@ import {
   useRoomContext,
 } from '@livekit/components-react'
 import { RoomEvent } from 'livekit-client'
+import { motion } from 'motion/react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
 
@@ -104,6 +106,8 @@ function LiveRoom({
     ? Number(selfParticipant.identity)
     : null
 
+  const [selfTileHidden, setSelfTileHidden] = useState(false)
+
   return (
     <div
       className="relative flex flex-col h-full w-full"
@@ -117,17 +121,43 @@ function LiveRoom({
           <TilesGrid />
         </div>
 
-        <div className="absolute bottom-4 right-4 z-30 w-60 h-36 rounded-lg overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.08]">
-          <TileEventOverlay userId={selfUserId}>
-            <TileActionOverlay participant={selfParticipant}>
-              <LiveParticipantTile
-                participant={selfParticipant}
-                isSelected={false}
-                isSelectable={false}
-                onSelect={() => {}}
-              />
-            </TileActionOverlay>
-          </TileEventOverlay>
+        <div className="absolute bottom-4 right-4 z-30 w-60 h-36">
+          <motion.div
+            initial={false}
+            animate={{ x: selfTileHidden ? 'calc(100% - 1.5rem)' : 0 }}
+            transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+            className={`relative w-60 h-36 rounded-lg overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.08] ${
+              selfTileHidden ? 'pointer-events-none' : ''
+            }`}
+          >
+            <TileEventOverlay userId={selfUserId}>
+              <TileActionOverlay participant={selfParticipant}>
+                <LiveParticipantTile
+                  participant={selfParticipant}
+                  isSelected={false}
+                  isSelectable={false}
+                  onSelect={() => {}}
+                />
+              </TileActionOverlay>
+            </TileEventOverlay>
+
+            {/* Handle strip along the card's left edge — stays visible when
+                the card is slid out to the right */}
+            <button
+              type="button"
+              onClick={() => setSelfTileHidden((v) => !v)}
+              className={`absolute left-0 top-0 bottom-0 w-6 z-30 flex items-center justify-center transition-colors duration-200 cursor-pointer bg-transparent hover:bg-[rgba(60,56,73,0.35)] ${
+                selfTileHidden ? 'pointer-events-auto' : ''
+              }`}
+              aria-label={selfTileHidden ? 'Show self view' : 'Hide self view'}
+            >
+              {selfTileHidden ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
+          </motion.div>
         </div>
       </div>
 

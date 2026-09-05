@@ -83,6 +83,8 @@ export interface TileEvent {
   type: string
   targetId: number
   roleType?: string
+  /** Revealed role name (e.g. lynch role reveal). */
+  roleName?: string
   key: string
 }
 
@@ -140,9 +142,11 @@ export function deriveTileEvents({
   }
 
   if (lynchTargetId != null) {
+    const lynchLog = logs.find((l) => l.action_type === 'lynch')
     events.push({
       type: 'lynch',
       targetId: lynchTargetId,
+      roleName: lynchLog?.role_name ?? undefined,
       key: `lynch:${lynchTargetId}`,
     })
   }

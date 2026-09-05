@@ -18,7 +18,6 @@ interface ActionVisual {
   Icon: LucideIcon
   label: string
   color: string
-  glow: string
 }
 
 const ACTION_VISUAL: Partial<Record<string, ActionVisual>> = {
@@ -26,43 +25,36 @@ const ACTION_VISUAL: Partial<Record<string, ActionVisual>> = {
     Icon: Vote,
     label: 'Vote',
     color: 'var(--game-gold)',
-    glow: 'rgba(237, 184, 58, 0.3)',
   },
   [ActionType.KILL]: {
     Icon: Skull,
     label: 'Kill',
     color: 'var(--game-crimson)',
-    glow: 'rgba(240, 96, 107, 0.3)',
   },
   [ActionType.HEAL]: {
     Icon: HeartPulse,
     label: 'Heal',
     color: 'var(--game-mint)',
-    glow: 'rgba(77, 232, 160, 0.3)',
   },
   [ActionType.DETECT]: {
     Icon: Search,
     label: 'Detect',
     color: 'var(--game-periwinkle)',
-    glow: 'rgba(143, 160, 245, 0.3)',
   },
   [ActionType.SHOOT]: {
     Icon: Crosshair,
     label: 'Shoot',
     color: '#F5925E',
-    glow: 'rgba(245, 146, 94, 0.3)',
   },
   [ActionType.REVENGE]: {
     Icon: Bomb,
     label: 'Revenge',
     color: 'var(--game-crimson)',
-    glow: 'rgba(240, 96, 107, 0.3)',
   },
   [ActionType.SILENCE]: {
     Icon: Ban,
     label: 'Silence',
     color: '#C49EF0',
-    glow: 'rgba(196, 158, 240, 0.3)',
   },
 }
 
@@ -150,7 +142,7 @@ export function TileActionOverlay({
       {tileActions.length > 0 && (
         <div
           className="absolute inset-0 z-25 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ backgroundColor: 'rgba(27, 25, 34, 0.7)' }}
+          style={{ backgroundColor: 'rgba(27, 25, 34, 0.25)' }}
         >
           {tileActions.map(({ actionType, visual }) => (
             <button
@@ -164,8 +156,8 @@ export function TileActionOverlay({
               className={orbBase}
               style={{
                 color: visual.color,
-                backgroundColor: visual.glow.replace('0.3', '0.12'),
-                borderColor: visual.glow.replace('0.3', '0.35'),
+                backgroundColor: `color-mix(in srgb, ${visual.color} 30%, #131314)`,
+                borderColor: `color-mix(in srgb, ${visual.color} 60%, #131314)`,
               }}
             >
               <visual.Icon className="h-4 w-4" />
