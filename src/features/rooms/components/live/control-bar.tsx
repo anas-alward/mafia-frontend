@@ -5,6 +5,7 @@ import {
   useRoomContext,
 } from '@livekit/components-react'
 import {
+  Crown,
   Users,
   PhoneOff,
   Mic,
@@ -19,6 +20,7 @@ import {
   RotateCcw,
   X,
 } from 'lucide-react'
+import { GraveyardStrip } from '#/features/rooms/components/live/graveyard-rail'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
@@ -67,7 +69,13 @@ export default function ControlBar({
 
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showStartTooltip, setShowStartTooltip] = useState(false)
+  const [hostMenuOpen, setHostMenuOpen] = useState(false)
   const startBtnRef = useRef<HTMLButtonElement>(null)
+
+  const showHostActions = gameStarted && isHost
+  const hostActionPending =
+    showHostActions &&
+    ((phase === Phase.DAY && allVoted) || phase === Phase.VOTE_RESULT)
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement)
@@ -141,100 +149,95 @@ export default function ControlBar({
             </>
           )}
 
-          {/* Submit Votes (host, day phase) */}
-          {gameStarted && phase === Phase.DAY && isHost && (
-            <button
-              type="button"
-              disabled={!allVoted}
-              onClick={submitVotes}
-              title={`Submit Votes${alivePlayerIds.length > 0 ? ` (${currentVotes.size}/${alivePlayerIds.length})` : ''}`}
-              className={`${orbBase} ${allVoted ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-              style={{
-                color: allVoted ? 'var(--game-gold)' : 'var(--game-text-muted)',
-                backgroundColor: allVoted
-                  ? 'rgba(237, 184, 58, 0.08)'
-                  : 'transparent',
-                borderColor: allVoted
-                  ? 'rgba(237, 184, 58, 0.3)'
-                  : 'var(--game-border)',
-              }}
-            >
-              <Send className="h-4 w-4" />
-            </button>
-          )}
+          {/* Graveyard strip — eliminated players (scrollable) */}
+          <GraveyardStrip />
 
-          {/* Resolve vote (host, vote_result phase) */}
-          {gameStarted && phase === Phase.VOTE_RESULT && isHost && (
-            <button
-              type="button"
-              onClick={submitVoteResult}
-              title="Resolve"
-              className={`${orbBase} cursor-pointer`}
-              style={{
-                color: '#F5925E',
-                backgroundColor: 'rgba(245, 146, 94, 0.08)',
-                borderColor: 'rgba(245, 146, 94, 0.3)',
-              }}
-            >
-              <Send className="h-4 w-4" />
-            </button>
-          )}
+          {/* Host actions dropdown (in game) */}
+          {showHostActions && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setHostMenuOpen((o) => !o)}
+                title="Host actions"
+                className={`${orbBase} cursor-pointer`}
+                style={{
+                  color: hostActionPending
+                    ? '#000'
+                    : hostMenuOpen
+                      ? 'var(--game-gold)'
+                      : 'var(--game-text-muted)',
+                  backgroundColor: hostActionPending
+                    ? 'var(--game-gold)'
+                    : hostMenuOpen
+                      ? 'var(--game-bg-elevated)'
+                      : 'transparent',
+                  borderColor: hostActionPending
+                    ? 'var(--game-gold)'
+                    : hostMenuOpen
+                      ? 'var(--game-gold)'
+                      : 'var(--game-border)',
+                }}
+                aria-label="Host actions"
+              >
+                <Crown className="h-4 w-4" />
+              </button>
 
-          {/* Separator */}
-          {gameStarted && isHost && (
-            <div
-              className="w-px h-6 mx-1"
-              style={{ backgroundColor: 'var(--game-border)' }}
-            />
-          )}
-
-          {/* Reset game (host) */}
-          {gameStarted && isHost && (
-            <button
-              type="button"
-              onClick={resetGame}
-              title="Reset Game"
-              className={`${orbBase} cursor-pointer`}
-              style={{
-                color: 'var(--game-text-muted)',
-                backgroundColor: 'transparent',
-                borderColor: 'var(--game-border)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = 'var(--game-text-primary)'
-                e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.04)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'var(--game-text-muted)'
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              <RotateCcw className="h-4 w-4" />
-            </button>
-          )}
-
-          {/* Cancel game (host) */}
-          {gameStarted && isHost && (
-            <button
-              type="button"
-              onClick={cancelGame}
-              title="Cancel Game"
-              className={`${orbBase} cursor-pointer`}
-              style={{
-                color: 'var(--game-crimson)',
-                backgroundColor: 'transparent',
-                borderColor: 'rgba(240, 96, 107, 0.2)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  'rgba(240, 96, 107, 0.12)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              <X className="h-4 w-4" />
-            </button>
+              {hostMenuOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setHostMenuOpen(false)}
+                  />
+                  <div
+                    className="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl border shadow-2xl overflow-hidden"
+                    style={{
+                      backgroundColor: 'var(--game-bg-elevated)',
+                      borderColor: 'var(--game-border)',
+                    }}
+                  >
+                    {phase === Phase.DAY && (
+                      <HostMenuItem
+                        icon={<Send className="h-3.5 w-3.5" />}
+                        label={`Submit Votes${alivePlayerIds.length > 0 ? ` (${currentVotes.size}/${alivePlayerIds.length})` : ''}`}
+                        disabled={!allVoted}
+                        onClick={() => {
+                          submitVotes()
+                          setHostMenuOpen(false)
+                        }}
+                      />
+                    )}
+                    {phase === Phase.VOTE_RESULT && (
+                      <HostMenuItem
+                        icon={<Send className="h-3.5 w-3.5" />}
+                        label="Resolve Votes"
+                        color="#F5925E"
+                        onClick={() => {
+                          submitVoteResult()
+                          setHostMenuOpen(false)
+                        }}
+                      />
+                    )}
+                    <HostMenuItem
+                      icon={<RotateCcw className="h-3.5 w-3.5" />}
+                      label="Reset Game"
+                      onClick={() => {
+                        resetGame()
+                        setHostMenuOpen(false)
+                      }}
+                    />
+                    <HostMenuItem
+                      icon={<X className="h-3.5 w-3.5" />}
+                      label="Cancel Game"
+                      color="var(--game-crimson)"
+                      onClick={() => {
+                        cancelGame()
+                        setHostMenuOpen(false)
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           {/* Fullscreen (always visible, non-game) */}
@@ -376,5 +379,36 @@ export default function ControlBar({
         </div>
       </div>
     </div>
+  )
+}
+
+function HostMenuItem({
+  icon,
+  label,
+  onClick,
+  disabled = false,
+  color = 'var(--game-text-primary)',
+}: {
+  icon: React.ReactNode
+  label: string
+  onClick: () => void
+  disabled?: boolean
+  color?: string
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium text-left transition-colors ${
+        disabled
+          ? 'opacity-40 cursor-not-allowed'
+          : 'cursor-pointer hover:bg-white/[0.06]'
+      }`}
+      style={{ color }}
+    >
+      {icon}
+      <span className="flex-1">{label}</span>
+    </button>
   )
 }

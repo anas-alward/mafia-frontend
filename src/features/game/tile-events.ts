@@ -129,6 +129,7 @@ export function deriveTileEvents({
     events.push({
       type: log.action_type,
       targetId: log.target_id,
+      roleName: log.role_name ?? undefined,
       key: `${log.action_type}:${log.target_id}:${i}`,
     })
   }

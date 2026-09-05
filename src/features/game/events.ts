@@ -70,6 +70,9 @@ export interface GameStatePlayer {
   id: number
   code: string
   status: 'alive' | 'dead'
+  /** Set for dead players — role reveal persists across reconnects. */
+  role_code?: string | null
+  role_name?: string | null
 }
 
 export interface GameResetEvent {
