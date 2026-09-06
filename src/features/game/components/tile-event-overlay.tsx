@@ -150,16 +150,20 @@ export function TileEventOverlay({ userId, children }: TileEventOverlayProps) {
                 className="text-sm font-bold tracking-wider uppercase"
                 style={{ color: visual.accent }}
               >
-                {visual.message}
+                {event.roleName ?? visual.message}
               </span>
-              {(event.detail || event.roleName) && (
+              {(event.roleName ||
+                (event.type === 'vote' && event.detail) ||
+                event.detail) && (
                 <span
                   className="text-xs font-semibold tracking-wide uppercase"
                   style={{ color: 'rgba(255, 255, 255, 0.85)' }}
                 >
-                  {event.type === 'vote' && event.detail
-                    ? `Voted by ${event.detail}`
-                    : (event.detail || event.roleName)}
+                  {event.roleName
+                    ? visual.message
+                    : event.type === 'vote' && event.detail
+                      ? `Voted by ${event.detail}`
+                      : event.detail}
                 </span>
               )}
             </motion.div>

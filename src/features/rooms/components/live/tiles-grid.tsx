@@ -1,3 +1,4 @@
+import { useEffect, useReducer } from 'react'
 import { useParticipants } from '@livekit/components-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import LiveParticipantTile from '#/features/rooms/components/live/participant-tile'
@@ -16,12 +17,28 @@ export default function TilesGrid() {
   const participants = useParticipants()
   const gameStarted = useGameStore((s) => s.gameStarted)
   const deadPlayerIds = useGameStore((s) => s.deadPlayerIds)
+  const graveyardHoldUntil = useGameStore((s) => s.graveyardHoldUntil)
+
+  // Re-render while a held (recently died) tile's grace window expires so
+  // it moves to the graveyard after its elimination animation finishes.
+  const [, tick] = useReducer((x: number) => x + 1, 0)
+  const hasHolds = Object.values(graveyardHoldUntil).some((t) => t > Date.now())
+  useEffect(() => {
+    if (!hasHolds) return
+    const iv = setInterval(() => tick(), 400)
+    return () => clearInterval(iv)
+  }, [hasHolds])
 
   // Once a game is running, eliminated players leave the main grid
-  // (they live on in the graveyard rail). Non-game participants stay.
+  // (they live on in the graveyard rail) — except players whose death
+  // animation is still playing out on their tile.
   const deadSet = new Set(deadPlayerIds)
   const gridParticipants = gameStarted
-    ? participants.filter((p) => !deadSet.has(Number(p.identity)))
+    ? participants.filter((p) => {
+        const id = Number(p.identity)
+        if (!deadSet.has(id)) return true
+        return (graveyardHoldUntil[id] ?? 0) > Date.now()
+      })
     : participants
   // Only remote participants in the grid — self is rendered as a corner tile
   const remoteParticipants = gridParticipants.filter((p) => !p.isLocal)

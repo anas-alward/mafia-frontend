@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { resolveActorName, resolveTileBorder } from './tile-events'
+import {
+  deriveTileEvents,
+  resolveActorName,
+  resolveTileBorder,
+} from './tile-events'
 import type { GameStatePlayer } from './events'
 
 const gamePlayers: GameStatePlayer[] = [
@@ -29,6 +33,54 @@ describe('resolveActorName', () => {
 
   it('returns undefined for hidden actors (null actor_id)', () => {
     expect(resolveActorName(null, gamePlayers, [])).toBeUndefined()
+  })
+})
+
+describe('deriveTileEvents — role reveal', () => {
+  const logs = [
+    {
+      actor_id: 2,
+      target_id: 1,
+      action_type: 'kill',
+      role_code: 'godfather',
+      role_name: 'Mafia King',
+    },
+    { actor_id: null, target_id: 4, action_type: 'died', role_name: 'Azure Vigilante' },
+  ]
+  const events = deriveTileEvents({
+    logs,
+    lynchTargetId: null,
+    detectResult: null,
+    newLogStart: 0,
+  })
+
+  it('carries the revealed role name on death events', () => {
+    expect(events.find((e) => e.type === 'kill')?.roleName).toBe('Mafia King')
+    expect(events.find((e) => e.type === 'died')?.roleName).toBe(
+      'Azure Vigilante',
+    )
+  })
+})
+
+describe('deriveTileEvents — lynch role reveal', () => {
+  it('carries the revealed role name on the lynch event', () => {
+    const events = deriveTileEvents({
+      logs: [
+        {
+          actor_id: 2,
+          target_id: null,
+          action_type: 'lynch',
+          role_code: 'godfather',
+          role_name: 'Mafia King',
+        },
+      ],
+      lynchTargetId: 2,
+      detectResult: null,
+      newLogStart: 0,
+    })
+    const lynch = events.find((e) => e.type === 'lynch')
+    expect(lynch?.targetId).toBe(2)
+    expect(lynch?.roleName).toBe('Mafia King')
   })
 })
 

@@ -65,6 +65,9 @@ interface GameStore {
   voterSelection: { targetId: number | null; voterIds: number[] }
   /** Anonymous per-action-type status for the current phase (no names). */
   roundRequirements: { action_type: string; done: boolean }[]
+  /** Dead players whose tile stays on the grid briefly so the death
+   * animation can play before they move to the graveyard. */
+  graveyardHoldUntil: Record<number, number>
   winner: Winner | null
   _send: ((data: unknown) => void) | null
 
@@ -124,6 +127,7 @@ export const useGameStore = create<GameStore>()(
           actionBorders: {},
           voterSelection: { targetId: null, voterIds: [] },
           roundRequirements: [],
+          graveyardHoldUntil: {},
           winner: null,
         })
       }
@@ -150,6 +154,7 @@ export const useGameStore = create<GameStore>()(
               roundRequirements: m.round_requirements ?? [],
               actionBorders: {},
               voterSelection: { targetId: null, voterIds: [] },
+              graveyardHoldUntil: {},
               winner: null,
             })
             break
@@ -175,42 +180,66 @@ export const useGameStore = create<GameStore>()(
           case 'sun_rise': {
             const m = msg as SunRiseEvent
             const { playerIds } = get()
-            set((s) => ({
-              alivePlayerIds: m.player_ids,
-              deadPlayerIds: playerIds.filter(
+            set((s) => {
+              // Hold freshly dead players' tiles on the grid briefly so
+              // their elimination animation plays before the graveyard.
+              const newlyDead = s.alivePlayerIds.filter(
                 (id) => !m.player_ids.includes(id),
-              ),
-              phase: 'day',
-              currentVotes: new Map(),
-              lynchTargetId: null,
-              hasVotedThisPhase: false,
-              logs: [...s.logs, ...m.logs],
-              requiredActions: m.required_actions,
-              roundRequirements: m.round_requirements ?? [],
-              actionBorders: {},
-              voterSelection: { targetId: null, voterIds: [] },
-            }))
+              )
+              const holds = { ...s.graveyardHoldUntil }
+              for (const id of newlyDead) holds[id] = Date.now() + 3000
+              for (const [id, t] of Object.entries(holds)) {
+                if (t <= Date.now()) delete holds[Number(id)]
+              }
+              return {
+                alivePlayerIds: m.player_ids,
+                deadPlayerIds: playerIds.filter(
+                  (id) => !m.player_ids.includes(id),
+                ),
+                graveyardHoldUntil: holds,
+                phase: 'day',
+                currentVotes: new Map(),
+                lynchTargetId: null,
+                hasVotedThisPhase: false,
+                logs: [...s.logs, ...m.logs],
+                requiredActions: m.required_actions,
+                roundRequirements: m.round_requirements ?? [],
+                actionBorders: {},
+                voterSelection: { targetId: null, voterIds: [] },
+              }
+            })
             break
           }
 
           case 'sun_set': {
             const m = msg as SunSetEvent
             const { playerIds } = get()
-            set((s) => ({
-              alivePlayerIds: m.player_ids,
-              deadPlayerIds: playerIds.filter(
+            set((s) => {
+              const newlyDead = s.alivePlayerIds.filter(
                 (id) => !m.player_ids.includes(id),
-              ),
-              phase: 'night',
-              currentVotes: new Map(),
-              lynchTargetId: null,
-              hasVotedThisPhase: false,
-              logs: [...s.logs, ...m.logs],
-              requiredActions: m.required_actions,
-              roundRequirements: m.round_requirements ?? [],
-              actionBorders: {},
-              voterSelection: { targetId: null, voterIds: [] },
-            }))
+              )
+              const holds = { ...s.graveyardHoldUntil }
+              for (const id of newlyDead) holds[id] = Date.now() + 3000
+              for (const [id, t] of Object.entries(holds)) {
+                if (t <= Date.now()) delete holds[Number(id)]
+              }
+              return {
+                alivePlayerIds: m.player_ids,
+                deadPlayerIds: playerIds.filter(
+                  (id) => !m.player_ids.includes(id),
+                ),
+                graveyardHoldUntil: holds,
+                phase: 'night',
+                currentVotes: new Map(),
+                lynchTargetId: null,
+                hasVotedThisPhase: false,
+                logs: [...s.logs, ...m.logs],
+                requiredActions: m.required_actions,
+                roundRequirements: m.round_requirements ?? [],
+                actionBorders: {},
+                voterSelection: { targetId: null, voterIds: [] },
+              }
+            })
             break
           }
 
@@ -304,6 +333,7 @@ export const useGameStore = create<GameStore>()(
               roundRequirements: m.round_requirements ?? [],
               actionBorders: {},
               voterSelection: { targetId: null, voterIds: [] },
+              graveyardHoldUntil: {},
               winner: null,
             })
             break
@@ -322,6 +352,7 @@ export const useGameStore = create<GameStore>()(
               actionBorders: {},
               voterSelection: { targetId: null, voterIds: [] },
               roundRequirements: [],
+              graveyardHoldUntil: {},
             }))
             break
           }
@@ -398,6 +429,7 @@ export const useGameStore = create<GameStore>()(
         actionBorders: {},
         voterSelection: { targetId: null, voterIds: [] },
         roundRequirements: [],
+        graveyardHoldUntil: {},
         winner: null,
         _send: null,
 
@@ -505,6 +537,7 @@ export const useGameStore = create<GameStore>()(
           actionBorders,
           voterSelection,
           roundRequirements,
+          graveyardHoldUntil,
           detectResult,
           ...data
         } = state
