@@ -11,14 +11,17 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
 
-import TilesGrid from '#/features/rooms/components/live/tiles-grid'
-import ControlBar from '#/features/rooms/components/live/control-bar'
-import LiveParticipantTile from '#/features/rooms/components/live/participant-tile'
+import {
+  ControlBar,
+  GameHUD,
+  LiveParticipantTile,
+  LiveSidebar,
+  TileActionOverlay,
+  TilesGrid,
+} from '#/features/rooms/components'
 import { TileEventOverlay } from '#/features/game/components/tile-event-overlay'
+import { PhaseEventsPanel } from '#/features/game/components/phase-events-panel'
 import { GameOverOverlay } from '#/features/game/components/game-over-overlay'
-import { TileActionOverlay } from '#/features/rooms/components/live/tile-action-overlay'
-import { GameHUD } from '#/features/rooms/components/live/game-hud'
-import { LiveSidebar } from '#/features/rooms/components/live/live-sidebar'
 
 export const Route = createFileRoute('/rooms/$roomId/live')({
   component: LiveRoute,
@@ -121,24 +124,34 @@ function LiveRoom({
           <TilesGrid />
         </div>
 
+        {/* Round events — collapsed icon rail stuck to the very left edge;
+            hover expands it to reveal names */}
+        {gameStarted && (
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-20">
+            <PhaseEventsPanel />
+          </div>
+        )}
+
         <div className="absolute bottom-4 right-4 z-30 w-60 h-36">
           <motion.div
             initial={false}
             animate={{ x: selfTileHidden ? 'calc(100% - 1.5rem)' : 0 }}
             transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
-            className={`relative w-60 h-36 rounded-lg overflow-hidden shadow-2xl shadow-black/50 ring-1 ring-white/[0.08] ${
+            className={`relative w-60 h-36 rounded-lg shadow-2xl shadow-black/50 ring-1 ring-white/[0.08] ${
               selfTileHidden ? 'pointer-events-none' : ''
             }`}
           >
             <TileEventOverlay userId={selfUserId}>
-              <TileActionOverlay participant={selfParticipant}>
-                <LiveParticipantTile
-                  participant={selfParticipant}
-                  isSelected={false}
-                  isSelectable={false}
-                  onSelect={() => {}}
-                />
-              </TileActionOverlay>
+              {(isAnimating) => (
+                <TileActionOverlay participant={selfParticipant} hideActions={isAnimating}>
+                  <LiveParticipantTile
+                    participant={selfParticipant}
+                    isSelected={false}
+                    isSelectable={false}
+                    onSelect={() => {}}
+                  />
+                </TileActionOverlay>
+              )}
             </TileEventOverlay>
 
             {/* Handle strip along the card's left edge — stays visible when
@@ -152,9 +165,9 @@ function LiveRoom({
               aria-label={selfTileHidden ? 'Show self view' : 'Hide self view'}
             >
               {selfTileHidden ? (
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" color="white" />
               ) : (
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" color="white" />
               )}
             </button>
           </motion.div>

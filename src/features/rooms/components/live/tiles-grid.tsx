@@ -44,14 +44,16 @@ export default function TilesGrid() {
             style={{ width: itemW, height: itemH }}
           >
             <TileEventOverlay userId={userId}>
-              <TileActionOverlay participant={participant}>
-                <LiveParticipantTile
-                  participant={participant}
-                  isSelected={false}
-                  isSelectable={false}
-                  onSelect={() => {}}
-                />
-              </TileActionOverlay>
+              {(isAnimating) => (
+                <TileActionOverlay participant={participant} hideActions={isAnimating}>
+                  <LiveParticipantTile
+                    participant={participant}
+                    isSelected={false}
+                    isSelectable={false}
+                    onSelect={() => {}}
+                  />
+                </TileActionOverlay>
+              )}
             </TileEventOverlay>
           </div>
         )

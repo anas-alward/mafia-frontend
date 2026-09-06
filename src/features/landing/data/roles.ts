@@ -3,8 +3,9 @@ import {
   TownVanilla,
   TownCop,
   TownDoctor,
-} from '#/features/game/constants'
-import type { RoleDefinition } from '#/features/game/constants'
+} from '#/features/game/constants/roles'
+import type { RoleDefinition } from '#/features/game/constants/roles'
+import type { LucideIcon } from 'lucide-react'
 
 export type RoleAlignment = 'town' | 'mafia' | 'neutral'
 
@@ -14,7 +15,7 @@ export interface GameRole {
   alignment: RoleAlignment
   description: string
   nightAction: string
-  icon: string
+  Icon: LucideIcon
 }
 
 const alignmentLabels: Record<RoleAlignment, string> = {
@@ -34,7 +35,7 @@ function toGameRole(role: RoleDefinition, nightAction: string): GameRole {
     alignment: role.role_type,
     description: role.description,
     nightAction,
-    icon: role.icon,
+    Icon: role.Icon,
   }
 }
 

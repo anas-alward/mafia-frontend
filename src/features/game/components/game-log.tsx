@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { ScrollText } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
+import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import type { GameLogEntry } from '#/features/game/events'
 
 const ACTION_LABELS: Record<string, string> = {
@@ -16,17 +17,11 @@ const ACTION_LABELS: Record<string, string> = {
   skipped: 'skipped',
 }
 
-function formatEntry(entry: GameLogEntry, index: number): string {
-  const verb = ACTION_LABELS[entry.action_type] ?? entry.action_type
-  if (entry.target_id) {
-    return `Player ${entry.actor_id} ${verb} Player ${entry.target_id}`
-  }
-  return `Player ${entry.actor_id} ${verb}`
-}
-
 export function GameLog() {
   const logs = useGameStore((s) => s.logs)
   const gameStarted = useGameStore((s) => s.gameStarted)
+  const players = useGameStore((s) => s.players)
+  const participants = useMeetingStore((s) => s.participants)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -34,6 +29,26 @@ export function GameLog() {
   }, [logs])
 
   if (!gameStarted) return null
+
+  const nameOf = (id: number) =>
+    players.find((p) => p.id === id)?.name ??
+    participants.find((p) => p.userId === id)?.username ??
+    `Player ${id}`
+
+  const formatEntry = (entry: GameLogEntry) => {
+    const verb = ACTION_LABELS[entry.action_type] ?? entry.action_type
+    const target = entry.target_id != null ? nameOf(entry.target_id) : null
+    if (entry.actor_id != null && target) {
+      return `${nameOf(entry.actor_id)} ${verb} ${target}`
+    }
+    if (target) {
+      return `${target} ${verb}`
+    }
+    if (entry.actor_id != null) {
+      return `${nameOf(entry.actor_id)} ${verb}`
+    }
+    return verb
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -47,7 +62,7 @@ export function GameLog() {
         ) : (
           logs.map((entry, i) => (
             <p key={i} className="text-sm text-[#d4d4d8] leading-relaxed">
-              {formatEntry(entry, i)}
+              {formatEntry(entry)}
             </p>
           ))
         )}

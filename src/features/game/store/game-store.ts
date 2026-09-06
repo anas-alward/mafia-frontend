@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { WsMessage } from '#/features/rooms/hooks/use-room-websocket'
 import type {
+  ActionSignalEvent,
   GamePhase,
   Winner,
   GameLogEntry,
@@ -15,7 +16,6 @@ import type {
   VoteResultStartedEvent,
   GameStateEvent,
   GameResetEvent,
-  GameCanceledEvent,
   GameOverEvent,
   DetectResultEvent,
   StartGameMessage,
@@ -51,6 +51,19 @@ interface GameStore {
   roundNumber: number | null
   requiredActions: RequiredAction[]
   detectResult: { targetId: number; roleType: string } | null
+  /** Transient per-recipient tile signals (audience decided server-side). */
+  actionSignals: (ActionSignalEvent & { seq: number })[]
+  actionSignalVersion: number
+  /**
+   * Persistent tile borders keyed by target id → action type. Set by
+   * action signals, cleared on phase transitions. Vote borders are derived
+   * from currentVotes instead.
+   */
+  actionBorders: Partial<Record<number, string>>
+  /** Clicking a vote badge selects the voters of that target. */
+  voterSelection: { targetId: number | null; voterIds: number[] }
+  /** Anonymous per-action-type status for the current phase (no names). */
+  roundRequirements: { action_type: string; done: boolean }[]
   winner: Winner | null
   _send: ((data: unknown) => void) | null
 
@@ -77,6 +90,8 @@ interface GameStore {
   resetGame: () => void
   cancelGame: () => void
   clearDetectResult: () => void
+  setVoterSelection: (targetId: number, voterIds: number[]) => void
+  clearVoterSelection: () => void
 }
 
 const STORE_NAME = 'mafia-game'
@@ -103,6 +118,11 @@ export const useGameStore = create<GameStore>()(
           roundNumber: null,
           requiredActions: [],
           detectResult: null,
+          actionSignals: [],
+          actionSignalVersion: 0,
+          actionBorders: {},
+          voterSelection: { targetId: null, voterIds: [] },
+          roundRequirements: [],
           winner: null,
         })
       }
@@ -116,6 +136,7 @@ export const useGameStore = create<GameStore>()(
               playerIds: m.player_ids,
               alivePlayerIds: m.alive_ids,
               deadPlayerIds: [],
+              players: m.players,
               phase: 'day',
               gameStarted: true,
               currentVotes: new Map(),
@@ -125,6 +146,9 @@ export const useGameStore = create<GameStore>()(
               mafiaIds: [],
               mafiaMemberRoles: {},
               requiredActions: m.required_actions,
+              roundRequirements: m.round_requirements ?? [],
+              actionBorders: {},
+              voterSelection: { targetId: null, voterIds: [] },
               winner: null,
             })
             break
@@ -161,6 +185,9 @@ export const useGameStore = create<GameStore>()(
               hasVotedThisPhase: false,
               logs: [...s.logs, ...m.logs],
               requiredActions: m.required_actions,
+              roundRequirements: m.round_requirements ?? [],
+              actionBorders: {},
+              voterSelection: { targetId: null, voterIds: [] },
             }))
             break
           }
@@ -179,6 +206,9 @@ export const useGameStore = create<GameStore>()(
               hasVotedThisPhase: false,
               logs: [...s.logs, ...m.logs],
               requiredActions: m.required_actions,
+              roundRequirements: m.round_requirements ?? [],
+              actionBorders: {},
+              voterSelection: { targetId: null, voterIds: [] },
             }))
             break
           }
@@ -200,6 +230,7 @@ export const useGameStore = create<GameStore>()(
               lynchTargetId: m.lynch_target_id,
               logs: [...s.logs, ...m.logs],
               requiredActions: m.required_actions,
+              roundRequirements: m.round_requirements ?? [],
             }))
             break
           }
@@ -207,6 +238,18 @@ export const useGameStore = create<GameStore>()(
           case 'game_state': {
             const m = msg as GameStateEvent
             if (m.session_id && m.current_phase) {
+              // Rebuild the current round's votes from its logs so the vote
+              // badges survive a mid-day reconnect.
+              const votesFromLogs = new Map<number, number>()
+              for (const log of m.logs) {
+                if (
+                  log.action_type === 'vote' &&
+                  log.actor_id != null &&
+                  log.target_id != null
+                ) {
+                  votesFromLogs.set(log.actor_id, log.target_id)
+                }
+              }
               const updates: Partial<GameStore> = {
                 sessionId: m.session_id,
                 phase: m.current_phase as GamePhase,
@@ -220,7 +263,10 @@ export const useGameStore = create<GameStore>()(
                 logs: m.logs,
                 lynchTargetId: m.lynch_target_id,
                 requiredActions: m.required_actions,
-                currentVotes: new Map(),
+                roundRequirements: m.round_requirements ?? [],
+                currentVotes: votesFromLogs,
+                actionBorders: {},
+                voterSelection: { targetId: null, voterIds: [] },
               }
               if (m.role_code) {
                 updates.myRoleCode = m.role_code
@@ -242,7 +288,7 @@ export const useGameStore = create<GameStore>()(
               playerIds: m.player_ids,
               alivePlayerIds: m.alive_ids,
               deadPlayerIds: [],
-              players: [],
+              players: m.players,
               phase: 'day',
               gameStarted: true,
               myRoleCode: null,
@@ -254,6 +300,9 @@ export const useGameStore = create<GameStore>()(
               mafiaMemberRoles: {},
               roundNumber: null,
               requiredActions: m.required_actions,
+              roundRequirements: m.round_requirements ?? [],
+              actionBorders: {},
+              voterSelection: { targetId: null, voterIds: [] },
               winner: null,
             })
             break
@@ -269,6 +318,9 @@ export const useGameStore = create<GameStore>()(
               lynchTargetId: null,
               hasVotedThisPhase: false,
               requiredActions: [],
+              actionBorders: {},
+              voterSelection: { targetId: null, voterIds: [] },
+              roundRequirements: [],
             }))
             break
           }
@@ -281,6 +333,25 @@ export const useGameStore = create<GameStore>()(
           case 'detect_result': {
             const m = msg as DetectResultEvent
             set({ detectResult: { targetId: m.target_id, roleType: m.role_type } })
+            break
+          }
+
+          case 'action_signal': {
+            const m = msg as ActionSignalEvent
+            const s = get()
+            set({
+              actionSignals: [
+                ...s.actionSignals.slice(-49),
+                { ...m, seq: s.actionSignalVersion + 1 },
+              ],
+              actionSignalVersion: s.actionSignalVersion + 1,
+              // Persist a colored border on the target tile until the next
+              // phase transition. Vote borders derive from currentVotes.
+              actionBorders:
+                m.action_type === 'vote'
+                  ? s.actionBorders
+                  : { ...s.actionBorders, [m.target_id]: m.action_type },
+            })
             break
           }
         }
@@ -310,6 +381,11 @@ export const useGameStore = create<GameStore>()(
         roundNumber: null,
         requiredActions: [],
         detectResult: null,
+        actionSignals: [],
+        actionSignalVersion: 0,
+        actionBorders: {},
+        voterSelection: { targetId: null, voterIds: [] },
+        roundRequirements: [],
         winner: null,
         _send: null,
 
@@ -385,6 +461,10 @@ export const useGameStore = create<GameStore>()(
           send_(msg)
         },
         clearDetectResult: () => set({ detectResult: null }),
+        setVoterSelection: (targetId, voterIds) =>
+          set({ voterSelection: { targetId, voterIds } }),
+        clearVoterSelection: () =>
+          set({ voterSelection: { targetId: null, voterIds: [] } }),
       }
     },
     {
@@ -407,6 +487,13 @@ export const useGameStore = create<GameStore>()(
           submitVoteResult,
           resetGame,
           cancelGame,
+          // transient overlays — never replay after a refresh
+          actionSignals,
+          actionSignalVersion,
+          actionBorders,
+          voterSelection,
+          roundRequirements,
+          detectResult,
           ...data
         } = state
         return {

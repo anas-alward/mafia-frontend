@@ -1,73 +1,20 @@
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
-import type { LucideIcon } from 'lucide-react'
-import {
-  Vote,
-  Skull,
-  HeartPulse,
-  Search,
-  Crosshair,
-  Bomb,
-  Ban,
-} from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useAuthStore } from '#/features/auth/store/auth-store'
-import { ActionType } from '#/features/game/constants'
-
-interface ActionVisual {
-  Icon: LucideIcon
-  label: string
-  color: string
-}
-
-const ACTION_VISUAL: Partial<Record<string, ActionVisual>> = {
-  [ActionType.VOTE]: {
-    Icon: Vote,
-    label: 'Vote',
-    color: 'var(--game-gold)',
-  },
-  [ActionType.KILL]: {
-    Icon: Skull,
-    label: 'Kill',
-    color: 'var(--game-crimson)',
-  },
-  [ActionType.HEAL]: {
-    Icon: HeartPulse,
-    label: 'Heal',
-    color: 'var(--game-mint)',
-  },
-  [ActionType.DETECT]: {
-    Icon: Search,
-    label: 'Detect',
-    color: 'var(--game-periwinkle)',
-  },
-  [ActionType.SHOOT]: {
-    Icon: Crosshair,
-    label: 'Shoot',
-    color: '#F5925E',
-  },
-  [ActionType.REVENGE]: {
-    Icon: Bomb,
-    label: 'Revenge',
-    color: 'var(--game-crimson)',
-  },
-  [ActionType.SILENCE]: {
-    Icon: Ban,
-    label: 'Silence',
-    color: '#C49EF0',
-  },
-}
-
-const orbBase =
-  'relative flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200 cursor-pointer'
+import { getActionDefinition, ActionType } from '#/features/game/constants/actions'
+import type { ActionDefinition } from '#/features/game/constants/actions'
 
 interface TileActionOverlayProps {
   participant: any
+  /** Hide the action orbs (e.g. while the event animation plays). */
+  hideActions?: boolean
   children: ReactNode
 }
 
 export function TileActionOverlay({
   participant,
+  hideActions,
   children,
 }: TileActionOverlayProps) {
   const gameStarted = useGameStore((s) => s.gameStarted)
@@ -99,11 +46,11 @@ export function TileActionOverlay({
     if (!gameStarted || !isAlive || !myAlive || isLocal) {
       return []
     }
-    const result: { actionType: string; visual: ActionVisual }[] = []
+    const result: { actionType: string; definition: ActionDefinition }[] = []
     for (const a of requiredActions) {
       if (!a.target_options.includes(tileUserId)) continue
-      const visual = ACTION_VISUAL[a.action_type]
-      if (visual) result.push({ actionType: a.action_type, visual })
+      const definition = getActionDefinition(a.action_type)
+      if (definition) result.push({ actionType: a.action_type, definition })
     }
     return result
   }, [gameStarted, isAlive, myAlive, isLocal, tileUserId, requiredActions])
@@ -136,15 +83,12 @@ export function TileActionOverlay({
   }
 
   return (
-    <div className="group relative h-full w-full rounded-lg overflow-hidden">
+    <div className="group relative h-full w-full rounded-lg">
       {children}
 
-      {tileActions.length > 0 && (
-        <div
-          className="absolute inset-0 z-25 flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ backgroundColor: 'rgba(27, 25, 34, 0.25)' }}
-        >
-          {tileActions.map(({ actionType, visual }) => (
+      {tileActions.length > 0 && !hideActions && (
+        <div className="absolute inset-0 z-25 flex opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg overflow-hidden">
+          {tileActions.map(({ actionType, definition }) => (
             <button
               key={actionType}
               type="button"
@@ -152,15 +96,16 @@ export function TileActionOverlay({
                 e.stopPropagation()
                 handleTileAction(actionType)
               }}
-              title={visual.label}
-              className={orbBase}
+              title={definition.label}
+              className="flex-1 h-full flex items-center justify-center cursor-pointer"
               style={{
-                color: visual.color,
-                backgroundColor: `color-mix(in srgb, ${visual.color} 30%, #131314)`,
-                borderColor: `color-mix(in srgb, ${visual.color} 60%, #131314)`,
+                backgroundColor: `color-mix(in srgb, ${definition.color} 30%, rgba(19, 19, 20, 0.55))`,
               }}
             >
-              <visual.Icon className="h-4 w-4" />
+              <definition.Icon
+                className="h-6 w-6"
+                style={{ color: definition.color }}
+              />
             </button>
           ))}
         </div>

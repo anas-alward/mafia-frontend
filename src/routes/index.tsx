@@ -4,8 +4,10 @@ import { SiteFooter } from '#/components/site-footer'
 import { HeroSection } from '#/features/landing/components/hero-section'
 import { HowToPlaySection } from '#/features/landing/components/how-to-play-section'
 import { GameMechanicsSection } from '#/features/landing/components/game-mechanics-section'
-import { CreateMeetingButton } from '#/features/rooms/components/create-meeting-button'
-import { JoinMeetingForm } from '#/features/rooms/components/join-meeting-form'
+import {
+  CreateMeetingButton,
+  JoinMeetingForm,
+} from '#/features/rooms/components'
 import { roles } from '#/features/landing/data/roles'
 import { phases } from '#/features/landing/data/phases'
 

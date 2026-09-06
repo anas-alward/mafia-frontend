@@ -5,12 +5,25 @@ export type GamePhase = 'lobby' | 'day' | 'night' | 'vote_result' | 'ended'
 export type Winner = 'mafia' | 'town'
 
 export interface GameLogEntry {
-  actor_id: number
-  target_id: number
+  /** Present only when the audience may know who acted (votes, revenge).
+   *  Omitted for anonymous events (kill, heal, silence). */
+  actor_id?: number | null
+  /** Absent on lynch entries (the victim rides in actor_id). */
+  target_id?: number | null
   action_type: string
   /** Set on lynch entries — the eliminated player's revealed role. */
   role_code?: string | null
   role_name?: string | null
+  /** Set on kill entries that were healed the same night. */
+  result?: string
+}
+
+export interface ActionSignalEvent {
+  type: 'action_signal'
+  action_type: string
+  target_id: number
+  /** Present only for actions whose audience may know who acted (votes). */
+  actor_id: number | null
 }
 
 export interface RequiredAction {
@@ -26,7 +39,9 @@ export interface GameStartedEvent {
   session_id: string
   host: number
   alive_ids: number[]
+  players: GameStatePlayer[]
   required_actions: RequiredAction[]
+  round_requirements?: { action_type: string; done: boolean }[]
 }
 
 export interface RoleAssignedEvent {
@@ -44,6 +59,7 @@ export interface SunRiseEvent {
   player_ids: number[]
   logs: GameLogEntry[]
   required_actions: RequiredAction[]
+  round_requirements?: { action_type: string; done: boolean }[]
 }
 
 export interface SunSetEvent {
@@ -51,6 +67,7 @@ export interface SunSetEvent {
   player_ids: number[]
   logs: GameLogEntry[]
   required_actions: RequiredAction[]
+  round_requirements?: { action_type: string; done: boolean }[]
 }
 
 export interface VoteCastEvent {
@@ -64,12 +81,15 @@ export interface VoteResultStartedEvent {
   lynch_target_id: number
   logs: GameLogEntry[]
   required_actions: RequiredAction[]
+  round_requirements?: { action_type: string; done: boolean }[]
 }
 
 export interface GameStatePlayer {
   id: number
   code: string
   status: 'alive' | 'dead'
+  /** Public username, resolved from the room session. */
+  name?: string | null
   /** Set for dead players — role reveal persists across reconnects. */
   role_code?: string | null
   role_name?: string | null
@@ -81,7 +101,9 @@ export interface GameResetEvent {
   session_id: string
   host: number
   alive_ids: number[]
+  players: GameStatePlayer[]
   required_actions: RequiredAction[]
+  round_requirements?: { action_type: string; done: boolean }[]
 }
 
 export interface GameCanceledEvent {
@@ -117,6 +139,7 @@ export interface GameStateEvent {
   role_description: string | null
   mafia_ids: number[] | null
   required_actions: RequiredAction[]
+  round_requirements?: { action_type: string; done: boolean }[]
 }
 
 // ── Game Inbound (client → server) ──

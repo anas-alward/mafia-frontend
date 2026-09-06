@@ -17,6 +17,7 @@ import type {
   SunSetEvent,
   VoteCastEvent,
   VoteResultStartedEvent,
+  ActionSignalEvent,
   GameStateEvent,
   GameResetEvent,
   GameCanceledEvent,
@@ -42,6 +43,7 @@ export type WsMessage =
   | SunSetEvent
   | VoteCastEvent
   | VoteResultStartedEvent
+  | ActionSignalEvent
   | GameStateEvent
   | GameResetEvent
   | GameCanceledEvent

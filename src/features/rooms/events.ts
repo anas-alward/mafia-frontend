@@ -96,6 +96,7 @@ export interface ChatSend {
 // ── Game types (re-exported from game feature) ──
 
 export type {
+  ActionSignalEvent,
   GamePhase,
   Winner,
   GameLogEntry,

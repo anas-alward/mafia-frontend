@@ -9,7 +9,7 @@ import {
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useAuthStore } from '#/features/auth/store/auth-store'
-import { ROLE_ICON_MAP, ROLE_REGISTRY } from '#/features/game/constants'
+import { ROLE_REGISTRY } from '#/features/game/constants/roles'
 import type { Participant as LkParticipant } from 'livekit-client'
 
 /**
@@ -70,7 +70,7 @@ export function GraveyardStrip() {
 
   return (
     <div
-      className="flex items-center gap-2 max-w-[22rem] px-0.5 py-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+      className="flex items-center gap-2 max-w-88 px-0.5 py-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
       style={{ scrollbarWidth: 'none' }}
     >
       <AnimatePresence initial={false}>
@@ -112,7 +112,7 @@ function GraveyardChip({
   const cameraRef = cameraRefs.length > 0 ? cameraRefs[0] : undefined
 
   const roleDef = roleCode ? ROLE_REGISTRY[roleCode] : undefined
-  const RoleIcon = roleDef ? ROLE_ICON_MAP[roleDef.icon] : undefined
+  const RoleIcon = roleDef?.Icon
 
   return (
     <div

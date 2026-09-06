@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { PHASE_META, Phase as GamePhaseEnum } from '#/features/game/constants'
+import { PHASE_META, Phase as GamePhaseEnum } from '#/features/game/constants/phases'
 import type { GamePhase } from '#/features/game/events'
 
 const GAMEPHASE_TO_PHASE: Partial<Record<GamePhase, GamePhaseEnum>> = {

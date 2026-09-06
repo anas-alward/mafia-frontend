@@ -3,12 +3,14 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Room } from 'livekit-client'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useMediaConfigStore } from '#/features/rooms/store/media-config-store'
-import { JoinButton } from '#/features/rooms/components/join/join-button'
-import { AudioToggleButton } from '#/features/rooms/components/media/audio-toggle-button'
-import { VideoToggleButton } from '#/features/rooms/components/media/video-toggle-button'
-import { AudioDeviceSelect } from '#/features/rooms/components/media/audio-device-select'
-import { VideoDeviceSelect } from '#/features/rooms/components/media/video-device-select'
-import { VideoPreview } from '#/features/rooms/components/media/video-preview'
+import {
+  AudioDeviceSelect,
+  AudioToggleButton,
+  JoinButton,
+  VideoDeviceSelect,
+  VideoPreview,
+  VideoToggleButton,
+} from '#/features/rooms/components'
 
 export const Route = createFileRoute('/rooms/$roomId/join')({
   component: JoinRoute,

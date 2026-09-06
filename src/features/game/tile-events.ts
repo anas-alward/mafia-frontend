@@ -1,6 +1,24 @@
 import type { LucideIcon } from 'lucide-react'
-import { Skull, HeartPulse, ShieldCheck, User } from 'lucide-react'
-import type { GameLogEntry } from '#/features/game/events'
+import { ShieldCheck, Skull, User } from 'lucide-react'
+import type { GameLogEntry, GameStatePlayer } from '#/features/game/events'
+import { ACTION_REGISTRY } from '#/features/game/constants/actions'
+
+/**
+ * Resolve the display name of a signal's actor. Empty-string names (stale
+ * room members) must fall through to the next source, hence `||` not `??`.
+ */
+export function resolveActorName(
+  actorId: number | null,
+  gamePlayers: GameStatePlayer[],
+  participants: { userId: number; username: string }[],
+): string | undefined {
+  if (actorId == null) return undefined
+  return (
+    gamePlayers.find((p) => p.id === actorId)?.name ||
+    participants.find((p) => p.userId === actorId)?.username ||
+    `Player ${actorId}`
+  )
+}
 
 // ── Tile event visuals ──
 // Keyed by the backend `action_type` string. Add a new entry here to support a
@@ -26,33 +44,33 @@ const MINT = 'var(--game-mint)'
 // Action types that represent a player being eliminated.
 const DEATH_ACTIONS = new Set(['kill', 'died', 'shoot', 'revenge', 'lynch'])
 
-const ELIMINATED: TileEventVisual = {
-  icon: Skull,
-  accent: CRIMSON,
-  bg: 'rgba(240, 96, 107, 0.30)',
-  message: 'Eliminated',
+const SAVED: TileEventVisual = {
+  icon: ShieldCheck,
+  accent: MINT,
+  bg: 'rgba(77, 232, 160, 0.24)',
+  message: 'Saved',
 }
+
+// Action visuals derive from ACTION_REGISTRY (constants/actions) — the single
+// source of truth for action presentation.
+const ACTION_EVENT_VISUALS = Object.fromEntries(
+  Object.entries(ACTION_REGISTRY).map(([type, def]) => [
+    type,
+    {
+      icon: def.eventIcon,
+      accent: def.color,
+      bg: def.bg,
+      message: def.eventMessage,
+    },
+  ]),
+) as Partial<Record<string, TileEventVisual>>
 
 export const TILE_EVENT_VISUALS: Partial<
   Record<string, TileEventVisualResolver>
 > = {
-  kill: ELIMINATED,
-  died: ELIMINATED,
-  shoot: ELIMINATED,
-  revenge: ELIMINATED,
-  lynch: ELIMINATED,
-  heal: {
-    icon: HeartPulse,
-    accent: MINT,
-    bg: 'rgba(77, 232, 160, 0.24)',
-    message: 'Healed',
-  },
-  saved: {
-    icon: ShieldCheck,
-    accent: MINT,
-    bg: 'rgba(77, 232, 160, 0.24)',
-    message: 'Saved',
-  },
+  ...ACTION_EVENT_VISUALS,
+  died: ACTION_EVENT_VISUALS.kill,
+  saved: SAVED,
   investigate: (roleType) =>
     roleType === 'mafia'
       ? {
@@ -79,12 +97,43 @@ export function resolveTileEventVisual(
   return typeof visual === 'function' ? visual(normalizedRoleType) : visual
 }
 
+/**
+ * Persistent tile border color per action type, from ACTION_REGISTRY.
+ * Votes derive from currentVotes; night/special actions from the store's
+ * actionBorders.
+ */
+export const TILE_BORDER_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(ACTION_REGISTRY).map(([type, def]) => [type, def.border]),
+)
+
+/**
+ * Resolve the persistent border color for one tile.
+ *
+ * `myVoteTarget` is the tile of the CURRENT viewer's own latest vote — the
+ * gold border marks where I last voted and moves when I revote (other
+ * players' votes are not bordered; counts live in the vote badge).
+ * Night-action borders (from the store's actionBorders) take precedence.
+ */
+export function resolveTileBorder(
+  tileUserId: number | null,
+  myVoteTarget: number | undefined,
+  actionBorders: Partial<Record<number, string>>,
+): string | undefined {
+  if (tileUserId == null) return undefined
+  const action = actionBorders[tileUserId]
+  if (action != null) return TILE_BORDER_COLORS[action]
+  if (myVoteTarget === tileUserId) return TILE_BORDER_COLORS.vote
+  return undefined
+}
+
 export interface TileEvent {
   type: string
   targetId: number
   roleType?: string
   /** Revealed role name (e.g. lynch role reveal). */
   roleName?: string
+  /** Secondary line — e.g. the voter behind a vote signal. */
+  detail?: string
   key: string
 }
 
@@ -112,6 +161,7 @@ export function deriveTileEvents({
   const killedTargets = new Set<number>()
   for (let i = newLogStart; i < logs.length; i++) {
     const log = logs[i]
+    if (log.target_id == null) continue
     if (log.action_type === 'heal') healedTargets.add(log.target_id)
     else if (DEATH_ACTIONS.has(log.action_type))
       killedTargets.add(log.target_id)
@@ -122,9 +172,17 @@ export function deriveTileEvents({
 
   for (let i = newLogStart; i < logs.length; i++) {
     const log = logs[i]
+    if (log.target_id == null) continue
     const isDeath = DEATH_ACTIONS.has(log.action_type)
     const isHeal = log.action_type === 'heal'
     if ((isDeath || isHeal) && savedTargets.has(log.target_id)) continue
+    // Votes animate only as live signals — the day's full vote history
+    // arriving in one batch (submit-votes/sunset) must not flash every
+    // voted tile at once.
+    if (log.action_type === 'vote') continue
+    // Detect results are private to the detective (detect_result event) —
+    // never animate them from broadcast logs.
+    if (log.action_type === 'detect') continue
     if (!TILE_EVENT_VISUALS[log.action_type]) continue
     events.push({
       type: log.action_type,
