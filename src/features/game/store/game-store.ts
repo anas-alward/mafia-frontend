@@ -18,6 +18,7 @@ import type {
   GameResetEvent,
   GameOverEvent,
   DetectResultEvent,
+  NightActionEvent,
   StartGameMessage,
   VoteMessage,
   KillMessage,
@@ -327,6 +328,17 @@ export const useGameStore = create<GameStore>()(
 
           case 'game_canceled': {
             _resetToLobby()
+            break
+          }
+
+          case 'night_action': {
+            // Anonymous real-time completion of a phase requirement.
+            const m = msg as NightActionEvent
+            set((s) => ({
+              roundRequirements: s.roundRequirements.map((r) =>
+                r.action_type === m.action_type ? { ...r, done: true } : r,
+              ),
+            }))
             break
           }
 

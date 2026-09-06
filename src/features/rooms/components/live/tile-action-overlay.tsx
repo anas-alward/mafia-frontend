@@ -18,7 +18,6 @@ export function TileActionOverlay({
   children,
 }: TileActionOverlayProps) {
   const gameStarted = useGameStore((s) => s.gameStarted)
-  const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
   const requiredActions = useGameStore((s) => s.requiredActions)
   const castVote = useGameStore((s) => s.castVote)
   const killPlayer = useGameStore((s) => s.killPlayer)
@@ -33,27 +32,29 @@ export function TileActionOverlay({
   const tileUserId: number | null = participant.identity
     ? Number(participant.identity)
     : null
-  const isAlive = tileUserId != null && alivePlayerIds.includes(tileUserId)
+  const currentUserId = currentUser ? Number(currentUser.id) : null
   const isLocal =
     tileUserId != null &&
     currentUser != null &&
-    tileUserId === Number(currentUser.id)
-  const currentUserId = currentUser ? Number(currentUser.id) : null
-  const myAlive =
-    currentUserId != null && alivePlayerIds.includes(currentUserId)
+    tileUserId === currentUserId
 
   const tileActions = useMemo(() => {
-    if (!gameStarted || !isAlive || !myAlive || isLocal) {
+    // Server-authoritative: required_actions is empty for players who may
+    // not act (including dead ones) — except dying-revenge entitlements,
+    // which arrive for dead players too. Alive checks are intentionally
+    // not applied here.
+    if (!gameStarted || isLocal) {
       return []
     }
     const result: { actionType: string; definition: ActionDefinition }[] = []
+    if (tileUserId == null) return result
     for (const a of requiredActions) {
       if (!a.target_options.includes(tileUserId)) continue
       const definition = getActionDefinition(a.action_type)
       if (definition) result.push({ actionType: a.action_type, definition })
     }
     return result
-  }, [gameStarted, isAlive, myAlive, isLocal, tileUserId, requiredActions])
+  }, [gameStarted, isLocal, tileUserId, requiredActions])
 
   const handleTileAction = (actionType: string) => {
     if (tileUserId == null) return

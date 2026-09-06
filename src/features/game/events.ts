@@ -117,6 +117,14 @@ export interface GameOverEvent {
   logs: GameLogEntry[]
 }
 
+export interface NightActionEvent {
+  type: 'night_action'
+  action_type: string
+  /** Stripped in anonymous broadcasts; present in scoped ones. */
+  actor_id?: number | null
+  target_id?: number | null
+}
+
 export interface DetectResultEvent {
   type: 'detect_result'
   target_id: number

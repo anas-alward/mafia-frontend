@@ -62,11 +62,13 @@ export const TownVigilante: RoleDefinition = {
   role_type: Team.TOWN,
   name: 'Azure Vigilante',
   description:
-    'Can choose to eliminate a player at night, but has limited ammo.',
+    'May shoot one player during the day instead of voting (2 bullets). Shooting a Town player eliminates the Vigilante too.',
   Icon: Crosshair,
   actions: {
-    [Phase.NIGHT]: [{ action_type: ActionType.SHOOT, required: false }],
-    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
+    [Phase.DAY]: [
+      { action_type: ActionType.SHOOT, required: false },
+      { action_type: ActionType.VOTE, required: true },
+    ],
   },
 }
 

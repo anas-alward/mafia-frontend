@@ -113,6 +113,7 @@ export type {
   GameCanceledEvent,
   GameOverEvent,
   DetectResultEvent,
+  NightActionEvent,
   StartGameMessage,
   VoteMessage,
   KillMessage,

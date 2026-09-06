@@ -23,6 +23,7 @@ import type {
   GameCanceledEvent,
   GameOverEvent,
   DetectResultEvent,
+  NightActionEvent,
 } from '../events'
 
 // ── WebSocket message union ──
@@ -49,6 +50,7 @@ export type WsMessage =
   | GameCanceledEvent
   | GameOverEvent
   | DetectResultEvent
+  | NightActionEvent
   | { type: string; [key: string]: unknown }
 
 export type WsState = 'connecting' | 'open' | 'closed' | 'error'

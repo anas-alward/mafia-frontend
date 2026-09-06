@@ -34,6 +34,25 @@ beforeEach(() => {
   useGameStore.setState({ gameStarted: false, currentVotes: new Map() })
 })
 
+describe('game store night_action real-time requirements', () => {
+  it('marks the matching phase requirement done in real time', () => {
+    startGame()
+    useGameStore.setState({
+      roundRequirements: [
+        { action_type: 'kill', done: false },
+        { action_type: 'heal', done: false },
+      ],
+    })
+    useGameStore.getState().processMessage({
+      type: 'night_action',
+      action_type: 'kill',
+    })
+    const rr = useGameStore.getState().roundRequirements
+    expect(rr.find((r) => r.action_type === 'kill')?.done).toBe(true)
+    expect(rr.find((r) => r.action_type === 'heal')?.done).toBe(false)
+  })
+})
+
 describe('game store action borders', () => {
   it('records a persistent border for non-vote signals', () => {
     startGame()
