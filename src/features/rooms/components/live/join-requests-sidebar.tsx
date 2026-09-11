@@ -27,7 +27,7 @@ export function JoinRequestsSidebar() {
         opacity: open ? 1 : 0,
       }}
       transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
-      className={`fixed right-4 top-20 bottom-24 z-10 w-72 bg-[#1c1c1f] border border-white/[0.06] rounded-2xl flex flex-col overflow-hidden shadow-2xl ${
+      className={`fixed right-4 top-20 bottom-24 z-40 w-72 bg-[#1c1c1f] border border-white/[0.06] rounded-2xl flex flex-col overflow-hidden shadow-2xl ${
         open ? '' : 'pointer-events-none'
       }`}
     >
