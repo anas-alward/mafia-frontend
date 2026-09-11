@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as GameRouteRouteImport } from './routes/game/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GameHowToPlayRouteImport } from './routes/game/how-to-play'
 import { Route as GameActionsRouteImport } from './routes/game/actions'
@@ -26,20 +27,25 @@ import { Route as authPasswordResetRouteImport } from './routes/(auth)/password/
 import { Route as authPasswordForgotRouteImport } from './routes/(auth)/password/forgot'
 import { Route as authPasswordChangeRouteImport } from './routes/(auth)/password/change'
 
+const GameRouteRoute = GameRouteRouteImport.update({
+  id: '/game',
+  path: '/game',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GameHowToPlayRoute = GameHowToPlayRouteImport.update({
-  id: '/game/how-to-play',
-  path: '/game/how-to-play',
-  getParentRoute: () => rootRouteImport,
+  id: '/how-to-play',
+  path: '/how-to-play',
+  getParentRoute: () => GameRouteRoute,
 } as any)
 const GameActionsRoute = GameActionsRouteImport.update({
-  id: '/game/actions',
-  path: '/game/actions',
-  getParentRoute: () => rootRouteImport,
+  id: '/actions',
+  path: '/actions',
+  getParentRoute: () => GameRouteRoute,
 } as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
   id: '/(auth)/verify-email',
@@ -62,9 +68,9 @@ const RoomsRoomIdRouteRoute = RoomsRoomIdRouteRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const GameRolesIndexRoute = GameRolesIndexRouteImport.update({
-  id: '/game/roles/',
-  path: '/game/roles/',
-  getParentRoute: () => rootRouteImport,
+  id: '/roles/',
+  path: '/roles/',
+  getParentRoute: () => GameRouteRoute,
 } as any)
 const RoomsRoomIdLiveRoute = RoomsRoomIdLiveRouteImport.update({
   id: '/live',
@@ -82,14 +88,14 @@ const RoomsRoomIdEndedRoute = RoomsRoomIdEndedRouteImport.update({
   getParentRoute: () => RoomsRoomIdRouteRoute,
 } as any)
 const GameRolesDistributionRoute = GameRolesDistributionRouteImport.update({
-  id: '/game/roles/distribution',
-  path: '/game/roles/distribution',
-  getParentRoute: () => rootRouteImport,
+  id: '/roles/distribution',
+  path: '/roles/distribution',
+  getParentRoute: () => GameRouteRoute,
 } as any)
 const GameRolesRoleCodeRoute = GameRolesRoleCodeRouteImport.update({
-  id: '/game/roles/$roleCode',
-  path: '/game/roles/$roleCode',
-  getParentRoute: () => rootRouteImport,
+  id: '/roles/$roleCode',
+  path: '/roles/$roleCode',
+  getParentRoute: () => GameRouteRoute,
 } as any)
 const authPasswordResetRoute = authPasswordResetRouteImport.update({
   id: '/(auth)/password/reset',
@@ -109,6 +115,7 @@ const authPasswordChangeRoute = authPasswordChangeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/game': typeof GameRouteRouteWithChildren
   '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/game': typeof GameRouteRouteWithChildren
   '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
@@ -146,6 +154,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/game': typeof GameRouteRouteWithChildren
   '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/signup': typeof authSignupRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/game'
     | '/rooms/$roomId'
     | '/login'
     | '/signup'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/game'
     | '/rooms/$roomId'
     | '/login'
     | '/signup'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/game'
     | '/rooms/$roomId'
     | '/(auth)/login'
     | '/(auth)/signup'
@@ -221,22 +233,25 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GameRouteRoute: typeof GameRouteRouteWithChildren
   RoomsRoomIdRouteRoute: typeof RoomsRoomIdRouteRouteWithChildren
   authLoginRoute: typeof authLoginRoute
   authSignupRoute: typeof authSignupRoute
   authVerifyEmailRoute: typeof authVerifyEmailRoute
-  GameActionsRoute: typeof GameActionsRoute
-  GameHowToPlayRoute: typeof GameHowToPlayRoute
   authPasswordChangeRoute: typeof authPasswordChangeRoute
   authPasswordForgotRoute: typeof authPasswordForgotRoute
   authPasswordResetRoute: typeof authPasswordResetRoute
-  GameRolesRoleCodeRoute: typeof GameRolesRoleCodeRoute
-  GameRolesDistributionRoute: typeof GameRolesDistributionRoute
-  GameRolesIndexRoute: typeof GameRolesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/game': {
+      id: '/game'
+      path: '/game'
+      fullPath: '/game'
+      preLoaderRoute: typeof GameRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -246,17 +261,17 @@ declare module '@tanstack/react-router' {
     }
     '/game/how-to-play': {
       id: '/game/how-to-play'
-      path: '/game/how-to-play'
+      path: '/how-to-play'
       fullPath: '/game/how-to-play'
       preLoaderRoute: typeof GameHowToPlayRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GameRouteRoute
     }
     '/game/actions': {
       id: '/game/actions'
-      path: '/game/actions'
+      path: '/actions'
       fullPath: '/game/actions'
       preLoaderRoute: typeof GameActionsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GameRouteRoute
     }
     '/(auth)/verify-email': {
       id: '/(auth)/verify-email'
@@ -288,10 +303,10 @@ declare module '@tanstack/react-router' {
     }
     '/game/roles/': {
       id: '/game/roles/'
-      path: '/game/roles'
+      path: '/roles'
       fullPath: '/game/roles/'
       preLoaderRoute: typeof GameRolesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GameRouteRoute
     }
     '/rooms/$roomId/live': {
       id: '/rooms/$roomId/live'
@@ -316,17 +331,17 @@ declare module '@tanstack/react-router' {
     }
     '/game/roles/distribution': {
       id: '/game/roles/distribution'
-      path: '/game/roles/distribution'
+      path: '/roles/distribution'
       fullPath: '/game/roles/distribution'
       preLoaderRoute: typeof GameRolesDistributionRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GameRouteRoute
     }
     '/game/roles/$roleCode': {
       id: '/game/roles/$roleCode'
-      path: '/game/roles/$roleCode'
+      path: '/roles/$roleCode'
       fullPath: '/game/roles/$roleCode'
       preLoaderRoute: typeof GameRolesRoleCodeRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof GameRouteRoute
     }
     '/(auth)/password/reset': {
       id: '/(auth)/password/reset'
@@ -352,6 +367,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface GameRouteRouteChildren {
+  GameActionsRoute: typeof GameActionsRoute
+  GameHowToPlayRoute: typeof GameHowToPlayRoute
+  GameRolesRoleCodeRoute: typeof GameRolesRoleCodeRoute
+  GameRolesDistributionRoute: typeof GameRolesDistributionRoute
+  GameRolesIndexRoute: typeof GameRolesIndexRoute
+}
+
+const GameRouteRouteChildren: GameRouteRouteChildren = {
+  GameActionsRoute: GameActionsRoute,
+  GameHowToPlayRoute: GameHowToPlayRoute,
+  GameRolesRoleCodeRoute: GameRolesRoleCodeRoute,
+  GameRolesDistributionRoute: GameRolesDistributionRoute,
+  GameRolesIndexRoute: GameRolesIndexRoute,
+}
+
+const GameRouteRouteWithChildren = GameRouteRoute._addFileChildren(
+  GameRouteRouteChildren,
+)
+
 interface RoomsRoomIdRouteRouteChildren {
   RoomsRoomIdEndedRoute: typeof RoomsRoomIdEndedRoute
   RoomsRoomIdJoinRoute: typeof RoomsRoomIdJoinRoute
@@ -369,18 +404,14 @@ const RoomsRoomIdRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GameRouteRoute: GameRouteRouteWithChildren,
   RoomsRoomIdRouteRoute: RoomsRoomIdRouteRouteWithChildren,
   authLoginRoute: authLoginRoute,
   authSignupRoute: authSignupRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
-  GameActionsRoute: GameActionsRoute,
-  GameHowToPlayRoute: GameHowToPlayRoute,
   authPasswordChangeRoute: authPasswordChangeRoute,
   authPasswordForgotRoute: authPasswordForgotRoute,
   authPasswordResetRoute: authPasswordResetRoute,
-  GameRolesRoleCodeRoute: GameRolesRoleCodeRoute,
-  GameRolesDistributionRoute: GameRolesDistributionRoute,
-  GameRolesIndexRoute: GameRolesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -42,7 +42,7 @@ function RoleCard({ role }: { role: RoleDefinition }) {
   const specials = getSpecialActions(role)
 
   return (
-    <Card className="feature-card w-72 shrink-0 snap-start transition-colors">
+    <Card className="feature-card relative w-72 shrink-0 snap-start transition-colors hover:border-neutral-400">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
           <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-neutral-100 text-neutral-900">
@@ -55,15 +55,7 @@ function RoleCard({ role }: { role: RoleDefinition }) {
             {role.role_type === Team.MAFIA ? 'Mafia' : 'Town'}
           </Badge>
         </div>
-        <CardTitle className="text-lg text-neutral-900">
-          <Link
-            to="/game/roles/$roleCode"
-            params={{ roleCode: role.code }}
-            className="underline-offset-2 hover:underline"
-          >
-            {role.name}
-          </Link>
-        </CardTitle>
+        <CardTitle className="text-lg text-neutral-900">{role.name}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <CardDescription className="text-sm text-neutral-600 leading-relaxed">
@@ -73,7 +65,7 @@ function RoleCard({ role }: { role: RoleDefinition }) {
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="flex items-center gap-1 text-xs font-semibold text-neutral-900 underline underline-offset-2"
+          className="relative z-10 flex items-center gap-1 text-xs font-semibold text-neutral-900 underline underline-offset-2"
         >
           {expanded ? 'Hide abilities' : 'Show abilities'}
           <ChevronDown
@@ -109,6 +101,12 @@ function RoleCard({ role }: { role: RoleDefinition }) {
           </ul>
         )}
       </CardContent>
+      <Link
+        to="/game/roles/$roleCode"
+        params={{ roleCode: role.code }}
+        aria-label={`View ${role.name} details`}
+        className="absolute inset-0 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
+      />
     </Card>
   )
 }
