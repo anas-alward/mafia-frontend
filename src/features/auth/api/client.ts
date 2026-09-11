@@ -41,7 +41,8 @@ export interface ForgotPasswordRequest {
 
 export interface ResetPasswordRequest {
   token: string
-  password: string
+  email: string
+  newPassword: string
 }
 
 export interface ChangePasswordRequest {
@@ -103,7 +104,14 @@ export async function forgotPassword(body: ForgotPasswordRequest) {
 export async function resetPassword(body: ResetPasswordRequest) {
   return request<{ success: true; data: { message: string } }>(
     '/accounts/password/reset/confirm/',
-    { method: 'POST', body: JSON.stringify(body) },
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        token: body.token,
+        email: body.email,
+        new_password: body.newPassword,
+      }),
+    },
   )
 }
 

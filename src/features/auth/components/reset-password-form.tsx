@@ -18,22 +18,28 @@ import type {
 
 interface ResetPasswordFormProps {
   token: string
+  email: string
   onSubmit: (
     data: ResetPasswordInput,
   ) => Promise<{ errors?: { message: string; field?: string }[] } | void>
 }
 
-export function ResetPasswordForm({ token, onSubmit }: ResetPasswordFormProps) {
+export function ResetPasswordForm({
+  token,
+  email,
+  onSubmit,
+}: ResetPasswordFormProps) {
   const form = useForm<ResetPasswordFormInput>({
     resolver: zodResolver(resetPasswordFormSchema),
-    defaultValues: { token, password: '', confirmPassword: '' },
+    defaultValues: { token, email, password: '', confirmPassword: '' },
   })
 
   const handleSubmit = async (data: ResetPasswordFormInput) => {
     // confirmPassword is validation-only — never sent to the API.
     const result = await onSubmit({
       token: data.token,
-      password: data.password,
+      email: data.email,
+      newPassword: data.password,
     })
     if (result?.errors) {
       for (const e of result.errors) {

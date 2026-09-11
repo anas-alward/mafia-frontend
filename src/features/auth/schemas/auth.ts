@@ -67,7 +67,8 @@ export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
 // ── Reset Password ──
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Reset token is required'),
-  password,
+  email,
+  newPassword: password,
 })
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
@@ -76,6 +77,7 @@ export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
 export const resetPasswordFormSchema = z
   .object({
     token: z.string().min(1, 'Reset token is required'),
+    email,
     password,
     confirmPassword: z.string().min(1, 'Please confirm your password'),
   })

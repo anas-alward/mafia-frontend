@@ -5,11 +5,13 @@ import { resetPassword } from '#/features/auth/api/client'
 import { PasswordPageShell, toFormErrors } from './-shared'
 
 interface ResetPasswordSearch {
+  email?: string
   token?: string
 }
 
 export const Route = createFileRoute('/(auth)/password/reset')({
   validateSearch: (search: Record<string, unknown>): ResetPasswordSearch => ({
+    email: typeof search.email === 'string' ? search.email : undefined,
     token: typeof search.token === 'string' ? search.token : undefined,
   }),
   component: ResetPasswordPage,
@@ -17,9 +19,10 @@ export const Route = createFileRoute('/(auth)/password/reset')({
 
 function ResetPasswordPage() {
   const navigate = useNavigate()
-  const { token } = Route.useSearch()
+  const search = Route.useSearch()
+  const { token, email } = search
 
-  if (!token) {
+  if (!token || !email) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-sm space-y-6 text-center">
@@ -54,7 +57,7 @@ function ResetPasswordPage() {
       title="Set new password"
       subtitle="Choose a new password for your account"
     >
-      <ResetPasswordForm token={token} onSubmit={handleSubmit} />
+      <ResetPasswordForm token={token} email={email} onSubmit={handleSubmit} />
     </PasswordPageShell>
   )
 }
