@@ -161,8 +161,9 @@ function Panel() {
                           {req.username}
                         </span>
                       </div>
-                      {/* Accept / reject — host-only */}
-                      {isHost ? (
+                      {/* Accept / reject — host-only; non-hosts just see
+                          the request */}
+                      {isHost && (
                         <div className="flex items-center gap-1 shrink-0">
                           <button
                             type="button"
@@ -181,10 +182,6 @@ function Panel() {
                             <X className="h-4 w-4" />
                           </button>
                         </div>
-                      ) : (
-                        <span className="text-[11px] text-[#71717a] shrink-0">
-                          Pending
-                        </span>
                       )}
                     </div>
                   </li>

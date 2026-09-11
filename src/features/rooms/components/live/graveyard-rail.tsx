@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react'
-import { Skull, User } from 'lucide-react'
+import { Eye, Skull, User } from 'lucide-react'
 import { Track } from 'livekit-client'
 import {
   useParticipantTracks,
@@ -21,13 +21,22 @@ import type { Participant as LkParticipant } from 'livekit-client'
 export function GraveyardStrip() {
   const gameStarted = useGameStore((s) => s.gameStarted)
   const deadPlayerIds = useGameStore((s) => s.deadPlayerIds)
+  const playerIds = useGameStore((s) => s.playerIds)
   const players = useGameStore((s) => s.players)
   const logs = useGameStore((s) => s.logs)
   const participants = useMeetingStore((s) => s.participants)
   const lkParticipants = useParticipants()
   const currentUser = useAuthStore((s) => s.user)
 
-  if (!gameStarted || deadPlayerIds.length === 0) return null
+  // Non-players: connected to the room but never dealt into the game.
+  const inGameIds = new Set(playerIds)
+  const spectators = lkParticipants.filter((p) => {
+    const id = Number(p.identity)
+    return Number.isFinite(id) && !inGameIds.has(id)
+  })
+
+  if (!gameStarted || (deadPlayerIds.length === 0 && spectators.length === 0))
+    return null
 
   const selfId = currentUser ? Number(currentUser.id) : null
   const byIdentity = new Map(
@@ -92,7 +101,58 @@ export function GraveyardStrip() {
             </span>
           </motion.div>
         ))}
+
+        {/* Spectators — connected but not in the game */}
+        {spectators.map((p) => (
+          <motion.div
+            key={`spectator-${p.identity}`}
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
+            className="shrink-0 flex flex-col items-center"
+          >
+            <SpectatorChip participant={p} />
+            <span className="text-[8px] text-[#a1a1aa] truncate w-16 text-center leading-tight">
+              {p.name ?? nameById.get(Number(p.identity)) ?? `Player ${p.identity}`}
+            </span>
+          </motion.div>
+        ))}
       </AnimatePresence>
+    </div>
+  )
+}
+
+/**
+ * Spectator chip: live camera feed (no grayscale) with an eye badge to
+ * distinguish watchers from dead players.
+ */
+function SpectatorChip({ participant }: { participant: LkParticipant }) {
+  const cameraRefs = useParticipantTracks([Track.Source.Camera], {
+    participantIdentity: participant.identity,
+  })
+  const cameraRef = cameraRefs.length > 0 ? cameraRefs[0] : undefined
+
+  return (
+    <div
+      className="relative w-16 h-10 rounded-md overflow-hidden border border-white/[0.06] opacity-80"
+      style={{ backgroundColor: 'var(--game-bg-elevated)' }}
+    >
+      {cameraRef ? (
+        <VideoTrack
+          trackRef={cameraRef}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <div className="h-full w-full flex items-center justify-center">
+          <User className="h-3.5 w-3.5 text-[#71717a]" />
+        </div>
+      )}
+      <div
+        className="absolute top-0.5 right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center border border-white/[0.1]"
+        style={{ backgroundColor: 'rgba(27, 25, 34, 0.9)' }}
+      >
+        <Eye className="h-2 w-2" style={{ color: 'var(--game-periwinkle)' }} />
+      </div>
     </div>
   )
 }

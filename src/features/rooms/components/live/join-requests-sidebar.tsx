@@ -5,6 +5,7 @@ import { useJoinRequests } from '#/features/rooms/hooks/use-join-requests'
 import { useSidebar } from '#/components/ui/sidebar'
 
 export function JoinRequestsSidebar() {
+  const isHost = useMeetingStore((s) => s.isHost)
   const roomJoinRequests = useMeetingStore((s) => s.joinRequests)
   const roomDismissJoinRequest = useMeetingStore((s) => s.dismissJoinRequest)
   const roomAcceptJoinRequest = useMeetingStore((s) => s.acceptJoinRequest)
@@ -73,24 +74,27 @@ export function JoinRequestsSidebar() {
                       {req.username}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => acceptJoinRequest(req.userId)}
-                      className="p-2 rounded-full text-[#a1a1aa] hover:text-[#22c55e] hover:bg-[#22c55e]/10 transition-colors"
-                      aria-label={`Accept ${req.username}`}
-                    >
-                      <Check className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => rejectJoinRequest(req.userId)}
-                      className="p-2 rounded-full text-[#a1a1aa] hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors"
-                      aria-label={`Reject ${req.username}`}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
+                  {/* Accept / reject — host-only */}
+                  {isHost ? (
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => acceptJoinRequest(req.userId)}
+                        className="p-2 rounded-full text-[#a1a1aa] hover:text-[#22c55e] hover:bg-[#22c55e]/10 transition-colors"
+                        aria-label={`Accept ${req.username}`}
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => rejectJoinRequest(req.userId)}
+                        className="p-2 rounded-full text-[#a1a1aa] hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors"
+                        aria-label={`Reject ${req.username}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               </li>
             ))}
