@@ -94,7 +94,7 @@ export async function forgotPassword(body: ForgotPasswordRequest) {
   return request<{
     success: true
     data: { message: string; resetLink?: string }
-  }>('/accounts/forgot-password/', {
+  }>('/accounts/password/reset/request/', {
     method: 'POST',
     body: JSON.stringify(body),
   })
@@ -102,7 +102,7 @@ export async function forgotPassword(body: ForgotPasswordRequest) {
 
 export async function resetPassword(body: ResetPasswordRequest) {
   return request<{ success: true; data: { message: string } }>(
-    '/accounts/reset-password/',
+    '/accounts/password/reset/confirm/',
     { method: 'POST', body: JSON.stringify(body) },
   )
 }
