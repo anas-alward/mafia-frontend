@@ -121,7 +121,7 @@ function ActionAvatar({
     <motion.div
       onMouseEnter={() => setHovered(index)}
       onMouseLeave={() => setHovered(null)}
-      animate={{ x: spread, scale: hovered === index ? 1.18 : 1, y: hovered === index ? -3 : 0 }}
+      animate={{ x: spread, scale: hovered === index ? 1.08 : 1, y: hovered === index ? -2 : 0 }}
       transition={{ type: 'spring', stiffness: 420, damping: 26 }}
       className={`relative ${index === 0 ? '' : '-ml-1.5'}`}
       style={{ zIndex: hovered === index ? 30 : 20 - index }}
