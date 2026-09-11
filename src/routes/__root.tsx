@@ -26,8 +26,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     const publicPaths = [
       '/login',
       '/signup',
-      '/forgot-password',
-      '/reset-password',
+      '/password/forgot',
+      '/password/reset',
       '/verify-email',
     ]
     if (publicPaths.includes(location.pathname)) return

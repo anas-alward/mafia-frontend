@@ -9,23 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
-import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
-import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as RoomsRoomIdRouteRouteImport } from './routes/rooms/$roomId/route'
 import { Route as RoomsRoomIdLiveRouteImport } from './routes/rooms/$roomId/live'
 import { Route as RoomsRoomIdJoinRouteImport } from './routes/rooms/$roomId/join'
 import { Route as RoomsRoomIdEndedRouteImport } from './routes/rooms/$roomId/ended'
+import { Route as authPasswordResetRouteImport } from './routes/(auth)/password/reset'
+import { Route as authPasswordForgotRouteImport } from './routes/(auth)/password/forgot'
+import { Route as authPasswordChangeRouteImport } from './routes/(auth)/password/change'
 
-const ChangePasswordRoute = ChangePasswordRouteImport.update({
-  id: '/change-password',
-  path: '/change-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -41,19 +36,9 @@ const authSignupRoute = authSignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const authResetPasswordRoute = authResetPasswordRouteImport.update({
-  id: '/(auth)/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const authLoginRoute = authLoginRouteImport.update({
   id: '/(auth)/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
-  id: '/(auth)/forgot-password',
-  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RoomsRoomIdRouteRoute = RoomsRoomIdRouteRouteImport.update({
@@ -76,29 +61,44 @@ const RoomsRoomIdEndedRoute = RoomsRoomIdEndedRouteImport.update({
   path: '/ended',
   getParentRoute: () => RoomsRoomIdRouteRoute,
 } as any)
+const authPasswordResetRoute = authPasswordResetRouteImport.update({
+  id: '/(auth)/password/reset',
+  path: '/password/reset',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authPasswordForgotRoute = authPasswordForgotRouteImport.update({
+  id: '/(auth)/password/forgot',
+  path: '/password/forgot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const authPasswordChangeRoute = authPasswordChangeRouteImport.update({
+  id: '/(auth)/password/change',
+  path: '/password/change',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/change-password': typeof ChangePasswordRoute
   '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
-  '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
-  '/reset-password': typeof authResetPasswordRoute
   '/signup': typeof authSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
+  '/password/change': typeof authPasswordChangeRoute
+  '/password/forgot': typeof authPasswordForgotRoute
+  '/password/reset': typeof authPasswordResetRoute
   '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
   '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
   '/rooms/$roomId/live': typeof RoomsRoomIdLiveRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/change-password': typeof ChangePasswordRoute
   '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
-  '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
-  '/reset-password': typeof authResetPasswordRoute
   '/signup': typeof authSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
+  '/password/change': typeof authPasswordChangeRoute
+  '/password/forgot': typeof authPasswordForgotRoute
+  '/password/reset': typeof authPasswordResetRoute
   '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
   '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
   '/rooms/$roomId/live': typeof RoomsRoomIdLiveRoute
@@ -106,13 +106,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/change-password': typeof ChangePasswordRoute
   '/rooms/$roomId': typeof RoomsRoomIdRouteRouteWithChildren
-  '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
-  '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/signup': typeof authSignupRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
+  '/(auth)/password/change': typeof authPasswordChangeRoute
+  '/(auth)/password/forgot': typeof authPasswordForgotRoute
+  '/(auth)/password/reset': typeof authPasswordResetRoute
   '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
   '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
   '/rooms/$roomId/live': typeof RoomsRoomIdLiveRoute
@@ -121,39 +121,39 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/change-password'
     | '/rooms/$roomId'
-    | '/forgot-password'
     | '/login'
-    | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/password/change'
+    | '/password/forgot'
+    | '/password/reset'
     | '/rooms/$roomId/ended'
     | '/rooms/$roomId/join'
     | '/rooms/$roomId/live'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/change-password'
     | '/rooms/$roomId'
-    | '/forgot-password'
     | '/login'
-    | '/reset-password'
     | '/signup'
     | '/verify-email'
+    | '/password/change'
+    | '/password/forgot'
+    | '/password/reset'
     | '/rooms/$roomId/ended'
     | '/rooms/$roomId/join'
     | '/rooms/$roomId/live'
   id:
     | '__root__'
     | '/'
-    | '/change-password'
     | '/rooms/$roomId'
-    | '/(auth)/forgot-password'
     | '/(auth)/login'
-    | '/(auth)/reset-password'
     | '/(auth)/signup'
     | '/(auth)/verify-email'
+    | '/(auth)/password/change'
+    | '/(auth)/password/forgot'
+    | '/(auth)/password/reset'
     | '/rooms/$roomId/ended'
     | '/rooms/$roomId/join'
     | '/rooms/$roomId/live'
@@ -161,24 +161,17 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ChangePasswordRoute: typeof ChangePasswordRoute
   RoomsRoomIdRouteRoute: typeof RoomsRoomIdRouteRouteWithChildren
-  authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
-  authResetPasswordRoute: typeof authResetPasswordRoute
   authSignupRoute: typeof authSignupRoute
   authVerifyEmailRoute: typeof authVerifyEmailRoute
+  authPasswordChangeRoute: typeof authPasswordChangeRoute
+  authPasswordForgotRoute: typeof authPasswordForgotRoute
+  authPasswordResetRoute: typeof authPasswordResetRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/change-password': {
-      id: '/change-password'
-      path: '/change-password'
-      fullPath: '/change-password'
-      preLoaderRoute: typeof ChangePasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -200,25 +193,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(auth)/reset-password': {
-      id: '/(auth)/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof authResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(auth)/login': {
       id: '/(auth)/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof authLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/(auth)/forgot-password': {
-      id: '/(auth)/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rooms/$roomId': {
@@ -249,6 +228,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RoomsRoomIdEndedRouteImport
       parentRoute: typeof RoomsRoomIdRouteRoute
     }
+    '/(auth)/password/reset': {
+      id: '/(auth)/password/reset'
+      path: '/password/reset'
+      fullPath: '/password/reset'
+      preLoaderRoute: typeof authPasswordResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/password/forgot': {
+      id: '/(auth)/password/forgot'
+      path: '/password/forgot'
+      fullPath: '/password/forgot'
+      preLoaderRoute: typeof authPasswordForgotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(auth)/password/change': {
+      id: '/(auth)/password/change'
+      path: '/password/change'
+      fullPath: '/password/change'
+      preLoaderRoute: typeof authPasswordChangeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -269,23 +269,14 @@ const RoomsRoomIdRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChangePasswordRoute: ChangePasswordRoute,
   RoomsRoomIdRouteRoute: RoomsRoomIdRouteRouteWithChildren,
-  authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
-  authResetPasswordRoute: authResetPasswordRoute,
   authSignupRoute: authSignupRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
+  authPasswordChangeRoute: authPasswordChangeRoute,
+  authPasswordForgotRoute: authPasswordForgotRoute,
+  authPasswordResetRoute: authPasswordResetRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

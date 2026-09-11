@@ -2,13 +2,13 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ResetPasswordForm } from '#/features/auth/components/reset-password-form'
 import type { ResetPasswordInput } from '#/features/auth/schemas/auth'
 import { resetPassword } from '#/features/auth/api/client'
-import type { ApiError } from '#/lib/api-client'
+import { PasswordPageShell, toFormErrors } from './-shared'
 
 interface ResetPasswordSearch {
   token?: string
 }
 
-export const Route = createFileRoute('/(auth)/reset-password')({
+export const Route = createFileRoute('/(auth)/password/reset')({
   validateSearch: (search: Record<string, unknown>): ResetPasswordSearch => ({
     token: typeof search.token === 'string' ? search.token : undefined,
   }),
@@ -30,7 +30,7 @@ function ResetPasswordPage() {
             This password reset link is missing or invalid.
           </p>
           <button
-            onClick={() => navigate({ to: '/forgot-password' })}
+            onClick={() => navigate({ to: '/password/forgot' })}
             className="text-sm text-neutral-900 underline underline-offset-2 font-medium"
           >
             Request a new reset link
@@ -45,26 +45,16 @@ function ResetPasswordPage() {
       await resetPassword(data)
       await navigate({ to: '/login' })
     } catch (err) {
-      const apiErr = err as ApiError
-      if (apiErr.errors) return { errors: apiErr.errors }
-      if (apiErr.message) return { errors: [{ message: apiErr.message }] }
-      throw err
+      return toFormErrors(err)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-8">
-        <div className="text-center">
-          <h1 className="display-title text-3xl text-neutral-900">
-            Set new password
-          </h1>
-          <p className="mt-2 text-sm text-neutral-600">
-            Choose a new password for your account
-          </p>
-        </div>
-        <ResetPasswordForm token={token} onSubmit={handleSubmit} />
-      </div>
-    </div>
+    <PasswordPageShell
+      title="Set new password"
+      subtitle="Choose a new password for your account"
+    >
+      <ResetPasswordForm token={token} onSubmit={handleSubmit} />
+    </PasswordPageShell>
   )
 }

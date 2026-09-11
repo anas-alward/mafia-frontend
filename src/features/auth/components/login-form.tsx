@@ -68,7 +68,7 @@ export function LoginForm({ onSubmit, defaultEmail }: LoginFormProps) {
               <div className="flex items-center justify-between">
                 <FormLabel>Password</FormLabel>
                 <Link
-                  to="/forgot-password"
+                  to="/password/forgot"
                   className="text-sm text-neutral-600 underline underline-offset-2 hover:text-neutral-900"
                 >
                   Forgot password?

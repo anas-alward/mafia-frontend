@@ -59,7 +59,7 @@ export function SiteHeader() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/change-password">
+                  <Link to="/password/change">
                     <KeyRound className="h-4 w-4 mr-2" />
                     Change Password
                   </Link>
