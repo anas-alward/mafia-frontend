@@ -8,7 +8,6 @@ import {
   CreateMeetingButton,
   JoinMeetingForm,
 } from '#/features/rooms/components'
-import { roles } from '#/features/landing/data/roles'
 import { phases } from '#/features/landing/data/phases'
 
 export const Route = createFileRoute('/')({ component: Home })
@@ -37,7 +36,6 @@ function Home() {
         <HowToPlaySection
           title="Choose Your Role"
           description="Every game assigns you a secret role with unique abilities. Your goal depends on which side you're on."
-          roles={roles}
         />
 
         <GameMechanicsSection title="The Game Cycle" phases={phases} />

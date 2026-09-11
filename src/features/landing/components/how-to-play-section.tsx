@@ -6,16 +6,29 @@ import {
   CardTitle,
 } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
-import type { GameRole } from '../data/roles'
-import { getAlignmentLabel } from '../data/roles'
+import { ROLES, Team } from '#/features/game/constants/roles'
+import type { RoleDefinition } from '#/features/game/constants/roles'
+import { ACTION_REGISTRY } from '#/features/game/constants/actions'
+import { Phase } from '#/features/game/constants/phases'
 
 interface HowToPlaySectionProps {
   title: string
   description: string
-  roles: GameRole[]
 }
 
-function RoleCard({ role }: { role: GameRole }) {
+function getAlignmentLabel(roleType: Team): string {
+  return roleType === Team.MAFIA ? 'Mafia' : 'Town'
+}
+
+function getNightAction(role: RoleDefinition): string {
+  const nightActions = role.actions[Phase.NIGHT] ?? []
+  if (nightActions.length === 0) return 'No night action'
+  return nightActions
+    .map((action) => ACTION_REGISTRY[action.action_type].label)
+    .join(' + ')
+}
+
+function RoleCard({ role }: { role: RoleDefinition }) {
   const Icon = role.Icon
 
   return (
@@ -29,7 +42,7 @@ function RoleCard({ role }: { role: GameRole }) {
             variant="secondary"
             className="text-[0.65rem] uppercase tracking-wider font-semibold"
           >
-            {getAlignmentLabel(role.alignment)}
+            {getAlignmentLabel(role.role_type)}
           </Badge>
         </div>
         <CardTitle className="text-lg text-neutral-900">{role.name}</CardTitle>
@@ -43,7 +56,7 @@ function RoleCard({ role }: { role: GameRole }) {
             Night Action
           </p>
           <p className="text-xs text-neutral-600 leading-relaxed">
-            {role.nightAction}
+            {getNightAction(role)}
           </p>
         </div>
       </CardContent>
@@ -54,7 +67,6 @@ function RoleCard({ role }: { role: GameRole }) {
 export function HowToPlaySection({
   title,
   description,
-  roles,
 }: HowToPlaySectionProps) {
   return (
     <section id="how-to-play" className="py-20 sm:py-28 reveal-on-scroll">
@@ -70,8 +82,8 @@ export function HowToPlaySection({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {roles.map((role) => (
-            <RoleCard key={role.id} role={role} />
+          {ROLES.map((role) => (
+            <RoleCard key={role.code} role={role} />
           ))}
         </div>
       </div>
