@@ -1,3 +1,5 @@
+import { Link } from '@tanstack/react-router'
+
 export function SiteFooter() {
   return (
     <footer aria-label="Site footer" className="site-footer py-12 mt-24">
@@ -10,9 +12,9 @@ export function SiteFooter() {
         </div>
 
         <div className="flex items-center gap-6">
-          <a href="#how-to-play" className="nav-link text-sm">
+          <Link to="/how-to-play" className="nav-link text-sm">
             How to Play
-          </a>
+          </Link>
           <a href="#game-mechanics" className="nav-link text-sm">
             Mechanics
           </a>

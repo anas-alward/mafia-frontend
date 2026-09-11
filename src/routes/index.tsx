@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { SiteHeader } from '#/components/site-header'
 import { SiteFooter } from '#/components/site-footer'
 import { HeroSection } from '#/features/landing/components/hero-section'
@@ -30,6 +30,12 @@ function Home() {
               <div className="flex-1 h-px bg-neutral-200" />
             </div>
             <JoinMeetingForm />
+            <Link
+              to="/how-to-play"
+              className="text-sm text-neutral-600 underline underline-offset-2 hover:text-neutral-900"
+            >
+              New here? Learn how to play
+            </Link>
           </div>
         </HeroSection>
 

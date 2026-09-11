@@ -39,6 +39,14 @@ export function SiteHeader() {
         </Link>
 
         <div className="flex items-center gap-4">
+          <nav className="hidden sm:flex items-center gap-4 mr-2">
+            <Link
+              to="/how-to-play"
+              className="text-sm text-neutral-600 hover:text-neutral-900"
+            >
+              How to play
+            </Link>
+          </nav>
           {isLoading ? null : isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="rounded-full ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
