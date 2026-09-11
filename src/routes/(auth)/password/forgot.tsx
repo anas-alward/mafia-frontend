@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { ForgotPasswordForm } from '#/features/auth/components/forgot-password-form'
 import type { ForgotPasswordInput } from '#/features/auth/schemas/auth'
 import { forgotPassword } from '#/features/auth/api/client'
-import { PasswordPageShell } from './-shared'
 
 export const Route = createFileRoute('/(auth)/password/forgot')({
   component: ForgotPasswordPage,
@@ -53,11 +52,18 @@ function ForgotPasswordPage() {
   }
 
   return (
-    <PasswordPageShell
-      title="Reset your password"
-      subtitle="Enter your email to receive a reset link"
-    >
-      <ForgotPasswordForm onSubmit={handleSubmit} />
-    </PasswordPageShell>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center">
+          <h1 className="display-title text-3xl text-neutral-900">
+            Reset your password
+          </h1>
+          <p className="mt-2 text-sm text-neutral-600">
+            Enter your email to receive a reset link
+          </p>
+        </div>
+        <ForgotPasswordForm onSubmit={handleSubmit} />
+      </div>
+    </div>
   )
 }

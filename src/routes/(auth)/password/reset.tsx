@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ResetPasswordForm } from '#/features/auth/components/reset-password-form'
 import type { ResetPasswordInput } from '#/features/auth/schemas/auth'
 import { resetPassword } from '#/features/auth/api/client'
-import { PasswordPageShell, toFormErrors } from './-shared'
+import type { ApiError } from '#/lib/api-client'
 
 interface ResetPasswordSearch {
   email?: string
@@ -48,16 +48,30 @@ function ResetPasswordPage() {
       await resetPassword(data)
       await navigate({ to: '/login' })
     } catch (err) {
-      return toFormErrors(err)
+      const apiErr = err as ApiError
+      if (apiErr.errors) return { errors: apiErr.errors }
+      if (apiErr.message) return { errors: [{ message: apiErr.message }] }
+      throw err
     }
   }
 
   return (
-    <PasswordPageShell
-      title="Set new password"
-      subtitle="Choose a new password for your account"
-    >
-      <ResetPasswordForm token={token} email={email} onSubmit={handleSubmit} />
-    </PasswordPageShell>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center">
+          <h1 className="display-title text-3xl text-neutral-900">
+            Set new password
+          </h1>
+          <p className="mt-2 text-sm text-neutral-600">
+            Choose a new password for your account
+          </p>
+        </div>
+        <ResetPasswordForm
+          token={token}
+          email={email}
+          onSubmit={handleSubmit}
+        />
+      </div>
+    </div>
   )
 }
