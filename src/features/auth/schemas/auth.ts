@@ -72,6 +72,20 @@ export const resetPasswordSchema = z.object({
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
 
+/** Form-level schema: double-checks the password before submission. */
+export const resetPasswordFormSchema = z
+  .object({
+    token: z.string().min(1, 'Reset token is required'),
+    password,
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.confirmPassword === data.password, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
+
+export type ResetPasswordFormInput = z.infer<typeof resetPasswordFormSchema>
+
 // ── Change Password ──
 export const changePasswordSchema = z
   .object({

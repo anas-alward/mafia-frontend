@@ -10,8 +10,11 @@ import {
   FormControl,
   FormMessage,
 } from '#/components/ui/form'
-import { resetPasswordSchema } from '../schemas/auth'
-import type { ResetPasswordInput } from '../schemas/auth'
+import { resetPasswordFormSchema } from '../schemas/auth'
+import type {
+  ResetPasswordFormInput,
+  ResetPasswordInput,
+} from '../schemas/auth'
 
 interface ResetPasswordFormProps {
   token: string
@@ -21,13 +24,17 @@ interface ResetPasswordFormProps {
 }
 
 export function ResetPasswordForm({ token, onSubmit }: ResetPasswordFormProps) {
-  const form = useForm<ResetPasswordInput>({
-    resolver: zodResolver(resetPasswordSchema),
-    defaultValues: { token, password: '' },
+  const form = useForm<ResetPasswordFormInput>({
+    resolver: zodResolver(resetPasswordFormSchema),
+    defaultValues: { token, password: '', confirmPassword: '' },
   })
 
-  const handleSubmit = async (data: ResetPasswordInput) => {
-    const result = await onSubmit(data)
+  const handleSubmit = async (data: ResetPasswordFormInput) => {
+    // confirmPassword is validation-only — never sent to the API.
+    const result = await onSubmit({
+      token: data.token,
+      password: data.password,
+    })
     if (result?.errors) {
       for (const e of result.errors) {
         form.setError(
@@ -53,6 +60,20 @@ export function ResetPasswordForm({ token, onSubmit }: ResetPasswordFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>New Password</FormLabel>
+              <FormControl>
+                <Input type="password" autoComplete="new-password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
               <FormControl>
                 <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
