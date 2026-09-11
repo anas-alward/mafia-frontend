@@ -31,7 +31,7 @@ function Home() {
             </div>
             <JoinMeetingForm />
             <Link
-              to="/how-to-play"
+              to="/game/how-to-play"
               className="text-sm text-neutral-600 underline underline-offset-2 hover:text-neutral-900"
             >
               New here? Learn how to play

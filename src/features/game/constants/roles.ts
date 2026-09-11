@@ -157,6 +157,11 @@ export const ROLE_REGISTRY: Record<string, RoleDefinition> = Object.fromEntries(
   ROLES.map((role) => [role.code, role]),
 )
 
+/** Registry lookup for untyped role `code` strings. */
+export function getRoleDefinition(code: string): RoleDefinition | undefined {
+  return Object.hasOwn(ROLE_REGISTRY, code) ? ROLE_REGISTRY[code] : undefined
+}
+
 export const TEAM_COLORS: Record<Team, string> = {
   [Team.TOWN]: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   [Team.MAFIA]: 'bg-red-500/10 text-red-400 border-red-500/20',

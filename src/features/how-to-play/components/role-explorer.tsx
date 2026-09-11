@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Card,
   CardContent,
@@ -11,7 +11,7 @@ import { ROLES, Team } from '#/features/game/constants/roles'
 import type { RoleDefinition } from '#/features/game/constants/roles'
 import { ACTION_REGISTRY, ActionType } from '#/features/game/constants/actions'
 import { PHASE_META, Phase } from '#/features/game/constants/phases'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
 type TeamFilter = 'all' | Team
 
@@ -41,7 +41,7 @@ function RoleCard({ role }: { role: RoleDefinition }) {
   const specials = getSpecialActions(role)
 
   return (
-    <Card className="feature-card transition-colors">
+    <Card className="feature-card w-72 shrink-0 snap-start transition-colors">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
           <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-neutral-100 text-neutral-900">
@@ -106,8 +106,38 @@ function RoleCard({ role }: { role: RoleDefinition }) {
 
 export function RoleExplorer() {
   const [filter, setFilter] = useState<TeamFilter>('all')
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
   const visible =
     filter === 'all' ? ROLES : ROLES.filter((role) => role.role_type === filter)
+
+  const updateArrows = useCallback(() => {
+    const track = trackRef.current
+    if (!track) return
+    setCanScrollLeft(track.scrollLeft > 4)
+    setCanScrollRight(
+      track.scrollLeft + track.clientWidth < track.scrollWidth - 4,
+    )
+  }, [])
+
+  useEffect(() => {
+    const track = trackRef.current
+    if (track) track.scrollLeft = 0
+    updateArrows()
+    window.addEventListener('resize', updateArrows)
+    return () => window.removeEventListener('resize', updateArrows)
+  }, [filter, updateArrows])
+
+  const scroll = (direction: 1 | -1) => {
+    const track = trackRef.current
+    if (!track) return
+    track.scrollBy({
+      left: direction * track.clientWidth * 0.8,
+      behavior: 'smooth',
+    })
+  }
 
   return (
     <section aria-labelledby="roles-heading" className="py-16 sm:py-20">
@@ -148,10 +178,38 @@ export function RoleExplorer() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {visible.map((role) => (
-            <RoleCard key={role.code} role={role} />
-          ))}
+        <div className="relative">
+          <div
+            ref={trackRef}
+            onScroll={updateArrows}
+            role="region"
+            aria-label="Roles"
+            className="flex gap-6 overflow-x-auto snap-x pb-2 [&::-webkit-scrollbar]:hidden"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {visible.map((role) => (
+              <RoleCard key={role.code} role={role} />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scroll(-1)}
+            disabled={!canScrollLeft}
+            aria-label="Scroll roles left"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 flex items-center justify-center w-10 h-10 rounded-full bg-neutral-900 text-white shadow-md transition-opacity disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <ChevronLeft className="w-5 h-5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scroll(1)}
+            disabled={!canScrollRight}
+            aria-label="Scroll roles right"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 flex items-center justify-center w-10 h-10 rounded-full bg-neutral-900 text-white shadow-md transition-opacity disabled:opacity-0 disabled:pointer-events-none"
+          >
+            <ChevronRight className="w-5 h-5" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </section>

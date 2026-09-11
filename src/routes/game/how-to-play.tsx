@@ -3,11 +3,12 @@ import { SiteHeader } from '#/components/site-header'
 import { SiteFooter } from '#/components/site-footer'
 import { Button } from '#/components/ui/button'
 import { RoleExplorer } from '#/features/how-to-play/components/role-explorer'
+import { ActionGlossary } from '#/features/how-to-play/components/action-glossary'
 import { GameFlow } from '#/features/how-to-play/components/game-flow'
 import { WinConditions } from '#/features/how-to-play/components/win-conditions'
 import { BeginnerTips } from '#/features/how-to-play/components/beginner-tips'
 
-export const Route = createFileRoute('/how-to-play')({
+export const Route = createFileRoute('/game/how-to-play')({
   component: HowToPlayPage,
 })
 
@@ -34,6 +35,7 @@ function HowToPlayPage() {
 
         <GameFlow />
         <RoleExplorer />
+        <ActionGlossary />
         <WinConditions />
         <BeginnerTips />
 

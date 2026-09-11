@@ -12,7 +12,7 @@ export function SiteFooter() {
         </div>
 
         <div className="flex items-center gap-6">
-          <Link to="/how-to-play" className="nav-link text-sm">
+          <Link to="/game/how-to-play" className="nav-link text-sm">
             How to Play
           </Link>
           <a href="#game-mechanics" className="nav-link text-sm">
