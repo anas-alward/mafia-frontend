@@ -10,10 +10,13 @@ import { addMember } from '../api/client'
 import { joinMeetingSchema } from '../schemas/room'
 import type { JoinMeetingInput } from '../schemas/room'
 
-function extractRoomId(input: string): string {
-  const match = input.match(/\/rooms\/([^/?\s]+)/)
+function extractRoomCode(input: string): string {
+  const trimmed = input.trim().replace(/\/+$/, '')
+  // Full link like .../rooms/<code>/join or .../rooms/<code> → take the code
+  const match = trimmed.match(/\/rooms\/([^/?\s]+)/)
   if (match) return match[1]
-  return input.trim()
+  // Bare code → use as-is
+  return trimmed
 }
 
 export function JoinMeetingForm() {
@@ -33,12 +36,12 @@ export function JoinMeetingForm() {
 
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: async (data: JoinMeetingInput) => {
-      const roomId = extractRoomId(data.link)
-      return addMember(roomId, { user_id: user!.id })
+      const roomCode = extractRoomCode(data.link)
+      return addMember(roomCode, { user_id: user!.id })
     },
     onSuccess: (_result, variables) => {
-      const roomId = extractRoomId(variables.link)
-      navigate({ to: '/rooms/$roomId', params: { roomId } })
+      const roomCode = extractRoomCode(variables.link)
+      navigate({ to: '/rooms/$roomId/join', params: { roomId: roomCode } })
     },
   })
 
