@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import {
   Card,
   CardContent,
@@ -54,7 +55,15 @@ function RoleCard({ role }: { role: RoleDefinition }) {
             {role.role_type === Team.MAFIA ? 'Mafia' : 'Town'}
           </Badge>
         </div>
-        <CardTitle className="text-lg text-neutral-900">{role.name}</CardTitle>
+        <CardTitle className="text-lg text-neutral-900">
+          <Link
+            to="/game/roles/$roleCode"
+            params={{ roleCode: role.code }}
+            className="underline-offset-2 hover:underline"
+          >
+            {role.name}
+          </Link>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <CardDescription className="text-sm text-neutral-600 leading-relaxed">

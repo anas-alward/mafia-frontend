@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GameHowToPlayRouteImport } from './routes/game/how-to-play'
+import { Route as GameActionsRouteImport } from './routes/game/actions'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authLoginRouteImport } from './routes/(auth)/login'
@@ -20,6 +21,7 @@ import { Route as RoomsRoomIdLiveRouteImport } from './routes/rooms/$roomId/live
 import { Route as RoomsRoomIdJoinRouteImport } from './routes/rooms/$roomId/join'
 import { Route as RoomsRoomIdEndedRouteImport } from './routes/rooms/$roomId/ended'
 import { Route as GameRolesDistributionRouteImport } from './routes/game/roles/distribution'
+import { Route as GameRolesRoleCodeRouteImport } from './routes/game/roles/$roleCode'
 import { Route as authPasswordResetRouteImport } from './routes/(auth)/password/reset'
 import { Route as authPasswordForgotRouteImport } from './routes/(auth)/password/forgot'
 import { Route as authPasswordChangeRouteImport } from './routes/(auth)/password/change'
@@ -32,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
 const GameHowToPlayRoute = GameHowToPlayRouteImport.update({
   id: '/game/how-to-play',
   path: '/game/how-to-play',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameActionsRoute = GameActionsRouteImport.update({
+  id: '/game/actions',
+  path: '/game/actions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const authVerifyEmailRoute = authVerifyEmailRouteImport.update({
@@ -79,6 +86,11 @@ const GameRolesDistributionRoute = GameRolesDistributionRouteImport.update({
   path: '/game/roles/distribution',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GameRolesRoleCodeRoute = GameRolesRoleCodeRouteImport.update({
+  id: '/game/roles/$roleCode',
+  path: '/game/roles/$roleCode',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const authPasswordResetRoute = authPasswordResetRouteImport.update({
   id: '/(auth)/password/reset',
   path: '/password/reset',
@@ -101,10 +113,12 @@ export interface FileRoutesByFullPath {
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
+  '/game/actions': typeof GameActionsRoute
   '/game/how-to-play': typeof GameHowToPlayRoute
   '/password/change': typeof authPasswordChangeRoute
   '/password/forgot': typeof authPasswordForgotRoute
   '/password/reset': typeof authPasswordResetRoute
+  '/game/roles/$roleCode': typeof GameRolesRoleCodeRoute
   '/game/roles/distribution': typeof GameRolesDistributionRoute
   '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
   '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
@@ -117,10 +131,12 @@ export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
+  '/game/actions': typeof GameActionsRoute
   '/game/how-to-play': typeof GameHowToPlayRoute
   '/password/change': typeof authPasswordChangeRoute
   '/password/forgot': typeof authPasswordForgotRoute
   '/password/reset': typeof authPasswordResetRoute
+  '/game/roles/$roleCode': typeof GameRolesRoleCodeRoute
   '/game/roles/distribution': typeof GameRolesDistributionRoute
   '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
   '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
@@ -134,10 +150,12 @@ export interface FileRoutesById {
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/signup': typeof authSignupRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
+  '/game/actions': typeof GameActionsRoute
   '/game/how-to-play': typeof GameHowToPlayRoute
   '/(auth)/password/change': typeof authPasswordChangeRoute
   '/(auth)/password/forgot': typeof authPasswordForgotRoute
   '/(auth)/password/reset': typeof authPasswordResetRoute
+  '/game/roles/$roleCode': typeof GameRolesRoleCodeRoute
   '/game/roles/distribution': typeof GameRolesDistributionRoute
   '/rooms/$roomId/ended': typeof RoomsRoomIdEndedRoute
   '/rooms/$roomId/join': typeof RoomsRoomIdJoinRoute
@@ -152,10 +170,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/verify-email'
+    | '/game/actions'
     | '/game/how-to-play'
     | '/password/change'
     | '/password/forgot'
     | '/password/reset'
+    | '/game/roles/$roleCode'
     | '/game/roles/distribution'
     | '/rooms/$roomId/ended'
     | '/rooms/$roomId/join'
@@ -168,10 +188,12 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/verify-email'
+    | '/game/actions'
     | '/game/how-to-play'
     | '/password/change'
     | '/password/forgot'
     | '/password/reset'
+    | '/game/roles/$roleCode'
     | '/game/roles/distribution'
     | '/rooms/$roomId/ended'
     | '/rooms/$roomId/join'
@@ -184,10 +206,12 @@ export interface FileRouteTypes {
     | '/(auth)/login'
     | '/(auth)/signup'
     | '/(auth)/verify-email'
+    | '/game/actions'
     | '/game/how-to-play'
     | '/(auth)/password/change'
     | '/(auth)/password/forgot'
     | '/(auth)/password/reset'
+    | '/game/roles/$roleCode'
     | '/game/roles/distribution'
     | '/rooms/$roomId/ended'
     | '/rooms/$roomId/join'
@@ -201,10 +225,12 @@ export interface RootRouteChildren {
   authLoginRoute: typeof authLoginRoute
   authSignupRoute: typeof authSignupRoute
   authVerifyEmailRoute: typeof authVerifyEmailRoute
+  GameActionsRoute: typeof GameActionsRoute
   GameHowToPlayRoute: typeof GameHowToPlayRoute
   authPasswordChangeRoute: typeof authPasswordChangeRoute
   authPasswordForgotRoute: typeof authPasswordForgotRoute
   authPasswordResetRoute: typeof authPasswordResetRoute
+  GameRolesRoleCodeRoute: typeof GameRolesRoleCodeRoute
   GameRolesDistributionRoute: typeof GameRolesDistributionRoute
   GameRolesIndexRoute: typeof GameRolesIndexRoute
 }
@@ -223,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/game/how-to-play'
       fullPath: '/game/how-to-play'
       preLoaderRoute: typeof GameHowToPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/actions': {
+      id: '/game/actions'
+      path: '/game/actions'
+      fullPath: '/game/actions'
+      preLoaderRoute: typeof GameActionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(auth)/verify-email': {
@@ -288,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GameRolesDistributionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/game/roles/$roleCode': {
+      id: '/game/roles/$roleCode'
+      path: '/game/roles/$roleCode'
+      fullPath: '/game/roles/$roleCode'
+      preLoaderRoute: typeof GameRolesRoleCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(auth)/password/reset': {
       id: '/(auth)/password/reset'
       path: '/password/reset'
@@ -333,10 +373,12 @@ const rootRouteChildren: RootRouteChildren = {
   authLoginRoute: authLoginRoute,
   authSignupRoute: authSignupRoute,
   authVerifyEmailRoute: authVerifyEmailRoute,
+  GameActionsRoute: GameActionsRoute,
   GameHowToPlayRoute: GameHowToPlayRoute,
   authPasswordChangeRoute: authPasswordChangeRoute,
   authPasswordForgotRoute: authPasswordForgotRoute,
   authPasswordResetRoute: authPasswordResetRoute,
+  GameRolesRoleCodeRoute: GameRolesRoleCodeRoute,
   GameRolesDistributionRoute: GameRolesDistributionRoute,
   GameRolesIndexRoute: GameRolesIndexRoute,
 }
