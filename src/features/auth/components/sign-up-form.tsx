@@ -11,8 +11,8 @@ import {
   FormControl,
   FormMessage,
 } from '#/components/ui/form'
-import { signUpSchema } from '../schemas/auth'
-import type { SignUpInput } from '../schemas/auth'
+import { signUpFormSchema } from '../schemas/auth'
+import type { SignUpInput, SignUpFormInput } from '../schemas/auth'
 
 interface SignUpFormProps {
   onSubmit: (
@@ -22,13 +22,18 @@ interface SignUpFormProps {
 
 export function SignUpForm({ onSubmit }: SignUpFormProps) {
   const navigate = useNavigate()
-  const form = useForm<SignUpInput>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: { username: '', email: '', password: '' },
+  const form = useForm<SignUpFormInput>({
+    resolver: zodResolver(signUpFormSchema),
+    defaultValues: { username: '', email: '', password: '', confirmPassword: '' },
   })
 
-  const handleSubmit = async (data: SignUpInput) => {
-    const result = await onSubmit(data)
+  const handleSubmit = async (data: SignUpFormInput) => {
+    // confirmPassword is validation-only — never sent to the API.
+    const result = await onSubmit({
+      username: data.username,
+      email: data.email,
+      password: data.password,
+    })
     if (result?.errors) {
       for (const e of result.errors) {
         form.setError((e.field ?? 'root') as keyof SignUpInput | 'root', {
@@ -79,6 +84,20 @@ export function SignUpForm({ onSubmit }: SignUpFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" autoComplete="new-password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
               <FormControl>
                 <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>

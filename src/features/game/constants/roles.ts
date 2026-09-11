@@ -114,7 +114,7 @@ export const MafiaGodfather: RoleDefinition = {
 export const MafiaSilencer: RoleDefinition = {
   code: 'silencer',
   role_type: Team.MAFIA,
-  name: 'Silencer',
+  name: 'Mafia Silencer',
   description:
     'Blocks one player each night, preventing them from using their action.',
   Icon: Ban,
@@ -130,7 +130,7 @@ export const MafiaSilencer: RoleDefinition = {
 export const MafiaMember: RoleDefinition = {
   code: 'mafia_member',
   role_type: Team.MAFIA,
-  name: 'Black Hand',
+  name: 'Mafia Member',
   description: 'Basic Mafia member who participates in night kills.',
   Icon: Skull,
   actions: {

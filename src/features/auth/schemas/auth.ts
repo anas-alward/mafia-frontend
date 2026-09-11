@@ -23,6 +23,21 @@ export const signUpSchema = z.object({
 
 export type SignUpInput = z.infer<typeof signUpSchema>
 
+/** Form-level schema: double-checks the password before submission. */
+export const signUpFormSchema = z
+  .object({
+    username,
+    email,
+    password,
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.confirmPassword === data.password, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
+
+export type SignUpFormInput = z.infer<typeof signUpFormSchema>
+
 // ── Login ──
 export const loginSchema = z.object({
   email: z
