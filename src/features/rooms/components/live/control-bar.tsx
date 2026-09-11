@@ -5,7 +5,6 @@ import {
   FullscreenButton,
   GraveyardStrip,
   HostActionsMenu,
-  JoinRequestsButton,
   MediaControls,
   StartGameButton,
 } from '#/features/rooms/components'
@@ -43,10 +42,6 @@ export default function ControlBar({
           {/* Graveyard strip — eliminated players (scrollable) */}
           <GraveyardStrip />
 
-          {/* Required actions — pending phase obligations; hover opens
-              the list above the bar */}
-          {gameStarted && <PhaseEventsPanel />}
-
           {/* Host actions dropdown (in game) */}
           {gameStarted && <HostActionsMenu />}
 
@@ -57,10 +52,10 @@ export default function ControlBar({
         {/* Center: media controls */}
         <MediaControls />
 
-        {/* Right: fullscreen (game) + join requests */}
+        {/* Right: fullscreen (game) + required actions */}
         <div className="flex items-center gap-1.5">
           {gameStarted && <FullscreenButton fullScreenRef={fullScreenRef} />}
-          <JoinRequestsButton />
+          {gameStarted && <PhaseEventsPanel />}
         </div>
       </div>
     </div>

@@ -1,25 +1,18 @@
-import { ListTodo } from 'lucide-react'
+import { useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useAuthStore } from '#/features/auth/store/auth-store'
 import { getActionDefinition } from '#/features/game/constants/actions'
-import {
-  derivePhaseEvents,
-  phaseHeading,
-} from '#/features/game/phase-events'
-
-const PHASE_LABELS: Record<string, string> = {
-  day: 'Day',
-  night: 'Night',
-  vote_result: 'Vote Result',
-  ended: 'Ended',
-  lobby: 'Lobby',
-}
+import { derivePhaseEvents } from '#/features/game/phase-events'
 
 /**
- * Required-action indicator living in the bottom control bar. Collapses
- * to a compact icon with a pending count; hovering (or keyboard-focusing)
- * opens a popup above the bar listing everyone who still owes an action.
+ * Required-action avatar stack in the control bar's left section. Pending
+ * obligations are grouped by action type; each group renders as one
+ * circular avatar carrying that action's icon and accent color. Hovering
+ * an avatar scales it up and lifts it, neighbours spread apart smoothly,
+ * and a tooltip above lists who still owes the action (or the action
+ * count for anonymous night requirements). A "+N" avatar groups overflow.
  */
 export function PhaseEventsPanel() {
   const phase = useGameStore((s) => s.phase)
@@ -29,10 +22,11 @@ export function PhaseEventsPanel() {
   const roundRequirements = useGameStore((s) => s.roundRequirements)
   const logs = useGameStore((s) => s.logs)
   const gamePlayers = useGameStore((s) => s.players)
-  const deadPlayerIds = useGameStore((s) => s.deadPlayerIds)
   const participants = useMeetingStore((s) => s.participants)
   const currentUser = useAuthStore((s) => s.user)
   const myUserId = currentUser ? Number(currentUser.id) : null
+
+  const [hovered, setHovered] = useState<number | null>(null)
 
   const { requirements } = derivePhaseEvents({
     phase,
@@ -49,100 +43,127 @@ export function PhaseEventsPanel() {
   // Only items that still require an action — completed ones are dropped.
   const pending = requirements.filter((event) => !event.done)
 
-  // Nothing pending — hide the trigger entirely.
+  // Nothing pending — hide the stack entirely.
   if (pending.length === 0) return null
 
+  // Group by action type, preserving first-seen order. Groups carry the
+  // pending actor names (day votes) and whether one of them is mine.
+  const groups = new Map<
+    string,
+    { actionType: string; names: (string | null)[]; isMine: boolean }
+  >()
+  for (const event of pending) {
+    const group = groups.get(event.actionType) ?? {
+      actionType: event.actionType,
+      names: [],
+      isMine: false,
+    }
+    group.names.push(event.actorName)
+    if (event.isMine) group.isMine = true
+    groups.set(event.actionType, group)
+  }
+
   return (
-    <div className="group relative flex items-center">
-      {/* Divider separating this section from the graveyard strip on its
-          left — only shown when the strip is actually rendered */}
-      {deadPlayerIds.length > 0 && (
-        <span
-          aria-hidden
-          className="w-px self-stretch my-1.5 mr-1.5"
-          style={{ backgroundColor: 'var(--game-border)' }}
+    <div className="flex items-center">
+      {[...groups.values()].map((group, i) => (
+        <ActionAvatar
+          key={group.actionType}
+          group={group}
+          index={i}
+          hovered={hovered}
+          setHovered={setHovered}
         />
-      )}
-
-      {/* Trigger — compact, styled like the other control-bar buttons */}
-      <button
-        type="button"
-        className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all duration-200 cursor-pointer border text-xs font-semibold"
-        style={{
-          color: 'var(--game-text-muted)',
-          backgroundColor: 'transparent',
-          borderColor: 'transparent',
-        }}
-        aria-label={`${pending.length} required action${pending.length === 1 ? '' : 's'}`}
-      >
-        <ListTodo className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">Actions</span>
-        <span
-          className="absolute -top-1.5 -right-1.5 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full leading-none px-1"
-          style={{
-            color: '#1b1922',
-            backgroundColor: 'var(--game-gold)',
-          }}
-        >
-          {pending.length}
-        </span>
-      </button>
-
-      {/* Popup — opens upward from the bar. The bottom padding keeps the
-          hover bridge intact so moving from trigger to card doesn't
-          dismiss it. Also revealed on keyboard focus-within. */}
-      <div className="absolute bottom-full left-0 z-50 pb-2.5 opacity-0 invisible translate-y-1 transition-all duration-200 ease-out group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0">
-        <div className="w-60 max-h-[40vh] overflow-y-auto rounded-2xl bg-[#1c1c1f]/95 border border-white/[0.06] shadow-2xl p-2.5">
-          <div className="flex items-center gap-2 px-1 pt-1 pb-2">
-            <ListTodo className="h-3.5 w-3.5 text-[#71717a] shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#71717a] truncate">
-              {phaseHeading(roundNumber, PHASE_LABELS[phase] ?? phase)}
-            </span>
-          </div>
-
-          <ul className="space-y-1">
-            {pending.map((event) => {
-              const def = getActionDefinition(event.actionType)
-              const Icon = def?.eventIcon
-              return (
-                <li
-                  key={event.key}
-                  className="flex items-center gap-2 rounded-lg px-1.5 py-1"
-                  style={{ backgroundColor: 'rgba(243, 240, 232, 0.04)' }}
-                >
-                  {Icon && (
-                    <Icon
-                      className="h-4 w-4 shrink-0"
-                      style={{ color: def.color }}
-                    />
-                  )}
-                  <span
-                    className="text-[12px] whitespace-nowrap truncate"
-                    style={{
-                      color: event.isMine
-                        ? 'var(--game-text-primary)'
-                        : 'var(--game-text-muted)',
-                    }}
-                  >
-                    {event.actorName ?? (def?.label ?? event.actionType)}
-                  </span>
-                  {event.isMine && (
-                    <span
-                      className="ml-auto text-[9px] font-semibold uppercase px-1 py-px rounded-full shrink-0 whitespace-nowrap"
-                      style={{
-                        color: 'var(--game-gold)',
-                        backgroundColor: 'rgba(237, 184, 58, 0.1)',
-                      }}
-                    >
-                      You
-                    </span>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      </div>
+      ))}
     </div>
+  )
+}
+
+interface ActionGroup {
+  actionType: string
+  names: (string | null)[]
+  isMine: boolean
+}
+
+function ActionAvatar({
+  group,
+  index,
+  hovered,
+  setHovered,
+}: {
+  group: ActionGroup
+  index: number
+  hovered: number | null
+  setHovered: (i: number | null) => void
+}) {
+  const isHovered = hovered === index
+  // Neighbours slide away from the hovered avatar; the hovered one lifts.
+  const spread =
+    hovered === null
+      ? 0
+      : hovered === index
+        ? 0
+        : index < hovered
+          ? -5
+          : 5
+
+  const def = getActionDefinition(group.actionType)
+  const Icon = def?.eventIcon
+  const pendingCount = group.names.length
+
+  // Tooltip lines: named players for public day votes, a count for the
+  // anonymous night requirements.
+  const tooltipLines =
+    group.names[0] != null
+      ? group.names.slice(0, 4)
+      : [`${def?.label ?? group.actionType} ×${pendingCount}`]
+
+  return (
+    <motion.div
+      onMouseEnter={() => setHovered(index)}
+      onMouseLeave={() => setHovered(null)}
+      animate={{ x: spread, scale: hovered === index ? 1.18 : 1, y: hovered === index ? -3 : 0 }}
+      transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+      className={`relative ${index === 0 ? '' : '-ml-1.5'}`}
+      style={{ zIndex: hovered === index ? 30 : 20 - index }}
+    >
+      <div
+        className="h-8 w-8 rounded-full flex items-center justify-center select-none transition-shadow duration-200"
+        style={{
+          backgroundColor: def?.bg ?? 'var(--game-bg-elevated)',
+          boxShadow: isHovered
+            ? `0 0 0 2px ${def?.border ?? 'var(--game-border)'}, 0 6px 16px rgba(0,0,0,0.5)`
+            : `0 0 0 1.5px ${def?.border ?? 'var(--game-border)'}, 0 2px 6px rgba(0,0,0,0.4)`,
+          ...(group.isMine
+            ? { outline: '2px solid var(--game-gold)', outlineOffset: '1px' }
+            : {}),
+        }}
+        aria-label={`${pendingCount} required action${pendingCount === 1 ? '' : 's'}: ${group.actionType}`}
+      >
+        {Icon && <Icon className="h-4 w-4" style={{ color: def.color }} />}
+      </div>
+
+      {/* Tooltip above the avatar */}
+      <AnimatePresence>
+        {hovered === index && (
+          <motion.div
+            initial={{ opacity: 0, y: 4, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ duration: 0.15, ease: [0, 0, 0.2, 1] }}
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none whitespace-nowrap rounded-lg bg-[#26262b] border border-white/[0.08] px-2.5 py-1.5 shadow-xl"
+          >
+            {tooltipLines.map((line) => (
+              <div
+                key={line}
+                className="text-[11px] font-medium leading-relaxed"
+                style={{ color: 'var(--game-text-primary)' }}
+              >
+                {line}
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }

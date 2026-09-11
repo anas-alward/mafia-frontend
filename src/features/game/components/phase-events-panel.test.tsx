@@ -1,21 +1,25 @@
-import { cleanup, render } from '@testing-library/react'
+import { cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { useGameStore } from '#/features/game/store/game-store'
 import { PhaseEventsPanel } from './phase-events-panel'
 import type { GameStartedEvent, VoteCastEvent } from '#/features/game/events'
 
-function startGame() {
+const NAMES = ['Alice', 'Bob', 'Carol', 'Dave']
+
+function startGame(playerCount = 3) {
+  const ids = Array.from({ length: playerCount }, (_, i) => i + 1)
   const msg: GameStartedEvent = {
     type: 'game_started',
-    player_ids: [1, 2, 3],
+    player_ids: ids,
     session_id: 's1',
     host: 1,
-    alive_ids: [1, 2, 3],
-    players: [
-      { id: 1, code: 'a', name: 'Alice', status: 'alive' },
-      { id: 2, code: 'b', name: 'Bob', status: 'alive' },
-      { id: 3, code: 'c', name: 'Carol', status: 'alive' },
-    ],
+    alive_ids: ids,
+    players: ids.map((id) => ({
+      id,
+      code: `p${id}`,
+      name: NAMES[id - 1],
+      status: 'alive' as const,
+    })),
     required_actions: [],
   }
   useGameStore.getState().processMessage(msg)
@@ -43,14 +47,12 @@ describe('PhaseEventsPanel', () => {
     expect(container.innerHTML).toBe('')
   })
 
-  it('lists everyone who still needs to vote with a pending count', () => {
+  it('renders one vote avatar while players still need to vote', () => {
     startGame()
     const { container } = render(<PhaseEventsPanel />)
-    const text = container.textContent
-    expect(text).toContain('3')
-    expect(text).toContain('Alice')
-    expect(text).toContain('Bob')
-    expect(text).toContain('Carol')
+    expect(
+      container.querySelector('[aria-label="3 required actions: vote"]'),
+    ).not.toBeNull()
   })
 
   it('drops players who already voted', () => {
@@ -58,11 +60,9 @@ describe('PhaseEventsPanel', () => {
     castVote(1, 2)
     castVote(3, 2)
     const { container } = render(<PhaseEventsPanel />)
-    const text = container.textContent
-    expect(text).toContain('1')
-    expect(text).toContain('Bob')
-    expect(text).not.toContain('Alice')
-    expect(text).not.toContain('Carol')
+    expect(
+      container.querySelector('[aria-label="1 required action: vote"]'),
+    ).not.toBeNull()
   })
 
   it('renders nothing once every alive player has voted', () => {
@@ -72,5 +72,18 @@ describe('PhaseEventsPanel', () => {
     castVote(3, 1)
     const { container } = render(<PhaseEventsPanel />)
     expect(container.innerHTML).toBe('')
+  })
+
+  it('tooltip lists the players who still need to vote', () => {
+    startGame()
+    castVote(1, 2)
+    const { container } = render(<PhaseEventsPanel />)
+    fireEvent.mouseEnter(
+      container.querySelector('[aria-label="2 required actions: vote"]')!,
+    )
+    const text = container.textContent
+    expect(text).toContain('Bob')
+    expect(text).toContain('Carol')
+    expect(text).not.toContain('Alice')
   })
 })
