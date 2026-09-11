@@ -63,7 +63,7 @@ export function HostActionsMenu() {
           setMenuOpen(false)
         }}
         title={primary ? primary.hint : undefined}
-        className={`flex items-center gap-2 pl-3 pr-2.5 py-2.5 rounded-l-xl transition-all duration-200 ${
+        className={`flex items-center justify-center w-10 py-2.5 rounded-l-xl transition-all duration-200 ${
           ready
             ? 'cursor-pointer hover:bg-white/[0.04]'
             : 'cursor-not-allowed opacity-50'
@@ -74,12 +74,6 @@ export function HostActionsMenu() {
         aria-label={primary ? `${primary.label} (primary)` : 'Host actions'}
       >
         <Send className="h-4 w-4" />
-        <span
-          className="hidden sm:inline text-xs font-semibold"
-          style={{ color: ready ? 'var(--game-text-primary)' : undefined }}
-        >
-          {primary?.label}
-        </span>
       </button>
 
       {/* Chevron — alternatives dropdown */}
