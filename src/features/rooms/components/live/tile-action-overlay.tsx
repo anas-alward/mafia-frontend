@@ -100,12 +100,12 @@ export function TileActionOverlay({
               title={definition.label}
               className="flex-1 h-full flex items-center justify-center cursor-pointer"
               style={{
-                backgroundColor: `color-mix(in srgb, ${definition.color} 30%, rgba(19, 19, 20, 0.55))`,
+                backgroundColor: definition.color,
               }}
             >
               <definition.Icon
                 className="h-6 w-6"
-                style={{ color: definition.color }}
+                style={{ color: '#131314' }}
               />
             </button>
           ))}

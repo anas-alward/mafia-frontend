@@ -6,51 +6,6 @@ import { useAuthStore } from '#/features/auth/store/auth-store'
 import { getActionDefinition } from '#/features/game/constants/actions'
 import { derivePhaseEvents } from '#/features/game/phase-events'
 
-// #131314 — var(--game-bg-deep), the control bar background the tints sit on.
-const BAR_BG = [19, 19, 20] as const
-
-function parseColor(
-  color: string,
-): [number, number, number, number] | null {
-  const withAlpha = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/)
-  if (withAlpha) {
-    return [
-      Number(withAlpha[1]),
-      Number(withAlpha[2]),
-      Number(withAlpha[3]),
-      Number(withAlpha[4]),
-    ]
-  }
-  const opaque = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)\)/)
-  if (opaque) {
-    return [Number(opaque[1]), Number(opaque[2]), Number(opaque[3]), 1]
-  }
-  const hex = color.match(/^#([0-9a-f]{6})$/i)
-  if (hex) {
-    const n = parseInt(hex[1], 16)
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255, 1]
-  }
-  return null
-}
-
-/** Opaque version of a tinted color, composited over the bar background. */
-function solidifyTint(color: string | undefined): string | null {
-  if (color == null) return null
-  const parsed = parseColor(color)
-  if (parsed == null) return null
-  const [r, g, b, a] = parsed
-  const mix = (c: number, base: number) => Math.round(c * a + base * (1 - a))
-  return `rgb(${mix(r, BAR_BG[0])}, ${mix(g, BAR_BG[1])}, ${mix(b, BAR_BG[2])})`
-}
-
-/** Perceived-brightness check for picking a contrasting icon color. */
-function isLightColor(color: string): boolean {
-  const parsed = parseColor(color)
-  if (parsed == null) return false
-  const [r, g, b] = parsed
-  return (r * 299 + g * 587 + b * 114) / 1000 > 140
-}
-
 /**
  * Required-action avatar stack in the control bar's left section. Pending
  * obligations are grouped by action type; each group renders as one
@@ -155,12 +110,9 @@ function ActionAvatar({
   const Icon = def?.eventIcon
   const pendingCount = group.names.length
 
-  // Solid, opaque avatar background: the action's tint composited over
-  // the bar background, so overlapping avatars never blend through. The
-  // icon flips dark when the resulting background is light.
-  const solid = solidifyTint(def?.bg) ?? 'var(--game-bg-elevated)'
-  const iconColor =
-    def != null && isLightColor(solid) ? '#131314' : (def?.color ?? 'var(--game-text-muted)')
+  // Solid avatar background: the action's full accent color, with a dark
+  // icon for contrast. No transparency — overlaps stay clean.
+  const solid = def?.color ?? 'var(--game-bg-elevated)'
 
   // Tooltip lines: named players for public day votes, a count for the
   // anonymous night requirements.
@@ -191,7 +143,7 @@ function ActionAvatar({
         }}
         aria-label={`${pendingCount} required action${pendingCount === 1 ? '' : 's'}: ${group.actionType}`}
       >
-        {Icon && <Icon className="h-4 w-4" style={{ color: iconColor }} />}
+        {Icon && <Icon className="h-4 w-4" style={{ color: '#131314' }} />}
       </div>
 
       {/* Tooltip above the avatar */}
