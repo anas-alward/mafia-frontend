@@ -135,8 +135,8 @@ function ActionAvatar({
         style={{
           backgroundColor: solid,
           boxShadow: isHovered
-            ? `0 0 0 2px ${def?.border ?? 'var(--game-border)'}, 0 6px 16px rgba(0,0,0,0.5)`
-            : `0 0 0 1.5px ${def?.border ?? 'var(--game-border)'}, 0 2px 6px rgba(0,0,0,0.4)`,
+            ? '0 6px 16px rgba(0,0,0,0.5)'
+            : '0 2px 6px rgba(0,0,0,0.4)',
           ...(group.isMine
             ? { outline: '2px solid var(--game-gold)', outlineOffset: '1px' }
             : {}),
