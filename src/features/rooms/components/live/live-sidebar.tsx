@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
-import { Users, ScrollText, X, Check } from 'lucide-react'
+import { Users, UserPlus, ScrollText, X, Check } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useParticipants } from '@livekit/components-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useJoinRequests } from '#/features/rooms/hooks/use-join-requests'
 import { GameLog } from '#/features/game/components/game-log'
+import { MembersList } from './members-list'
 
-type SidebarTab = 'log' | 'requests' | null
+type SidebarTab = 'log' | 'members' | 'requests' | null
 
 interface LiveSidebarContextValue {
   activeTab: SidebarTab
@@ -66,6 +68,7 @@ function Panel() {
   const { activeTab, close } = useLiveSidebar()
   const open = activeTab !== null
 
+  const isHost = useMeetingStore((s) => s.isHost)
   const roomJoinRequests = useMeetingStore((s) => s.joinRequests)
   const roomDismissJoinRequest = useMeetingStore((s) => s.dismissJoinRequest)
   const roomAcceptJoinRequest = useMeetingStore((s) => s.acceptJoinRequest)
@@ -81,16 +84,19 @@ function Panel() {
 
   const gameStarted = useGameStore((s) => s.gameStarted)
   const showPanel =
-    open && ((activeTab === 'log' && gameStarted) || activeTab === 'requests')
+    open && ((activeTab === 'log' && gameStarted) || activeTab !== 'log')
 
   let title: string
   let TitleIcon: typeof ScrollText
   if (activeTab === 'log') {
     title = 'Event Log'
     TitleIcon = ScrollText
+  } else if (activeTab === 'members') {
+    title = 'Members'
+    TitleIcon = Users
   } else if (activeTab === 'requests') {
     title = 'Join Requests'
-    TitleIcon = Users
+    TitleIcon = UserPlus
   } else {
     title = ''
     TitleIcon = ScrollText
@@ -113,6 +119,7 @@ function Panel() {
         <div className="flex items-center gap-2.5">
           <TitleIcon className="h-4 w-4 text-[#a1a1aa]" />
           <h2 className="text-sm font-medium text-[#f4f4f5]">{title}</h2>
+          {activeTab === 'members' && <MembersCount />}
           {activeTab === 'requests' && count > 0 && (
             <span className="text-[11px] font-medium text-[#a1a1aa] bg-white/[0.06] px-1.5 py-px rounded-full leading-relaxed">
               {count}
@@ -132,6 +139,7 @@ function Panel() {
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-y-auto">
         {activeTab === 'log' && <GameLog />}
+        {activeTab === 'members' && <MembersList />}
         {activeTab === 'requests' && (
           <>
             {count === 0 ? (
@@ -153,24 +161,31 @@ function Panel() {
                           {req.username}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => acceptJoinRequest(req.userId)}
-                          className="p-2 rounded-full text-[#a1a1aa] hover:text-[#22c55e] hover:bg-[#22c55e]/10 transition-colors"
-                          aria-label={`Accept ${req.username}`}
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => rejectJoinRequest(req.userId)}
-                          className="p-2 rounded-full text-[#a1a1aa] hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors"
-                          aria-label={`Reject ${req.username}`}
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
+                      {/* Accept / reject — host-only */}
+                      {isHost ? (
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => acceptJoinRequest(req.userId)}
+                            className="p-2 rounded-full text-[#a1a1aa] hover:text-[#22c55e] hover:bg-[#22c55e]/10 transition-colors"
+                            aria-label={`Accept ${req.username}`}
+                          >
+                            <Check className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => rejectJoinRequest(req.userId)}
+                            className="p-2 rounded-full text-[#a1a1aa] hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors"
+                            aria-label={`Reject ${req.username}`}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-[#71717a] shrink-0">
+                          Pending
+                        </span>
+                      )}
                     </div>
                   </li>
                 ))}
@@ -180,6 +195,15 @@ function Panel() {
         )}
       </div>
     </motion.aside>
+  )
+}
+
+function MembersCount() {
+  const participants = useParticipants()
+  return (
+    <span className="text-[11px] font-medium text-[#a1a1aa] bg-white/[0.06] px-1.5 py-px rounded-full leading-relaxed">
+      {participants.length}
+    </span>
   )
 }
 

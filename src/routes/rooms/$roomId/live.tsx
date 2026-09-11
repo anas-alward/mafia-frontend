@@ -14,6 +14,7 @@ import { useGameStore } from '#/features/game/store/game-store'
 import {
   ControlBar,
   GameHUD,
+  HostMediaListener,
   LiveParticipantTile,
   LiveSidebar,
   TileActionOverlay,
@@ -70,6 +71,7 @@ function LiveRoute() {
 
   return (
     <RoomContext.Provider value={room}>
+      <HostMediaListener />
       <LiveSidebar>
         <div className="flex flex-col h-screen">
           <div
