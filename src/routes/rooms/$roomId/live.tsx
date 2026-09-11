@@ -20,7 +20,6 @@ import {
   TilesGrid,
 } from '#/features/rooms/components'
 import { TileEventOverlay } from '#/features/game/components/tile-event-overlay'
-import { PhaseEventsPanel } from '#/features/game/components/phase-events-panel'
 import { GameOverOverlay } from '#/features/game/components/game-over-overlay'
 
 export const Route = createFileRoute('/rooms/$roomId/live')({
@@ -124,14 +123,7 @@ function LiveRoom({
           <TilesGrid />
         </div>
 
-        {/* Round events — collapsed icon rail stuck to the very left edge;
-            hover expands it to reveal names */}
-        {gameStarted && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-20">
-            <PhaseEventsPanel />
-          </div>
-        )}
-
+        {/* Self-view PiP tile */}
         <div className="absolute bottom-4 right-4 z-30 w-60 h-36">
           <motion.div
             initial={false}

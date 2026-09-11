@@ -1,4 +1,5 @@
 import { useGameStore } from '#/features/game/store/game-store'
+import { PhaseEventsPanel } from '#/features/game/components/phase-events-panel'
 import {
   ConnectionErrorBanner,
   FullscreenButton,
@@ -41,6 +42,10 @@ export default function ControlBar({
 
           {/* Graveyard strip — eliminated players (scrollable) */}
           <GraveyardStrip />
+
+          {/* Required actions — pending phase obligations; hover opens
+              the list above the bar */}
+          {gameStarted && <PhaseEventsPanel />}
 
           {/* Host actions dropdown (in game) */}
           {gameStarted && <HostActionsMenu />}
