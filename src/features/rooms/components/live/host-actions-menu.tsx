@@ -5,9 +5,10 @@ import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 
 /**
- * Host split button. The primary section executes the current phase's
- * default action (submit/resolve votes); the chevron opens a dropdown
- * with the alternative actions (reset / cancel).
+ * Host split button, styled like the rest of the control bar: subtle
+ * bordered container, accent used only through the icon color. The
+ * primary section executes the current phase's default action
+ * (submit/resolve votes); the chevron opens the alternatives dropdown.
  */
 export function HostActionsMenu() {
   const gameStarted = useGameStore((s) => s.gameStarted)
@@ -32,60 +33,61 @@ export function HostActionsMenu() {
       ? {
           label: 'Submit Votes',
           hint: `Waiting for all votes (${currentVotes.size}/${alivePlayerIds.length})`,
-          disabled: !allVoted,
+          ready: allVoted,
           run: submitVotes,
         }
       : phase === Phase.VOTE_RESULT
-        ? {
-            label: 'Resolve Votes',
-            hint: 'Resolve votes',
-            disabled: false,
-            run: submitVoteResult,
-          }
+        ? { label: 'Resolve Votes', hint: 'Resolve votes', ready: true, run: submitVoteResult }
         : null
 
-  const isActive = primary != null && !primary.disabled
+  const ready = primary != null && primary.ready
 
   return (
-    <div className="relative flex items-stretch">
+    <div
+      className="relative flex items-stretch rounded-xl border transition-all duration-200"
+      style={{
+        backgroundColor: menuOpen
+          ? 'var(--game-bg-elevated)'
+          : 'transparent',
+        borderColor: ready
+          ? 'rgba(237, 184, 58, 0.35)'
+          : 'var(--game-border)',
+      }}
+    >
       {/* Primary — phase's default action */}
       <button
         type="button"
-        disabled={primary == null || primary.disabled}
+        disabled={primary == null || !primary.ready}
         onClick={() => {
           primary?.run()
           setMenuOpen(false)
         }}
-        title={primary ? (isActive ? primary.label : primary.hint) : undefined}
-        className={`flex items-center justify-center w-10 rounded-l-xl border border-r-0 transition-all duration-200 ${
-          isActive ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
+        title={primary ? primary.hint : undefined}
+        className={`flex items-center gap-2 pl-3 pr-2.5 py-2.5 rounded-l-xl transition-all duration-200 ${
+          ready
+            ? 'cursor-pointer hover:bg-white/[0.04]'
+            : 'cursor-not-allowed opacity-50'
         }`}
         style={{
-          color: isActive ? '#000' : 'var(--game-text-muted)',
-          backgroundColor: isActive
-            ? 'var(--game-gold)'
-            : hostMenuBg(menuOpen),
-          borderColor: isActive
-            ? 'var(--game-gold)'
-            : menuOpen
-              ? 'var(--game-gold)'
-              : 'var(--game-border)',
+          color: ready ? 'var(--game-gold)' : 'var(--game-text-muted)',
         }}
         aria-label={primary ? `${primary.label} (primary)` : 'Host actions'}
       >
         <Send className="h-4 w-4" />
+        <span
+          className="hidden sm:inline text-xs font-semibold"
+          style={{ color: ready ? 'var(--game-text-primary)' : undefined }}
+        >
+          {primary?.label}
+        </span>
       </button>
 
       {/* Chevron — alternatives dropdown */}
       <button
         type="button"
         onClick={() => setMenuOpen((o) => !o)}
-        className="flex items-center justify-center w-6 rounded-r-xl border transition-all duration-200 cursor-pointer"
-        style={{
-          color: menuOpen ? 'var(--game-gold)' : 'var(--game-text-muted)',
-          backgroundColor: hostMenuBg(menuOpen),
-          borderColor: menuOpen ? 'var(--game-gold)' : 'var(--game-border)',
-        }}
+        className="flex items-center justify-center w-7 border-l rounded-r-xl transition-colors duration-200 cursor-pointer hover:bg-white/[0.04]"
+        style={{ borderColor: 'var(--game-border)' }}
         aria-label="Host actions menu"
         aria-expanded={menuOpen}
       >
@@ -93,6 +95,7 @@ export function HostActionsMenu() {
           className={`h-3.5 w-3.5 transition-transform duration-200 ${
             menuOpen ? 'rotate-180' : ''
           }`}
+          style={{ color: menuOpen ? 'var(--game-gold)' : 'var(--game-text-muted)' }}
         />
       </button>
 
@@ -103,7 +106,7 @@ export function HostActionsMenu() {
             onClick={() => setMenuOpen(false)}
           />
           <div
-            className="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl border shadow-2xl overflow-hidden"
+            className="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl border shadow-2xl overflow-hidden py-1"
             style={{
               backgroundColor: 'var(--game-bg-elevated)',
               borderColor: 'var(--game-border)',
@@ -131,10 +134,6 @@ export function HostActionsMenu() {
       )}
     </div>
   )
-}
-
-function hostMenuBg(open: boolean): string {
-  return open ? 'var(--game-bg-elevated)' : 'transparent'
 }
 
 function HostMenuItem({
