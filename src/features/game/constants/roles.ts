@@ -5,6 +5,7 @@ import {
   Crosshair,
   Bomb,
   User,
+  Landmark,
   Crown,
   Ban,
   Skull,
@@ -96,6 +97,17 @@ export const TownVanilla: RoleDefinition = {
   },
 }
 
+export const TownMayor: RoleDefinition = {
+  code: 'mayor',
+  role_type: Team.TOWN,
+  name: 'Mayor',
+  description: 'Elected town leader whose day vote counts as 3 votes.',
+  Icon: Landmark,
+  actions: {
+    [Phase.DAY]: [{ action_type: ActionType.VOTE, required: true }],
+  },
+}
+
 export const MafiaGodfather: RoleDefinition = {
   code: 'godfather',
   role_type: Team.MAFIA,
@@ -148,6 +160,7 @@ export const ROLES: RoleDefinition[] = [
   TownVigilante,
   TownBomb,
   TownVanilla,
+  TownMayor,
   MafiaGodfather,
   MafiaSilencer,
   MafiaMember,
