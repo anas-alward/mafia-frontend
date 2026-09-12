@@ -33,7 +33,8 @@ export default function ControlBar({
       lkParticipants.some((p) => !playerIds.includes(Number(p.identity))))
 
   return (
-    <div className="shrink-0 z-50 flex flex-col">
+    // Pinned to LTR in every locale — control bar chrome never mirrors.
+    <div dir="ltr" className="shrink-0 z-50 flex flex-col">
       <ConnectionErrorBanner />
 
       {/* Main bar */}

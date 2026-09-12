@@ -20,7 +20,8 @@ export function GameHUD({
   const participantCount = useParticipants().length
 
   return (
-    <div className="shrink-0 z-50">
+    // Pinned to LTR in every locale — header chrome never mirrors.
+    <div dir="ltr" className="shrink-0 z-50">
       <div
         className="flex items-center justify-between h-11 px-4"
         style={{
