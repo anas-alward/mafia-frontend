@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { useGameStore } from '#/features/game/store/game-store'
-import { PhaseEventsPanel } from './phase-events-panel'
+import { PhaseBadge } from './phase-badge'
 import type { GameStartedEvent, VoteCastEvent } from '#/features/game/events'
 
 const NAMES = ['Alice', 'Bob', 'Carol', 'Dave']
@@ -41,15 +41,10 @@ beforeEach(() => {
   useGameStore.setState({ gameStarted: false, currentVotes: new Map() })
 })
 
-describe('PhaseEventsPanel', () => {
-  it('renders nothing before the game starts', () => {
-    const { container } = render(<PhaseEventsPanel />)
-    expect(container.innerHTML).toBe('')
-  })
-
+describe('PhaseBadge pending split', () => {
   it('renders one vote avatar while players still need to vote', () => {
     startGame()
-    const { container } = render(<PhaseEventsPanel />)
+    const { container } = render(<PhaseBadge phase="day" />)
     expect(
       container.querySelector('[aria-label="3 required actions: Vote"]'),
     ).not.toBeNull()
@@ -59,25 +54,31 @@ describe('PhaseEventsPanel', () => {
     startGame()
     castVote(1, 2)
     castVote(3, 2)
-    const { container } = render(<PhaseEventsPanel />)
+    const { container } = render(<PhaseBadge phase="day" />)
     expect(
       container.querySelector('[aria-label="1 required action: Vote"]'),
     ).not.toBeNull()
   })
 
-  it('renders nothing once every alive player has voted', () => {
+  it('renders the plain phase pill once every alive player has voted', () => {
     startGame()
     castVote(1, 2)
     castVote(2, 1)
     castVote(3, 1)
-    const { container } = render(<PhaseEventsPanel />)
-    expect(container.innerHTML).toBe('')
+    const { container } = render(<PhaseBadge phase="day" />)
+    expect(container.textContent).toContain('Day')
+    expect(
+      container.querySelector('[aria-label$="required action: Vote"]'),
+    ).toBeNull()
+    expect(
+      container.querySelector('[aria-label$="required actions: Vote"]'),
+    ).toBeNull()
   })
 
   it('tooltip lists the players who still need to vote', () => {
     startGame()
     castVote(1, 2)
-    const { container } = render(<PhaseEventsPanel />)
+    const { container } = render(<PhaseBadge phase="day" />)
     fireEvent.mouseEnter(
       container.querySelector('[aria-label="2 required actions: Vote"]')!,
     )

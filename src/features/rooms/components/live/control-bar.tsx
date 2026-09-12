@@ -1,7 +1,6 @@
 import { useParticipants } from '@livekit/components-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
-import { PhaseEventsPanel } from '#/features/game/components/phase-events-panel'
 import {
   ConnectionErrorBanner,
   GraveyardStrip,
@@ -71,10 +70,9 @@ export default function ControlBar({
         {/* Center: media controls */}
         <MediaControls />
 
-        {/* Right: required actions */}
-        <div className="flex items-center gap-1.5">
-          {gameStarted && <PhaseEventsPanel />}
-        </div>
+        {/* Right: empty — balances the bar so media stays centered.
+            Required actions moved into the header phase badge. */}
+        <div className="flex items-center gap-1.5" aria-hidden="true" />
       </div>
     </div>
   )
