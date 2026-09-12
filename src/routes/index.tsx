@@ -3,7 +3,6 @@ import { SiteHeader } from '#/components/site-header'
 import { SiteFooter } from '#/components/site-footer'
 import { HeroSection } from '#/features/landing/components/hero-section'
 import { FaqSection } from '#/features/landing/components/faq-section'
-import { CtaSection } from '#/features/landing/components/cta-section'
 import {
   CreateMeetingButton,
   JoinMeetingForm,
@@ -39,11 +38,6 @@ function Home() {
         </HeroSection>
 
         <FaqSection />
-
-        <CtaSection
-          title="Ready to lie to your friends?"
-          description="Make an account, grab a room code, and find out who trusts you."
-        />
       </main>
 
       <SiteFooter />
