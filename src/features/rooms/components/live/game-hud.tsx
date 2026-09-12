@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { useParticipants } from '@livekit/components-react'
-import { Users, UserPlus, Copy, Check } from 'lucide-react'
+import { Users, UserPlus } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
@@ -14,20 +13,12 @@ export function GameHUD({
 }: {
   fullScreenRef: React.RefObject<HTMLDivElement | null>
 }) {
-  const roomId = useMeetingStore((s) => s.roomId)
   const gameStarted = useGameStore((s) => s.gameStarted)
   const phase = useGameStore((s) => s.phase)
   const roundNumber = useGameStore((s) => s.roundNumber)
   const pendingRequests = useMeetingStore((s) => s.joinRequests)
 
   const participantCount = useParticipants().length
-
-  const [copied, setCopied] = useState(false)
-  const copyRoomCode = async () => {
-    await navigator.clipboard.writeText(roomId)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   return (
     <div className="shrink-0 z-50">
@@ -37,34 +28,8 @@ export function GameHUD({
           backgroundColor: 'var(--game-bg-deep)',
         }}
       >
-        {/* Left: Room code + copy */}
+        {/* Left: phase + round */}
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={copyRoomCode}
-            className="group flex items-center gap-2 text-xs font-mono tracking-wider cursor-pointer"
-            style={{ color: 'var(--game-text-primary)' }}
-          >
-            #{roomId}
-            {copied ? (
-              <Check
-                className="h-3.5 w-3.5"
-                style={{ color: 'var(--game-mint)' }}
-              />
-            ) : (
-              <Copy className="h-3.5 w-3.5" />
-            )}
-          </button>
-
-          {gameStarted && (
-            <span
-              className="text-xs select-none"
-              style={{ color: 'var(--game-text-muted)' }}
-            >
-              |
-            </span>
-          )}
-
           {gameStarted && <PhaseBadge phase={phase} />}
 
           {gameStarted && roundNumber != null && (
