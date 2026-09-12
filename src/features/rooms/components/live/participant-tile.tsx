@@ -140,7 +140,10 @@ export default function LiveParticipantTile({
   }
 
   return (
+    // Tiles keep their LTR structure in every locale — name bottom-left,
+    // vote count bottom-right, role top-left.
     <div
+      dir="ltr"
       className={`relative w-full h-full rounded-lg overflow-hidden transition-all duration-200 ${ringClass}`}
       onClick={handleClick}
       style={ringStyle}

@@ -46,7 +46,7 @@ export function TileRoleBadge({
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className="absolute top-3 start-3 z-30 w-6 h-6 rounded-md flex items-center justify-center border"
+            className="absolute top-3 left-3 z-30 w-6 h-6 rounded-md flex items-center justify-center border"
             style={{
               backgroundColor: 'rgba(27, 25, 34, 0.75)',
               borderColor: 'var(--game-border)',

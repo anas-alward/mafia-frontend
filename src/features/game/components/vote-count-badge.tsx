@@ -77,7 +77,7 @@ export function VoteCountBadge({ userId }: VoteCountBadgeProps) {
       type="button"
       data-vote-count-badge=""
       onClick={handleClick}
-      className="absolute bottom-3 end-3 z-30 flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold border cursor-pointer"
+      className="absolute bottom-3 right-3 z-30 flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold border cursor-pointer"
       style={{
         backgroundColor: '#B98A1C',
         borderColor: '#B98A1C',

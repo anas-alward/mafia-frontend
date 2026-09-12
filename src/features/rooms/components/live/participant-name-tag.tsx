@@ -11,7 +11,7 @@ export function ParticipantNameTag({
 }: ParticipantNameTagProps) {
   const { t } = useTranslation()
   return (
-    <div className="absolute bottom-3 start-3 z-20 flex items-center gap-1.5 rounded-md bg-black/45 px-2 py-1 backdrop-blur-sm">
+    <div className="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 rounded-md bg-black/45 px-2 py-1 backdrop-blur-sm">
       <span
         className={`h-1.5 w-1.5 rounded-full transition-colors duration-150 ${
           isSpeaking ? 'bg-[#8FA0F5]' : 'bg-white/30'
