@@ -114,7 +114,7 @@ export function PhaseBadge({ phase }: PhaseBadgeProps) {
             className="w-px self-stretch my-1.5"
             style={{ backgroundColor: 'rgba(27, 25, 34, 0.25)' }}
           />
-          <span className="flex items-center ps-2 pe-3 py-1">
+          <span className="flex items-center gap-2 ps-2 pe-3 py-1">
             {[...groups.values()].map((group, i) => (
               <ActionAvatar
                 key={group.actionType}
@@ -142,14 +142,13 @@ function ActionAvatar({
   hovered: number | null
   setHovered: (i: number | null) => void
 }) {
-  const isHovered = hovered === index
-  // Neighbours slide away from the hovered avatar; the hovered one lifts.
-  const spread =
-    hovered === null ? 0 : hovered === index ? 0 : index < hovered ? -5 : 5
-
   const def = getActionDefinition(group.actionType)
   const Icon = def?.eventIcon
   const pendingCount = group.names.length
+
+  // Neighbours slide away from the hovered icon; the hovered one lifts.
+  const spread =
+    hovered === null ? 0 : hovered === index ? 0 : index < hovered ? -5 : 5
 
   const { t } = useTranslation()
 
@@ -187,34 +186,37 @@ function ActionAvatar({
         y: hovered === index ? -2 : 0,
       }}
       transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-      className={`relative ${index === 0 ? '' : '-ms-1'}`}
+      className="relative"
       style={{ zIndex: hovered === index ? 30 : 20 - index }}
     >
       <div
-        className="h-6 w-6 rounded-full flex items-center justify-center select-none transition-shadow duration-200"
-        style={{
-          backgroundColor: solid,
-          boxShadow: isHovered
-            ? '0 6px 16px rgba(0,0,0,0.5)'
-            : '0 2px 6px rgba(0,0,0,0.4)',
-          ...(group.isMine
-            ? { outline: '2px solid var(--game-gold)', outlineOffset: '1px' }
-            : {}),
-        }}
+        className="relative flex items-center justify-center select-none"
         aria-label={ariaLabel}
       >
-        {Icon && <Icon className="h-3 w-3" style={{ color: '#131314' }} />}
+        {Icon && (
+          <Icon
+            className="h-4 w-4"
+            style={{ color: group.isMine ? 'var(--game-gold)' : solid }}
+          />
+        )}
+        {group.isMine && (
+          <span
+            aria-hidden="true"
+            className="absolute -bottom-1 h-1 w-1 rounded-full"
+            style={{ backgroundColor: 'var(--game-gold)' }}
+          />
+        )}
       </div>
 
-      {/* Tooltip above the avatar */}
+      {/* Tooltip below the icon — the badge sits at the top of the screen */}
       <AnimatePresence>
         {hovered === index && (
           <motion.div
-            initial={{ opacity: 0, y: 4, scale: 0.95 }}
+            initial={{ opacity: 0, y: -4, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            exit={{ opacity: 0, y: -4, scale: 0.95 }}
             transition={{ duration: 0.15, ease: [0, 0, 0.2, 1] }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none whitespace-nowrap rounded-lg bg-[#26262b] border border-white/[0.08] px-2.5 py-1.5 shadow-xl"
+            className="absolute top-full left-1/2 -translate-x-1/2 mt-2 pointer-events-none whitespace-nowrap rounded-lg bg-[#26262b] border border-white/[0.08] px-2.5 py-1.5 shadow-xl"
           >
             {tooltipLines.map((line) => (
               <div
