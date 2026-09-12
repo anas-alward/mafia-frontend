@@ -2,13 +2,10 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { SiteHeader } from '#/components/site-header'
 import { SiteFooter } from '#/components/site-footer'
 import { HeroSection } from '#/features/landing/components/hero-section'
-import { HowToPlaySection } from '#/features/landing/components/how-to-play-section'
-import { GameMechanicsSection } from '#/features/landing/components/game-mechanics-section'
 import {
   CreateMeetingButton,
   JoinMeetingForm,
 } from '#/features/rooms/components'
-import { phases } from '#/features/landing/data/phases'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -38,16 +35,6 @@ function Home() {
             </Link>
           </div>
         </HeroSection>
-
-        <HowToPlaySection
-          title="Everyone gets a secret"
-          description="Two teams, nine roles, nobody you can trust. This is who might be sitting at your table."
-        />
-
-        <GameMechanicsSection
-          title="Night. Day. Vote. Repeat."
-          phases={phases}
-        />
       </main>
 
       <SiteFooter />
