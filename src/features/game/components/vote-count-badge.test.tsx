@@ -21,11 +21,12 @@ function startGame() {
   useGameStore.getState().processMessage(msg)
 }
 
-function castVote(actorId: number, targetId: number) {
+function castVote(actorId: number, targetId: number, weight?: number) {
   const msg: VoteCastEvent = {
     type: 'vote_cast',
     actor_id: actorId,
     target_id: targetId,
+    ...(weight !== undefined ? { weight } : {}),
   }
   useGameStore.getState().processMessage(msg)
 }
@@ -66,6 +67,32 @@ describe('VoteCountBadge', () => {
       castVote(1, 2)
     })
     expect(container.textContent).toBe('1')
+  })
+
+  it('sums vote weights instead of counting ballots', () => {
+    startGame()
+    castVote(1, 2, 3) // e.g. Mayor counts 3
+    castVote(3, 2, 1)
+    const { container } = render(<VoteCountBadge userId={2} />)
+    expect(container.textContent).toBe('4')
+  })
+
+  it('defaults to weight 1 when the broadcast has no weight', () => {
+    startGame()
+    castVote(1, 2)
+    castVote(3, 2, 3)
+    const { container } = render(<VoteCountBadge userId={2} />)
+    expect(container.textContent).toBe('4')
+  })
+
+  it('a weighted revote moves the full weight to the new target', () => {
+    startGame()
+    castVote(1, 2, 3)
+    castVote(1, 3, 3)
+    const { container: oldTarget } = render(<VoteCountBadge userId={2} />)
+    expect(oldTarget.innerHTML).toBe('')
+    const { container: newTarget } = render(<VoteCountBadge userId={3} />)
+    expect(newTarget.textContent).toBe('3')
   })
 })
 

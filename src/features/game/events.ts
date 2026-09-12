@@ -11,6 +11,8 @@ export interface GameLogEntry {
   /** Absent on lynch entries (the victim rides in actor_id). */
   target_id?: number | null
   action_type: string
+  /** Vote power of the actor (e.g. Mayor counts 3). Defaults to 1. */
+  weight?: number | null
   /** Set on lynch entries — the eliminated player's revealed role. */
   role_code?: string | null
   role_name?: string | null
@@ -74,6 +76,8 @@ export interface VoteCastEvent {
   type: 'vote_cast'
   actor_id: number
   target_id: number
+  /** Vote power of the actor (e.g. Mayor counts 3). Defaults to 1. */
+  weight?: number | null
 }
 
 export interface VoteResultStartedEvent {

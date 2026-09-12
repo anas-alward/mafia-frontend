@@ -45,6 +45,10 @@ interface GameStore {
   myRoleCode: string | null
   logs: GameLogEntry[]
   currentVotes: Map<number, number>
+  /** Per-actor vote power (actor_id → weight). Set from the `weight` field
+   *  on `vote_cast` broadcasts; defaults to 1 when absent (old payloads,
+   *  reconnect rebuilds from logs). Cleared with currentVotes. */
+  voteWeights: Map<number, number>
   lynchTargetId: number | null
   hasVotedThisPhase: boolean
   mafiaIds: number[]
@@ -115,6 +119,7 @@ export const useGameStore = create<GameStore>()(
           myRoleCode: null,
           logs: [],
           currentVotes: new Map(),
+          voteWeights: new Map(),
           lynchTargetId: null,
           hasVotedThisPhase: false,
           mafiaIds: [],
@@ -145,6 +150,7 @@ export const useGameStore = create<GameStore>()(
               phase: 'day',
               gameStarted: true,
               currentVotes: new Map(),
+              voteWeights: new Map(),
               logs: [],
               lynchTargetId: null,
               hasVotedThisPhase: false,
@@ -199,6 +205,7 @@ export const useGameStore = create<GameStore>()(
                 graveyardHoldUntil: holds,
                 phase: 'day',
                 currentVotes: new Map(),
+                voteWeights: new Map(),
                 lynchTargetId: null,
                 hasVotedThisPhase: false,
                 logs: [...s.logs, ...m.logs],
@@ -231,6 +238,7 @@ export const useGameStore = create<GameStore>()(
                 graveyardHoldUntil: holds,
                 phase: 'night',
                 currentVotes: new Map(),
+                voteWeights: new Map(),
                 lynchTargetId: null,
                 hasVotedThisPhase: false,
                 logs: [...s.logs, ...m.logs],
@@ -248,7 +256,9 @@ export const useGameStore = create<GameStore>()(
             set((s) => {
               const next = new Map(s.currentVotes)
               next.set(m.actor_id, m.target_id)
-              return { currentVotes: next }
+              const weights = new Map(s.voteWeights)
+              weights.set(m.actor_id, m.weight ?? 1)
+              return { currentVotes: next, voteWeights: weights }
             })
             break
           }
@@ -269,8 +279,10 @@ export const useGameStore = create<GameStore>()(
             const m = msg as GameStateEvent
             if (m.session_id && m.current_phase) {
               // Rebuild the current round's votes from its logs so the vote
-              // badges survive a mid-day reconnect.
+              // badges survive a mid-day reconnect. Logs may carry the
+              // actor's vote `weight`; default to 1 when absent.
               const votesFromLogs = new Map<number, number>()
+              const weightsFromLogs = new Map<number, number>()
               for (const log of m.logs) {
                 if (
                   log.action_type === 'vote' &&
@@ -278,6 +290,7 @@ export const useGameStore = create<GameStore>()(
                   log.target_id != null
                 ) {
                   votesFromLogs.set(log.actor_id, log.target_id)
+                  weightsFromLogs.set(log.actor_id, log.weight ?? 1)
                 }
               }
               const updates: Partial<GameStore> = {
@@ -295,6 +308,7 @@ export const useGameStore = create<GameStore>()(
                 requiredActions: m.required_actions,
                 roundRequirements: m.round_requirements ?? [],
                 currentVotes: votesFromLogs,
+                voteWeights: weightsFromLogs,
                 actionBorders: {},
                 voterSelection: { targetId: null, voterIds: [] },
               }
@@ -323,6 +337,7 @@ export const useGameStore = create<GameStore>()(
               gameStarted: true,
               myRoleCode: null,
               currentVotes: new Map(),
+              voteWeights: new Map(),
               logs: [],
               lynchTargetId: null,
               hasVotedThisPhase: false,
@@ -346,6 +361,7 @@ export const useGameStore = create<GameStore>()(
               winner: m.winner,
               logs: [...s.logs, ...m.logs],
               currentVotes: new Map(),
+              voteWeights: new Map(),
               lynchTargetId: null,
               hasVotedThisPhase: false,
               requiredActions: [],
@@ -375,7 +391,9 @@ export const useGameStore = create<GameStore>()(
 
           case 'detect_result': {
             const m = msg as DetectResultEvent
-            set({ detectResult: { targetId: m.target_id, roleType: m.role_type } })
+            set({
+              detectResult: { targetId: m.target_id, roleType: m.role_type },
+            })
             break
           }
 
@@ -417,6 +435,7 @@ export const useGameStore = create<GameStore>()(
         myRoleCode: null,
         logs: [],
         currentVotes: new Map(),
+        voteWeights: new Map(),
         lynchTargetId: null,
         hasVotedThisPhase: false,
         mafiaIds: [],
@@ -544,6 +563,7 @@ export const useGameStore = create<GameStore>()(
         return {
           ...data,
           currentVotes: Array.from(data.currentVotes.entries()),
+          voteWeights: Array.from(data.voteWeights.entries()),
         }
       },
       merge: (persisted, current) => {
@@ -553,6 +573,9 @@ export const useGameStore = create<GameStore>()(
           ...p,
           currentVotes: new Map(
             (p.currentVotes as Iterable<[number, number]> | undefined) ?? [],
+          ),
+          voteWeights: new Map(
+            (p.voteWeights as Iterable<[number, number]> | undefined) ?? [],
           ),
         }
       },

@@ -11,6 +11,7 @@ interface VoteCountBadgeProps {
 export function VoteCountBadge({ userId }: VoteCountBadgeProps) {
   const gameStarted = useGameStore((s) => s.gameStarted)
   const currentVotes = useGameStore((s) => s.currentVotes)
+  const voteWeights = useGameStore((s) => s.voteWeights)
   const sessionId = useGameStore((s) => s.sessionId)
   const voterSelection = useGameStore((s) => s.voterSelection)
   const setVoterSelection = useGameStore((s) => s.setVoterSelection)
@@ -19,20 +20,29 @@ export function VoteCountBadge({ userId }: VoteCountBadgeProps) {
   // Clicking anywhere outside a vote badge hides the selection.
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
-      if (e.target instanceof Element && e.target.closest('[data-vote-count-badge]')) {
+      if (
+        e.target instanceof Element &&
+        e.target.closest('[data-vote-count-badge]')
+      ) {
         return
       }
       clearVoterSelection()
     }
     document.addEventListener('pointerdown', onPointerDown, true)
-    return () => document.removeEventListener('pointerdown', onPointerDown, true)
+    return () =>
+      document.removeEventListener('pointerdown', onPointerDown, true)
   }, [clearVoterSelection])
 
   if (!gameStarted || userId == null) return null
 
-  const count = Array.from(currentVotes.values()).filter(
-    (id) => id === userId,
-  ).length
+  // Weighted tally: each voter's power comes from the `weight` field on
+  // the `vote_cast` broadcast (e.g. Mayor counts 3). Defaults to 1 when
+  // the weight is unknown (old payloads, reconnect rebuilds from logs).
+  const count = Array.from(currentVotes.entries()).reduce(
+    (total, [actorId, targetId]) =>
+      targetId === userId ? total + (voteWeights.get(actorId) ?? 1) : total,
+    0,
+  )
 
   if (count === 0) return null
 
