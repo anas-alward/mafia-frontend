@@ -100,7 +100,7 @@ function LiveRoom({
 }: {
   fullScreenRef: React.RefObject<HTMLDivElement | null>
 }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const isHost = useMeetingStore((s) => s.isHost)
   const gameStarted = useGameStore((s) => s.gameStarted)
   const startGame = useGameStore((s) => s.startGame)
@@ -113,14 +113,8 @@ function LiveRoom({
     : null
 
   const [selfTileHidden, setSelfTileHidden] = useState(false)
-  // In RTL the PiP docks to the inline-end (left) edge, so sliding
-  // outward means negative-x; in LTR it stays positive-x.
-  const isRtl = i18n.dir() === 'rtl'
-  const hiddenX = selfTileHidden
-    ? isRtl
-      ? 'calc(-100% + 1.5rem)'
-      : 'calc(100% - 1.5rem)'
-    : 0
+  // Pinned to the bottom-right in every locale — never mirrors.
+  const hiddenX = selfTileHidden ? 'calc(100% - 1.5rem)' : 0
 
   return (
     <div
@@ -136,7 +130,7 @@ function LiveRoom({
         </div>
 
         {/* Self-view PiP tile */}
-        <div className="absolute bottom-4 end-4 z-30 w-60 h-36">
+        <div dir="ltr" className="absolute bottom-4 right-4 z-30 w-60 h-36">
           <motion.div
             initial={false}
             animate={{ x: hiddenX }}
@@ -161,7 +155,7 @@ function LiveRoom({
               )}
             </TileEventOverlay>
 
-            {/* Handle strip along the card's inline-start edge — stays
+            {/* Handle strip along the card's left edge — stays
                 visible when the card is slid outward */}
             <button
               type="button"
@@ -176,12 +170,9 @@ function LiveRoom({
               }
             >
               {selfTileHidden ? (
-                <ChevronLeft className="h-4 w-4 rtl:rotate-180" color="white" />
+                <ChevronLeft className="h-4 w-4" color="white" />
               ) : (
-                <ChevronRight
-                  className="h-4 w-4 rtl:rotate-180"
-                  color="white"
-                />
+                <ChevronRight className="h-4 w-4" color="white" />
               )}
             </button>
           </motion.div>
