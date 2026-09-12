@@ -5,7 +5,6 @@ import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
 import { PhaseBadge } from '#/features/game/components/phase-badge'
-import { RoundBadge } from '#/features/game/components/round-badge'
 import { PlayerCount } from '#/features/game/components/player-count'
 import { HeaderMenu } from '#/features/rooms/components/live/header-menu'
 
@@ -16,7 +15,6 @@ export function GameHUD({
 }) {
   const gameStarted = useGameStore((s) => s.gameStarted)
   const phase = useGameStore((s) => s.phase)
-  const roundNumber = useGameStore((s) => s.roundNumber)
   const pendingRequests = useMeetingStore((s) => s.joinRequests)
 
   const participantCount = useParticipants().length
@@ -29,21 +27,9 @@ export function GameHUD({
           backgroundColor: 'var(--game-bg-deep)',
         }}
       >
-        {/* Left: phase + round */}
+        {/* Left: phase */}
         <div className="flex items-center gap-2">
           {gameStarted && <PhaseBadge phase={phase} />}
-
-          {gameStarted && roundNumber != null && (
-            <>
-              <span
-                className="text-xs select-none"
-                style={{ color: 'var(--game-text-muted)' }}
-              >
-                |
-              </span>
-              <RoundBadge roundNumber={roundNumber} />
-            </>
-          )}
         </div>
 
         {/* Center: Game stats */}

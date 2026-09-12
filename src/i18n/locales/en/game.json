@@ -70,9 +70,6 @@
       "alive": "{{count}} alive",
       "dead": "{{count}} dead"
     },
-    "roundBadge": {
-      "label": "R{{round}}"
-    },
     "playerState": {
       "dead": "Dead"
     },
@@ -89,7 +86,7 @@
       "pendingActions_other": "{{count}} required actions: {{action}}"
     },
     "tileEvent": {
-      "votedBy": "Voted by {{name}}",
+      "votedBy": "by {{name}}",
       "saved": "Saved",
       "playerFallback": "Player {{id}}"
     },
