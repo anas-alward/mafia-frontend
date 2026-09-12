@@ -9,7 +9,10 @@ import type { GamePhase } from '#/features/game/events'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useAuthStore } from '#/features/auth/store/auth-store'
-import { getActionDefinition } from '#/features/game/constants/actions'
+import {
+  getActionDefinition,
+  ActionType,
+} from '#/features/game/constants/actions'
 import { derivePhaseEvents } from '#/features/game/phase-events'
 
 const GAMEPHASE_TO_PHASE: Partial<Record<GamePhase, GamePhaseEnum>> = {
@@ -157,16 +160,15 @@ function ActionAvatar({
     defaultValue: def?.label ?? group.actionType,
   })
 
-  // Solid avatar background: the action's full accent color, with a dark
-  // icon for contrast. No transparency — overlaps stay clean.
-  const solid = def?.color ?? 'var(--game-bg-elevated)'
-
   // Tooltip lines: named players for public day votes, a count for the
   // anonymous night requirements.
   const tooltipLines =
     group.names[0] != null
       ? group.names.slice(0, 4)
       : [`${actionLabel} ×${pendingCount}`]
+
+  // Only the vote icon carries its pending count inline.
+  const showCount = group.actionType === ActionType.VOTE
 
   const ariaLabel = t('game.phaseEvents.pendingActions', {
     count: pendingCount,
@@ -190,14 +192,14 @@ function ActionAvatar({
       style={{ zIndex: hovered === index ? 30 : 20 - index }}
     >
       <div
-        className="relative flex items-center justify-center select-none"
+        className="relative flex items-center gap-1 select-none"
         aria-label={ariaLabel}
       >
-        {Icon && (
-          <Icon
-            className="h-4 w-4"
-            style={{ color: group.isMine ? 'var(--game-gold)' : solid }}
-          />
+        {Icon && <Icon className="h-4 w-4" style={{ color: '#1B1922' }} />}
+        {showCount && (
+          <span className="text-xs font-bold" style={{ color: '#1B1922' }}>
+            {pendingCount}
+          </span>
         )}
         {group.isMine && (
           <span
