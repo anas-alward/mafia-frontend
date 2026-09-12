@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react'
 import { ShieldCheck, Skull, User } from 'lucide-react'
+import i18n from '#/i18n'
 import type { GameLogEntry, GameStatePlayer } from '#/features/game/events'
 import { ACTION_REGISTRY } from '#/features/game/constants/actions'
 
@@ -16,7 +17,10 @@ export function resolveActorName(
   return (
     gamePlayers.find((p) => p.id === actorId)?.name ||
     participants.find((p) => p.userId === actorId)?.username ||
-    `Player ${actorId}`
+    i18n.t('game.tileEvent.playerFallback', {
+      id: actorId,
+      defaultValue: `Player ${actorId}`,
+    })
   )
 }
 
@@ -132,6 +136,8 @@ export interface TileEvent {
   roleType?: string
   /** Revealed role name (e.g. lynch role reveal). */
   roleName?: string
+  /** Role code backing `roleName`, for localization at the render site. */
+  roleCode?: string
   /** Secondary line — e.g. the voter behind a vote signal. */
   detail?: string
   key: string
@@ -188,6 +194,7 @@ export function deriveTileEvents({
       type: log.action_type,
       targetId: log.target_id,
       roleName: log.role_name ?? undefined,
+      roleCode: log.role_code ?? undefined,
       key: `${log.action_type}:${log.target_id}:${i}`,
     })
   }
@@ -206,6 +213,7 @@ export function deriveTileEvents({
       type: 'lynch',
       targetId: lynchTargetId,
       roleName: lynchLog?.role_name ?? undefined,
+      roleCode: lynchLog?.role_code ?? undefined,
       key: `lynch:${lynchTargetId}`,
     })
   }

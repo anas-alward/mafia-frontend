@@ -1,0 +1,42 @@
+{
+  "hero": {
+    "headline": "Someone at this table is lying.",
+    "subheadline": "Mafia is a social deduction game for 6–11 players, right in your browser. Get a secret role, argue with your friends, vote someone out — or get fooled trying.",
+    "divider": "or",
+    "howToPlayLink": "New here? Learn how to play"
+  },
+  "faq": {
+    "kicker": "Before you sit down",
+    "title": "Fair questions",
+    "items": [
+      {
+        "q": "How many players do we need?",
+        "a": "Six to eleven. Roles are dealt to fit your table, so a small group and a full house both get a proper game."
+      },
+      {
+        "q": "Do I need an account?",
+        "a": "Yes — everyone signs up first. Then one person creates a room and the rest join with the invite link or room code."
+      },
+      {
+        "q": "How do my friends join?",
+        "a": "Send them your invite link or room code. They join from their browser, and the host lets them in. No installs, no downloads."
+      },
+      {
+        "q": "Do I need a camera or microphone?",
+        "a": "They run right in the browser, and you can toggle either before joining. Mafia is a talking game though — mic on is strongly advised."
+      },
+      {
+        "q": "What happens when I get eliminated?",
+        "a": "You stay and watch. The fallen gather in the graveyard strip while the living keep arguing — perfect for backseat suspecting."
+      },
+      {
+        "q": "How long does a game take?",
+        "a": "Rounds of night, day, and voting repeat until one side wins. Most games wrap up in minutes, not hours."
+      }
+    ]
+  },
+  "cta": {
+    "logIn": "Log in",
+    "signUp": "Sign up"
+  }
+}

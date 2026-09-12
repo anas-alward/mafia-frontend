@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
 import { Users, UserPlus, X, Check } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useParticipants } from '@livekit/components-react'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useJoinRequests } from '#/features/rooms/hooks/use-join-requests'
@@ -40,6 +41,7 @@ export function LiveSidebar({ children }: { children: ReactNode }) {
 }
 
 function Panel() {
+  const { t } = useTranslation()
   const { activeTab, close } = useLiveSidebar()
   const open = activeTab !== null
 
@@ -62,10 +64,10 @@ function Panel() {
   let title: string
   let TitleIcon: typeof Users
   if (activeTab === 'members') {
-    title = 'Members'
+    title = t('room.sidebar.members')
     TitleIcon = Users
   } else if (activeTab === 'requests') {
-    title = 'Join Requests'
+    title = t('room.sidebar.requests')
     TitleIcon = UserPlus
   } else {
     title = ''
@@ -80,7 +82,7 @@ function Panel() {
         opacity: showPanel ? 1 : 0,
       }}
       transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
-      className={`fixed right-4 top-20 bottom-24 z-40 w-72 bg-[#1c1c1f] border border-white/[0.06] rounded-2xl flex flex-col overflow-hidden shadow-2xl ${
+      className={`fixed end-4 top-20 bottom-24 z-40 w-72 bg-[#1c1c1f] border border-white/[0.06] rounded-2xl flex flex-col overflow-hidden shadow-2xl ${
         showPanel ? '' : 'pointer-events-none'
       }`}
     >
@@ -100,7 +102,7 @@ function Panel() {
           type="button"
           onClick={close}
           className="p-1.5 rounded-full text-[#71717a] hover:text-[#f4f4f5] hover:bg-white/[0.06] transition-colors"
-          aria-label="Close"
+          aria-label={t('room.sidebar.close')}
         >
           <X className="h-4 w-4" />
         </button>
@@ -113,7 +115,7 @@ function Panel() {
           <>
             {count === 0 ? (
               <p className="px-5 py-12 text-[13px] text-[#71717a] text-center">
-                No pending requests
+                {t('room.sidebar.noRequests')}
               </p>
             ) : (
               <ul className="flex flex-col">
@@ -138,7 +140,10 @@ function Panel() {
                             type="button"
                             onClick={() => acceptJoinRequest(req.userId)}
                             className="p-2 rounded-full text-[#a1a1aa] hover:text-[#22c55e] hover:bg-[#22c55e]/10 transition-colors"
-                            aria-label={`Accept ${req.username}`}
+                            aria-label={t('room.sidebar.acceptUser', {
+                              name: req.username,
+                              defaultValue: `Accept ${req.username}`,
+                            })}
                           >
                             <Check className="h-4 w-4" />
                           </button>
@@ -146,7 +151,10 @@ function Panel() {
                             type="button"
                             onClick={() => rejectJoinRequest(req.userId)}
                             className="p-2 rounded-full text-[#a1a1aa] hover:text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors"
-                            aria-label={`Reject ${req.username}`}
+                            aria-label={t('room.sidebar.rejectUser', {
+                              name: req.username,
+                              defaultValue: `Reject ${req.username}`,
+                            })}
                           >
                             <X className="h-4 w-4" />
                           </button>

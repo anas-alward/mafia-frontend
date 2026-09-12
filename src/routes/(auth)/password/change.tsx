@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { ChangePasswordForm } from '#/features/auth/components/change-password-form'
 import type { ChangePasswordInput } from '#/features/auth/schemas/auth'
 import { useAuthStore } from '#/features/auth/store/auth-store'
@@ -11,6 +12,7 @@ export const Route = createFileRoute('/(auth)/password/change')({
 
 function ChangePasswordPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const clearAuth = useAuthStore((s) => s.clearAuth)
 
   const handleSubmit = async (data: ChangePasswordInput) => {
@@ -31,10 +33,14 @@ function ChangePasswordPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="display-title text-3xl text-neutral-900">
-            Change password
+            {t('auth.pages.change.title', {
+              defaultValue: 'Change password',
+            })}
           </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Enter your current and new password
+            {t('auth.pages.change.subtitle', {
+              defaultValue: 'Enter your current and new password',
+            })}
           </p>
         </div>
         <ChangePasswordForm onSubmit={handleSubmit} />

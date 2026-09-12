@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { LoginForm } from '#/features/auth/components/login-form.tsx'
 import type { LoginInput } from '#/features/auth/schemas/auth.ts'
 import { useAuthStore } from '#/features/auth/store/auth-store.ts'
@@ -20,6 +21,7 @@ export const Route = createFileRoute('/(auth)/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const setAuth = useAuthStore((s) => s.setAuth)
   const { redirect, email } = Route.useSearch()
 
@@ -42,10 +44,12 @@ function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="display-title text-3xl text-neutral-900">
-            Welcome back
+            {t('auth.pages.login.title', { defaultValue: 'Welcome back' })}
           </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Log in to continue playing
+            {t('auth.pages.login.subtitle', {
+              defaultValue: 'Log in to continue playing',
+            })}
           </p>
         </div>
         <LoginForm onSubmit={handleSubmit} defaultEmail={email} />

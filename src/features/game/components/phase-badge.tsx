@@ -1,5 +1,9 @@
 import { motion } from 'motion/react'
-import { PHASE_META, Phase as GamePhaseEnum } from '#/features/game/constants/phases'
+import { useTranslation } from 'react-i18next'
+import {
+  PHASE_META,
+  Phase as GamePhaseEnum,
+} from '#/features/game/constants/phases'
 import type { GamePhase } from '#/features/game/events'
 
 const GAMEPHASE_TO_PHASE: Partial<Record<GamePhase, GamePhaseEnum>> = {
@@ -13,6 +17,7 @@ interface PhaseBadgeProps {
 }
 
 export function PhaseBadge({ phase }: PhaseBadgeProps) {
+  const { t } = useTranslation()
   const phaseEnum = GAMEPHASE_TO_PHASE[phase]
   const phaseMeta = phaseEnum ? PHASE_META[phaseEnum] : null
   const PhaseIcon = phaseMeta?.Icon ?? null
@@ -33,7 +38,13 @@ export function PhaseBadge({ phase }: PhaseBadgeProps) {
       transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
     >
       {PhaseIcon && <PhaseIcon className="h-4 w-4" />}
-      <span>{phaseMeta.label}</span>
+      <span>
+        {phaseEnum
+          ? t(`game.phases.${phaseEnum}.label`, {
+              defaultValue: phaseMeta.label,
+            })
+          : null}
+      </span>
     </motion.div>
   )
 }

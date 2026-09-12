@@ -1,0 +1,22 @@
+{
+  "language": {
+    "menu": "Language",
+    "english": "English",
+    "arabic": "Arabic"
+  },
+  "nav": {
+    "howToPlay": "How to play",
+    "mechanics": "Mechanics",
+    "join": "Join"
+  },
+  "footer": {
+    "tagline": "Social Deduction Online",
+    "copyright": "© {{year}} Mafia. All rights reserved."
+  },
+  "user": {
+    "changePassword": "Change Password",
+    "logOut": "Log Out",
+    "logIn": "Log in",
+    "signUp": "Sign up"
+  }
+}

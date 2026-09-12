@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ForgotPasswordForm } from '#/features/auth/components/forgot-password-form'
 import type { ForgotPasswordInput } from '#/features/auth/schemas/auth'
 import { forgotPassword } from '#/features/auth/api/client'
@@ -9,6 +10,7 @@ export const Route = createFileRoute('/(auth)/password/forgot')({
 })
 
 function ForgotPasswordPage() {
+  const { t } = useTranslation()
   const [result, setResult] = useState<{ resetLink: string | null } | null>(
     null,
   )
@@ -29,15 +31,23 @@ function ForgotPasswordPage() {
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-sm space-y-6 text-center">
           <h1 className="display-title text-3xl text-neutral-900">
-            Check your email
+            {t('auth.pages.forgot.successTitle', {
+              defaultValue: 'Check your email',
+            })}
           </h1>
           <p className="text-sm text-neutral-600">
-            If an account with that email exists, we&apos;ve sent a password
-            reset link.
+            {t('auth.pages.forgot.successMessage', {
+              defaultValue:
+                "If an account with that email exists, we've sent a password reset link.",
+            })}
           </p>
           {result.resetLink && (
-            <div className="rounded-md bg-neutral-50 border border-neutral-200 p-4 text-left">
-              <p className="text-xs text-neutral-500 mb-1">Development link:</p>
+            <div className="rounded-md bg-neutral-50 border border-neutral-200 p-4 text-start">
+              <p className="text-xs text-neutral-500 mb-1">
+                {t('auth.pages.forgot.devLinkLabel', {
+                  defaultValue: 'Development link:',
+                })}
+              </p>
               <a
                 href={result.resetLink}
                 className="text-sm text-neutral-900 underline break-all"
@@ -56,10 +66,14 @@ function ForgotPasswordPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="display-title text-3xl text-neutral-900">
-            Reset your password
+            {t('auth.pages.forgot.title', {
+              defaultValue: 'Reset your password',
+            })}
           </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Enter your email to receive a reset link
+            {t('auth.pages.forgot.subtitle', {
+              defaultValue: 'Enter your email to receive a reset link',
+            })}
           </p>
         </div>
         <ForgotPasswordForm onSubmit={handleSubmit} />

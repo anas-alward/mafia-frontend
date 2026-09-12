@@ -1,0 +1,116 @@
+{
+  "room": {
+    "hud": {
+      "showMembers": "Show members",
+      "showRequests": "Show join requests"
+    },
+    "controlBar": {
+      "startGame": "Start Game"
+    },
+    "media": {
+      "muteMic": "Mute microphone",
+      "unmuteMic": "Unmute microphone",
+      "silenced": "You are silenced",
+      "cameraOff": "Turn off camera",
+      "cameraOn": "Turn on camera",
+      "leave": "Leave meeting"
+    },
+    "hostMenu": {
+      "submitVotes": "Submit Votes",
+      "resolveVotes": "Resolve Votes",
+      "primaryAction": "{{label}} (primary)",
+      "waitingVotes": "Waiting for all votes ({{count}}/{{total}})",
+      "resolveHint": "Resolve votes",
+      "menu": "Host actions menu",
+      "resetGame": "Reset Game",
+      "cancelGame": "Cancel Game",
+      "confirmResetTitle": "Restart game?",
+      "confirmResetDesc": "Roles will be redealt and the current round will be discarded.",
+      "confirmResetLabel": "Restart game",
+      "confirmCancelTitle": "Cancel game?",
+      "confirmCancelDesc": "The game ends now and everyone returns to the lobby.",
+      "confirmCancelLabel": "Cancel game"
+    },
+    "confirm": {
+      "cancel": "Cancel"
+    },
+    "tiles": {
+      "guest": "Guest",
+      "unknown": "Unknown",
+      "playerFallback": "Player {{id}}"
+    },
+    "sidebar": {
+      "members": "Members",
+      "requests": "Join Requests",
+      "close": "Close",
+      "noMembers": "No members connected",
+      "noRequests": "No pending requests",
+      "you": "You",
+      "acceptUser": "Accept {{name}}",
+      "rejectUser": "Reject {{name}}",
+      "micOn": "Microphone on",
+      "micOff": "Microphone off",
+      "camOn": "Camera on",
+      "camOff": "Camera off",
+      "turnOffMic": "Turn off {{name}}'s microphone",
+      "turnOffCam": "Turn off {{name}}'s camera",
+      "micAlreadyOff": "Microphone already off",
+      "camAlreadyOff": "Camera already off"
+    },
+    "join": {
+      "titleReturn": "Welcome back",
+      "titleNew": "Ready to join?",
+      "subtitleReturn": "Set up your audio and video before joining.",
+      "subtitleNew": "Set up your audio and video, then ask to join.",
+      "connectFailed": "Failed to connect to meeting.",
+      "connectionLost": "Connection lost.",
+      "tryAgain": "Try again",
+      "joining": "Joining...",
+      "connecting": "Connecting to room...",
+      "startingCamera": "Starting camera...",
+      "waitingHost": "Waiting for host...",
+      "joinMeeting": "Join meeting",
+      "askToJoin": "Ask to join",
+      "rejected": "The host declined your request. You can try again.",
+      "micLabel": "Microphone",
+      "cameraLabel": "Camera",
+      "cameraUnavailable": "Camera unavailable",
+      "cameraOff": "Camera off",
+      "micFallback": "Mic {{id}}",
+      "cameraFallback": "Camera {{id}}",
+      "turnOnMic": "Turn on microphone",
+      "turnOffMic": "Turn off microphone",
+      "turnOnCamera": "Turn on camera",
+      "turnOffCamera": "Turn off camera"
+    },
+    "ended": {
+      "title": "Meeting ended",
+      "subtitle": "Thanks for joining.",
+      "back": "Back to rooms"
+    },
+    "states": {
+      "closedTitle": "Meeting ended by host",
+      "closedDesc": "This room is no longer active.",
+      "back": "Back to rooms"
+    },
+    "menu": {
+      "open": "Open menu",
+      "share": "Share link",
+      "copied": "Link copied!",
+      "enterFullscreen": "Enter fullscreen",
+      "exitFullscreen": "Exit fullscreen"
+    },
+    "tooltip": {
+      "selectPlayers": "Select Players",
+      "selectAll": "Select All",
+      "start": "Start Game ({{count}}/6)"
+    },
+    "connection": {
+      "lost": "Connection lost. Check your network."
+    },
+    "live": {
+      "showSelf": "Show self view",
+      "hideSelf": "Hide self view"
+    }
+  }
+}

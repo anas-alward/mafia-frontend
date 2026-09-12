@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
 import {
@@ -11,7 +12,7 @@ import {
   FormControl,
   FormMessage,
 } from '#/components/ui/form'
-import { forgotPasswordSchema } from '../schemas/auth'
+import { createForgotPasswordSchema } from '../schemas/auth'
 import type { ForgotPasswordInput } from '../schemas/auth'
 
 interface ForgotPasswordFormProps {
@@ -20,8 +21,9 @@ interface ForgotPasswordFormProps {
 
 export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const form = useForm<ForgotPasswordInput>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(createForgotPasswordSchema(t)),
     defaultValues: { email: '' },
   })
 
@@ -37,8 +39,10 @@ export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
         noValidate
       >
         <p className="text-sm text-neutral-600">
-          Enter your email address and we&apos;ll send you a link to reset your
-          password.
+          {t('auth.forgot.description', {
+            defaultValue:
+              "Enter your email address and we'll send you a link to reset your password.",
+          })}
         </p>
 
         <FormField
@@ -46,7 +50,9 @@ export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>
+                {t('auth.fields.email', { defaultValue: 'Email' })}
+              </FormLabel>
               <FormControl>
                 <Input type="email" autoComplete="email" {...field} />
               </FormControl>
@@ -60,7 +66,9 @@ export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
           className="w-full text-white"
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? 'Sending...' : 'Send Reset Link'}
+          {form.formState.isSubmitting
+            ? t('auth.forgot.submitting', { defaultValue: 'Sending...' })
+            : t('auth.forgot.submit', { defaultValue: 'Send Reset Link' })}
         </Button>
 
         <p className="text-sm text-center text-neutral-600">
@@ -69,7 +77,7 @@ export function ForgotPasswordForm({ onSubmit }: ForgotPasswordFormProps) {
             onClick={() => navigate({ to: '/login' })}
             className="text-neutral-900 underline underline-offset-2 font-medium"
           >
-            Back to login
+            {t('auth.forgot.backToLogin', { defaultValue: 'Back to login' })}
           </button>
         </p>
       </form>

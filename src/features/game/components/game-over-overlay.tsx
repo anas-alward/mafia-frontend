@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { Skull, ShieldCheck, Trophy, X, RotateCcw } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
@@ -33,6 +34,7 @@ const LOSER_OF: Record<Winner, Winner> = {
 }
 
 export function GameOverOverlay() {
+  const { t } = useTranslation()
   const phase = useGameStore((s) => s.phase)
   const winner = useGameStore((s) => s.winner)
   const resetGame = useGameStore((s) => s.resetGame)
@@ -48,6 +50,15 @@ export function GameOverOverlay() {
   const winnerMeta = winner ? TEAM_META[winner] : null
   const loserMeta = winner ? TEAM_META[LOSER_OF[winner]] : null
   const WinnerIcon = winnerMeta?.icon
+  const winnerLabel = winner
+    ? t(`game.teams.${winner}`, { defaultValue: winnerMeta?.label ?? winner })
+    : null
+  const loserLabel =
+    winner && loserMeta
+      ? t(`game.teams.${LOSER_OF[winner]}`, {
+          defaultValue: loserMeta.label,
+        })
+      : null
 
   return (
     <AnimatePresence>
@@ -68,8 +79,8 @@ export function GameOverOverlay() {
           <button
             type="button"
             onClick={() => setDismissed(true)}
-            aria-label="Dismiss"
-            className="absolute top-4 right-4 p-2 rounded-full transition-colors cursor-pointer"
+            aria-label={t('game.gameOver.dismiss', { defaultValue: 'Dismiss' })}
+            className="absolute top-4 end-4 p-2 rounded-full transition-colors cursor-pointer"
             style={{
               color: 'var(--game-text-muted)',
               backgroundColor: 'rgba(255, 255, 255, 0.04)',
@@ -113,7 +124,7 @@ export function GameOverOverlay() {
               className="mt-6 text-xs font-bold tracking-[0.28em] uppercase"
               style={{ color: 'var(--game-text-muted)' }}
             >
-              Game Over
+              {t('game.gameOver.title', { defaultValue: 'Game Over' })}
             </p>
 
             <h2
@@ -123,12 +134,29 @@ export function GameOverOverlay() {
                 textShadow: `0 0 32px ${winnerMeta.glow}`,
               }}
             >
-              {winnerMeta.label} Wins
+              {t('game.gameOver.wins', {
+                team: winnerLabel ?? winnerMeta.label,
+                defaultValue: `${winnerMeta.label} Wins`,
+              })}
             </h2>
 
             <div className="mt-8 flex items-center gap-3">
-              <TeamPill meta={winnerMeta} outcome="Victory" />
-              <TeamPill meta={loserMeta} outcome="Defeated" />
+              <TeamPill
+                meta={winnerMeta}
+                label={winnerLabel ?? winnerMeta.label}
+                outcome={t('game.gameOver.victory', {
+                  defaultValue: 'Victory',
+                })}
+                isVictory
+              />
+              <TeamPill
+                meta={loserMeta}
+                label={loserLabel ?? loserMeta.label}
+                outcome={t('game.gameOver.defeated', {
+                  defaultValue: 'Defeated',
+                })}
+                isVictory={false}
+              />
             </div>
 
             {isHost && (
@@ -143,7 +171,7 @@ export function GameOverOverlay() {
                 }}
               >
                 <RotateCcw className="h-4 w-4" />
-                Play Again
+                {t('game.gameOver.playAgain', { defaultValue: 'Play Again' })}
               </button>
             )}
           </motion.div>
@@ -155,13 +183,16 @@ export function GameOverOverlay() {
 
 function TeamPill({
   meta,
+  label,
   outcome,
+  isVictory,
 }: {
   meta: TeamMeta
-  outcome: 'Victory' | 'Defeated'
+  label: string
+  outcome: string
+  isVictory: boolean
 }) {
   const Icon = meta.icon
-  const isVictory = outcome === 'Victory'
 
   return (
     <div
@@ -186,7 +217,7 @@ function TeamPill({
           className="text-sm font-bold"
           style={{ color: isVictory ? meta.color : 'var(--game-text-muted)' }}
         >
-          {meta.label}
+          {label}
         </span>
       </div>
     </div>

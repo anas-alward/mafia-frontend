@@ -1,7 +1,9 @@
 import { Video, VideoOff } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMediaConfigStore } from '#/features/rooms/store/media-config-store'
 
 export function VideoToggleButton() {
+  const { t } = useTranslation()
   const videoEnabled = useMediaConfigStore((s) => s.videoEnabled)
   const toggleVideo = useMediaConfigStore((s) => s.toggleVideo)
   const mediaError = useMediaConfigStore((s) => s.mediaError)
@@ -11,6 +13,11 @@ export function VideoToggleButton() {
       type="button"
       onClick={toggleVideo}
       disabled={!!mediaError}
+      aria-label={
+        videoEnabled
+          ? t('room.join.turnOffCamera')
+          : t('room.join.turnOnCamera')
+      }
       className={`h-12 w-12 rounded-full flex items-center justify-center transition-colors ${
         videoEnabled
           ? 'bg-[#60a5fa] text-white hover:bg-[#3b82f6]'

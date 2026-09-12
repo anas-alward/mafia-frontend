@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
 import {
@@ -10,7 +11,7 @@ import {
   FormControl,
   FormMessage,
 } from '#/components/ui/form'
-import { resetPasswordFormSchema } from '../schemas/auth'
+import { createResetPasswordFormSchema } from '../schemas/auth'
 import type {
   ResetPasswordFormInput,
   ResetPasswordInput,
@@ -29,8 +30,9 @@ export function ResetPasswordForm({
   email,
   onSubmit,
 }: ResetPasswordFormProps) {
+  const { t } = useTranslation()
   const form = useForm<ResetPasswordFormInput>({
-    resolver: zodResolver(resetPasswordFormSchema),
+    resolver: zodResolver(createResetPasswordFormSchema(t)),
     defaultValues: { token, email, password: '', confirmPassword: '' },
   })
 
@@ -46,7 +48,7 @@ export function ResetPasswordForm({
         form.setError(
           (e.field ?? 'root') as keyof ResetPasswordInput | 'root',
           {
-            message: e.message,
+            message: t('auth.errors.server', { defaultValue: e.message }),
           },
         )
       }
@@ -65,7 +67,11 @@ export function ResetPasswordForm({
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>New Password</FormLabel>
+              <FormLabel>
+                {t('auth.fields.newPassword', {
+                  defaultValue: 'New Password',
+                })}
+              </FormLabel>
               <FormControl>
                 <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
@@ -79,7 +85,11 @@ export function ResetPasswordForm({
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel>
+                {t('auth.fields.confirmPassword', {
+                  defaultValue: 'Confirm Password',
+                })}
+              </FormLabel>
               <FormControl>
                 <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
@@ -99,7 +109,9 @@ export function ResetPasswordForm({
           className="w-full text-white"
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? 'Resetting...' : 'Reset Password'}
+          {form.formState.isSubmitting
+            ? t('auth.reset.submitting', { defaultValue: 'Resetting...' })
+            : t('auth.reset.submit', { defaultValue: 'Reset Password' })}
         </Button>
       </form>
     </Form>

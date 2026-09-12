@@ -1,5 +1,6 @@
 import { useParticipants } from '@livekit/components-react'
 import { Users, UserPlus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
@@ -63,6 +64,7 @@ export function GameHUD({
 
 /** Joined count — opens the members tab. */
 function MembersToggle({ count }: { count: number }) {
+  const { t } = useTranslation()
   const { activeTab, toggle } = useLiveSidebar()
   const isActive = activeTab === 'members'
 
@@ -74,7 +76,7 @@ function MembersToggle({ count }: { count: number }) {
       style={{
         color: isActive ? 'var(--game-text-primary)' : 'var(--game-text-muted)',
       }}
-      aria-label="Show members"
+      aria-label={t('room.hud.showMembers')}
     >
       <Users className="h-3.5 w-3.5" />
       <span>{count}</span>
@@ -84,6 +86,7 @@ function MembersToggle({ count }: { count: number }) {
 
 /** Pending join-request count — opens the requests tab. */
 function RequestsToggle({ count }: { count: number }) {
+  const { t } = useTranslation()
   const { toggle } = useLiveSidebar()
 
   return (
@@ -94,7 +97,7 @@ function RequestsToggle({ count }: { count: number }) {
       style={{
         color: 'var(--game-gold)',
       }}
-      aria-label="Show join requests"
+      aria-label={t('room.hud.showRequests')}
     >
       <UserPlus className="h-3.5 w-3.5" />
       <span>{count}</span>

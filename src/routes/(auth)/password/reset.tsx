@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { ResetPasswordForm } from '#/features/auth/components/reset-password-form'
 import type { ResetPasswordInput } from '#/features/auth/schemas/auth'
 import { resetPassword } from '#/features/auth/api/client'
@@ -19,6 +20,7 @@ export const Route = createFileRoute('/(auth)/password/reset')({
 
 function ResetPasswordPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const search = Route.useSearch()
   const { token, email } = search
 
@@ -27,16 +29,22 @@ function ResetPasswordPage() {
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-sm space-y-6 text-center">
           <h1 className="display-title text-3xl text-neutral-900">
-            Invalid link
+            {t('auth.pages.reset.invalidTitle', {
+              defaultValue: 'Invalid link',
+            })}
           </h1>
           <p className="text-sm text-neutral-600">
-            This password reset link is missing or invalid.
+            {t('auth.pages.reset.invalidMessage', {
+              defaultValue: 'This password reset link is missing or invalid.',
+            })}
           </p>
           <button
             onClick={() => navigate({ to: '/password/forgot' })}
             className="text-sm text-neutral-900 underline underline-offset-2 font-medium"
           >
-            Request a new reset link
+            {t('auth.pages.reset.requestNew', {
+              defaultValue: 'Request a new reset link',
+            })}
           </button>
         </div>
       </div>
@@ -60,10 +68,14 @@ function ResetPasswordPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="display-title text-3xl text-neutral-900">
-            Set new password
+            {t('auth.pages.reset.title', {
+              defaultValue: 'Set new password',
+            })}
           </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Choose a new password for your account
+            {t('auth.pages.reset.subtitle', {
+              defaultValue: 'Choose a new password for your account',
+            })}
           </p>
         </div>
         <ResetPasswordForm

@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Button } from '#/components/ui/button'
 
 interface CtaSectionProps {
@@ -7,6 +8,8 @@ interface CtaSectionProps {
 }
 
 export function CtaSection({ title, description }: CtaSectionProps) {
+  const { t } = useTranslation()
+
   return (
     <section id="join" className="py-20 sm:py-28 reveal-on-scroll">
       <div className="page-wrap">
@@ -25,14 +28,14 @@ export function CtaSection({ title, description }: CtaSectionProps) {
               size="lg"
               className="text-base px-8 py-6 rounded-xl"
             >
-              <Link to="/login">Log in</Link>
+              <Link to="/login">{t('cta.logIn')}</Link>
             </Button>
             <Button
               asChild
               size="lg"
               className="cta-glow text-white text-base px-8 py-6 rounded-xl shadow-none"
             >
-              <Link to="/signup">Sign up</Link>
+              <Link to="/signup">{t('cta.signUp')}</Link>
             </Button>
           </div>
         </div>

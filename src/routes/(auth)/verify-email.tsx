@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { VerifyEmailForm } from '#/features/auth/components/verify-email-form.tsx'
 import { verifyEmail } from '#/features/auth/api/client.ts'
 import type { VerifyEmailInput } from '#/features/auth/schemas/auth.ts'
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/(auth)/verify-email')({
 
 function VerifyEmailPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { email } = Route.useSearch()
 
   const handleVerify = async (data: VerifyEmailInput) => {
@@ -35,10 +37,14 @@ function VerifyEmailPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="display-title text-3xl text-neutral-900">
-            Verify your email
+            {t('auth.pages.verify.title', {
+              defaultValue: 'Verify your email',
+            })}
           </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Enter the code sent to your email
+            {t('auth.pages.verify.subtitle', {
+              defaultValue: 'Enter the code sent to your email',
+            })}
           </p>
         </div>
         <VerifyEmailForm email={email} onSubmit={handleVerify} />

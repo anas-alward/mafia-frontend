@@ -10,6 +10,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { SessionInit } from '../features/auth/components/session-init'
+import { LocaleSync } from '../i18n/LocaleSync'
 
 import appCss from '../styles.css?url'
 
@@ -76,6 +77,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <SessionInit />
+        <LocaleSync />
         {children}
         <TanStackDevtools
           config={{

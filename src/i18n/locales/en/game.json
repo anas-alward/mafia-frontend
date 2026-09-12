@@ -1,0 +1,276 @@
+{
+  "game": {
+    "roles": {
+      "doctor": {
+        "name": "Doctor",
+        "description": "Protects one player from being eliminated each night."
+      },
+      "detective": {
+        "name": "Detective",
+        "description": "Investigates one player each night to learn their alignment."
+      },
+      "vigilante": {
+        "name": "Azure Vigilante",
+        "description": "May shoot one player during the day instead of voting (2 bullets). Shooting a Town player eliminates the Vigilante too."
+      },
+      "bomb": {
+        "name": "Crimson Kamikaze",
+        "description": "Explodes upon death, eliminating whoever was responsible for killing them."
+      },
+      "vanilla": {
+        "name": "Vanilla Townie",
+        "description": "Has no special ability. Uses vote power during the day."
+      },
+      "mayor": {
+        "name": "Mayor",
+        "description": "Elected town leader whose day vote counts as 3 votes."
+      },
+      "godfather": {
+        "name": "Mafia King",
+        "description": "The leader of the Mafia. Appears as 'Town' if investigated by the Cop."
+      },
+      "silencer": {
+        "name": "Mafia Silencer",
+        "description": "Blocks one player each night, preventing them from using their action."
+      },
+      "mafia_member": {
+        "name": "Mafia Member",
+        "description": "Basic Mafia member who participates in night kills."
+      }
+    },
+    "actions": {
+      "kill": { "label": "Kill", "eventMessage": "Eliminated" },
+      "revenge": { "label": "Revenge", "eventMessage": "Eliminated" },
+      "vote": { "label": "Vote", "eventMessage": "Vote" },
+      "heal": { "label": "Heal", "eventMessage": "Healed" },
+      "detect": { "label": "Detect", "eventMessage": "Detect" },
+      "shoot": { "label": "Shoot", "eventMessage": "Eliminated" },
+      "silence": { "label": "Silence", "eventMessage": "Silenced" },
+      "lynch": { "label": "Lynch", "eventMessage": "Eliminated" }
+    },
+    "phases": {
+      "day": {
+        "label": "Day",
+        "description": "The village wakes and talks. Everyone discusses the events of the night, shares suspicions, and defends themselves. The Vigilante may spend a bullet instead of voting — but shooting a Town player backfires."
+      },
+      "night": {
+        "label": "Night",
+        "description": "The village sleeps. Players with night abilities act one by one, in secret. Nobody sees who chose whom — only the outcomes surface in the morning."
+      },
+      "vote_result": {
+        "label": "Vote Result",
+        "description": "Discussion ends and every living player votes. The top suspect is eliminated and their role is revealed for all to see. If the Crimson Kamikaze dies, they take their killer down with them."
+      }
+    },
+    "teams": {
+      "mafia": "Mafia",
+      "town": "Town"
+    },
+    "playerCount": {
+      "alive": "{{count}} alive",
+      "dead": "{{count}} dead"
+    },
+    "roundBadge": {
+      "label": "R{{round}}"
+    },
+    "playerState": {
+      "dead": "Dead"
+    },
+    "gameOver": {
+      "title": "Game Over",
+      "wins": "{{team}} Wins",
+      "victory": "Victory",
+      "defeated": "Defeated",
+      "playAgain": "Play Again",
+      "dismiss": "Dismiss"
+    },
+    "phaseEvents": {
+      "pendingActions_one": "{{count}} required action: {{action}}",
+      "pendingActions_other": "{{count}} required actions: {{action}}"
+    },
+    "tileEvent": {
+      "votedBy": "Voted by {{name}}",
+      "saved": "Saved",
+      "playerFallback": "Player {{id}}"
+    },
+    "roleExplorer": {
+      "kicker": "The Cast",
+      "title": "Meet the roles",
+      "subtitle": "Your role is secret. Learn what everyone at the table might be plotting.",
+      "filterLabel": "Filter roles by team",
+      "filters": {
+        "all": "All roles"
+      },
+      "showAbilities": "Show abilities",
+      "hideAbilities": "Hide abilities",
+      "everyoneVotes": "Everyone votes during the day.",
+      "viewDetails": "View {{name}} details",
+      "scrollLeft": "Scroll roles left",
+      "scrollRight": "Scroll roles right",
+      "regionLabel": "Roles"
+    },
+    "phaseExplorer": {
+      "tablistLabel": "Explore each phase",
+      "titleSuffix": "{{phase}} phase",
+      "whoActs": "Who acts",
+      "actionsLabel": "Actions",
+      "discussionVote": "Discussion + vote",
+      "allPlayers": "All players",
+      "repeatNote": "Night, day, and vote repeat until a side wins."
+    },
+    "howToPlay": {
+      "flow": {
+        "kicker": "Start To Finish",
+        "title": "How a game unfolds",
+        "introA": "One game is a loop of nights and days. Here is the full journey —",
+        "introLink": "explore what happens inside each phase",
+        "steps": {
+          "gather": {
+            "title": "Gather your crew",
+            "text": "The host creates a room and shares the invite link or room code. Everyone joins from their browser — no installs, just audio, video, and suspicion."
+          },
+          "roles": {
+            "title": "Roles are dealt in secret",
+            "text": "Each player is assigned a hidden role: most are Town, a few are Mafia. Look at your own role and tell no one. The Mafia learn who each other are — the Town knows nothing."
+          },
+          "night": {
+            "title": "Night falls — roles act",
+            "text": "When night comes, each role with a night ability acts in secret: the Mafia pick a target, the Detective investigates a suspect, the Doctor protects someone. See the phases page for who does what."
+          },
+          "morning": {
+            "title": "Morning — the reveal",
+            "text": "Everyone wakes up to the news: someone may have been eliminated overnight — unless the Doctor made a save. The eliminated player's role is revealed."
+          },
+          "discuss": {
+            "title": "Discuss and accuse",
+            "text": "The living debate. Who acted suspiciously? Who is deflecting? Town players share what they know (carefully), and Mafia players blend in, sow doubt, and push suspicion onto innocents."
+          },
+          "vote": {
+            "title": "Vote to eliminate",
+            "text": "Everyone casts a vote. The player with the most votes is eliminated and their role is revealed. Then night falls again — repeat until one side wins."
+          },
+          "victory": {
+            "title": "A side claims victory",
+            "text": "Town wins by eliminating every Mafia member. Mafia wins once they match the Town in numbers and control the vote. See the win conditions below."
+          }
+        }
+      }
+    },
+    "actionGlossary": {
+      "kicker": "The Moves",
+      "title": "Every action, explained",
+      "subtitle": "These are all the moves in the game — who can use them, when, and what the village sees.",
+      "announcedAs": "Announced as “{{message}}”.",
+      "usedBy": "Used by",
+      "none": "—"
+    },
+    "winConditions": {
+      "kicker": "The Stakes",
+      "title": "How each side wins",
+      "town": {
+        "side": "Town wins",
+        "headline": "Eliminate every Mafia member",
+        "text": "The Town — everyone who is not Mafia — wins when the last Mafia player is eliminated, whether by day vote, Vigilante shot, or Kamikaze explosion. Every revealed role is a clue: count down the remaining suspects."
+      },
+      "mafia": {
+        "side": "Mafia wins",
+        "headline": "Reach parity with the Town",
+        "text": "The Mafia wins once their numbers match the surviving Town — at parity they control every vote, so the outcome is sealed. Kill quietly at night, deflect by day, and survive the eliminations."
+      }
+    },
+    "beginnerTips": {
+      "kicker": "Play Smarter",
+      "title": "Beginner tips",
+      "tips": {
+        "track": {
+          "title": "Track everything",
+          "text": "Note who voted for whom and who pushed each elimination. Mafia voting patterns leak over time — the record rarely lies."
+        },
+        "speak": {
+          "title": "Town: speak up, but time it",
+          "text": "Share what you know during discussion. If you hold a power role, hint instead of claiming outright — the Mafia is listening."
+        },
+        "blend": {
+          "title": "Mafia: blend, don't hide",
+          "text": "Silent players look suspicious. Accuse, defend, and vote like a Town member would — and never let your partners look coordinated."
+        },
+        "detective": {
+          "title": "Detective: protect your findings",
+          "text": "Found a Mafia member? Steer the vote toward them without exposing how you know. A revealed Detective rarely survives the next night."
+        },
+        "doctor": {
+          "title": "Doctor: guard the valuable",
+          "text": "Protect outspoken Town voices and confirmed power roles. Avoid obvious patterns — the Mafia watches who keeps surviving."
+        },
+        "quiet": {
+          "title": "Everyone: watch the quiet ones",
+          "text": "Players coasting through discussion without committing to reads are often hiding something. Ask them direct questions."
+        }
+      }
+    },
+    "distribution": {
+      "kicker": "The Deal",
+      "title": "Roles at every table size",
+      "tablistLabel": "Filter by player count",
+      "playersTab": "{{count}} players",
+      "cardTitle": "{{count}} players: {{town}} {{townName}} vs {{mafia}} {{mafiaName}}",
+      "cardSubtitle": "The Mafia is always outnumbered — their edge is secrecy."
+    },
+    "pages": {
+      "phases": {
+        "kicker": "Game · Phases",
+        "title": "Night, day, repeat",
+        "subtitle": "Every round cycles through the same phases. Explore each one — what happens, who acts, and which actions resolve.",
+        "ctaTitle": "Know the rhythm? Learn the flow",
+        "readGuide": "Read the guide",
+        "seeActions": "See every action"
+      },
+      "actions": {
+        "kicker": "Game · Actions",
+        "title": "Every move in the game",
+        "subtitle": "All the actions — who can use them, in which phase, and what the village sees when they land.",
+        "ctaTitle": "Know the moves? Learn the flow",
+        "readGuide": "Read the guide",
+        "browseRoles": "Browse all roles"
+      },
+      "roles": {
+        "kicker": "Game · Roles",
+        "title": "Know every role at the table",
+        "subtitle": "Every role and what it can do. Slide through the deck, filter by team, expand a card for abilities.",
+        "ctaTitle": "Which roles appear in your game?",
+        "ctaText": "The deal depends on your table size — see the exact composition for 6 to 11 players.",
+        "seeDistribution": "See role distribution",
+        "readGuide": "Read the guide"
+      },
+      "roleDetail": {
+        "unknownTitle": "Unknown role",
+        "unknownText": "No role with code “{{code}}” exists in this game.",
+        "browseRoles": "Browse all roles",
+        "backToRoles": "All roles",
+        "abilitiesLabel": "Abilities",
+        "tableSizesLabel": "Table sizes",
+        "abilityNight": "Night ability",
+        "abilityDay": "Day ability",
+        "abilityVoteResult": "Vote result ability",
+        "noAbility": "No {{phase}} ability.",
+        "voteWithOthers": "Cast a vote with everyone else",
+        "mustAct": "Must act every time",
+        "optional": "Optional — use it or skip",
+        "notInDistribution": "Not in the current distribution",
+        "notDealtText": "This role is not dealt at any supported table size.",
+        "includedFrom": "Included from {{min}} players",
+        "appearsIn": " — appears in {{tables}} player games",
+        "seeDistributionTable": "See the full distribution table",
+        "moreRoles": "More roles"
+      },
+      "distribution": {
+        "kicker": "Game · Roles · Distribution",
+        "title": "Who plays at your table size",
+        "subtitle": "Games run with 6 to 11 players. Pick a table size to see exactly which roles are dealt — shuffled, so anyone could be anything.",
+        "ctaTitle": "Done studying the odds?",
+        "startPlaying": "Start playing",
+        "browseRoles": "Browse all roles"
+      }
+    }
+  }
+}

@@ -1,102 +1,208 @@
 import { z } from 'zod'
+import type { TFunction } from 'i18next'
 
-// Shared field validators
-const username = z
-  .string()
-  .min(3, 'Username must be at least 3 characters')
-  .max(30, 'Username must be at most 30 characters')
-  .regex(
-    /^[a-zA-Z0-9_-]+$/,
-    'Username can only contain letters, numbers, underscores, and hyphens',
+// Shared field validators (per-language: call inside a factory with `t`)
+function usernameValidator(t: TFunction) {
+  return z
+    .string()
+    .min(
+      3,
+      t('auth.validation.usernameMin', {
+        defaultValue: 'Username must be at least 3 characters',
+      }),
+    )
+    .max(
+      30,
+      t('auth.validation.usernameMax', {
+        defaultValue: 'Username must be at most 30 characters',
+      }),
+    )
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      t('auth.validation.usernamePattern', {
+        defaultValue:
+          'Username can only contain letters, numbers, underscores, and hyphens',
+      }),
+    )
+}
+
+function emailValidator(t: TFunction) {
+  return z.string().email(
+    t('auth.validation.emailInvalid', {
+      defaultValue: 'Please enter a valid email address',
+    }),
   )
+}
 
-const email = z.string().email('Please enter a valid email address')
+function passwordValidator(t: TFunction) {
+  return z.string().min(
+    8,
+    t('auth.validation.passwordMin', {
+      defaultValue: 'Password must be at least 8 characters',
+    }),
+  )
+}
 
-const password = z.string().min(8, 'Password must be at least 8 characters')
+function confirmPasswordValidator(t: TFunction) {
+  return z.string().min(
+    1,
+    t('auth.validation.confirmRequired', {
+      defaultValue: 'Please confirm your password',
+    }),
+  )
+}
+
+function passwordMismatchMessage(t: TFunction) {
+  return t('auth.validation.passwordMismatch', {
+    defaultValue: 'Passwords do not match',
+  })
+}
 
 // ── Sign Up ──
-export const signUpSchema = z.object({
-  username,
-  email,
-  password,
-})
+export function createSignUpSchema(t: TFunction) {
+  return z.object({
+    username: usernameValidator(t),
+    email: emailValidator(t),
+    password: passwordValidator(t),
+  })
+}
 
-export type SignUpInput = z.infer<typeof signUpSchema>
+export type SignUpInput = z.infer<ReturnType<typeof createSignUpSchema>>
 
 /** Form-level schema: double-checks the password before submission. */
-export const signUpFormSchema = z
-  .object({
-    username,
-    email,
-    password,
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.confirmPassword === data.password, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  })
+export function createSignUpFormSchema(t: TFunction) {
+  return z
+    .object({
+      username: usernameValidator(t),
+      email: emailValidator(t),
+      password: passwordValidator(t),
+      confirmPassword: confirmPasswordValidator(t),
+    })
+    .refine((data) => data.confirmPassword === data.password, {
+      message: passwordMismatchMessage(t),
+      path: ['confirmPassword'],
+    })
+}
 
-export type SignUpFormInput = z.infer<typeof signUpFormSchema>
+export type SignUpFormInput = z.infer<ReturnType<typeof createSignUpFormSchema>>
 
 // ── Login ──
-export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-})
+export function createLoginSchema(t: TFunction) {
+  return z.object({
+    email: z
+      .string()
+      .min(
+        1,
+        t('auth.validation.emailRequired', {
+          defaultValue: 'Email is required',
+        }),
+      )
+      .email(
+        t('auth.validation.emailInvalid', {
+          defaultValue: 'Please enter a valid email address',
+        }),
+      ),
+    password: z.string().min(
+      1,
+      t('auth.validation.passwordRequired', {
+        defaultValue: 'Password is required',
+      }),
+    ),
+  })
+}
 
-export type LoginInput = z.infer<typeof loginSchema>
+export type LoginInput = z.infer<ReturnType<typeof createLoginSchema>>
 
 // ── Verify Email ──
-export const verifyEmailSchema = z.object({
-  email: z.string().email(),
-  code: z.string().min(1, 'Verification code is required'),
-})
+export function createVerifyEmailSchema(t: TFunction) {
+  return z.object({
+    email: z.string().email(),
+    code: z.string().min(
+      1,
+      t('auth.validation.codeRequired', {
+        defaultValue: 'Verification code is required',
+      }),
+    ),
+  })
+}
 
-export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>
+export type VerifyEmailInput = z.infer<
+  ReturnType<typeof createVerifyEmailSchema>
+>
 
 // ── Forgot Password ──
-export const forgotPasswordSchema = z.object({
-  email,
-})
+export function createForgotPasswordSchema(t: TFunction) {
+  return z.object({
+    email: emailValidator(t),
+  })
+}
 
-export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
+export type ForgotPasswordInput = z.infer<
+  ReturnType<typeof createForgotPasswordSchema>
+>
 
 // ── Reset Password ──
-export const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
-  email,
-  newPassword: password,
-})
+export function createResetPasswordSchema(t: TFunction) {
+  return z.object({
+    token: z.string().min(
+      1,
+      t('auth.validation.tokenRequired', {
+        defaultValue: 'Reset token is required',
+      }),
+    ),
+    email: emailValidator(t),
+    newPassword: passwordValidator(t),
+  })
+}
 
-export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
+export type ResetPasswordInput = z.infer<
+  ReturnType<typeof createResetPasswordSchema>
+>
 
 /** Form-level schema: double-checks the password before submission. */
-export const resetPasswordFormSchema = z
-  .object({
-    token: z.string().min(1, 'Reset token is required'),
-    email,
-    password,
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.confirmPassword === data.password, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  })
+export function createResetPasswordFormSchema(t: TFunction) {
+  return z
+    .object({
+      token: z.string().min(
+        1,
+        t('auth.validation.tokenRequired', {
+          defaultValue: 'Reset token is required',
+        }),
+      ),
+      email: emailValidator(t),
+      password: passwordValidator(t),
+      confirmPassword: confirmPasswordValidator(t),
+    })
+    .refine((data) => data.confirmPassword === data.password, {
+      message: passwordMismatchMessage(t),
+      path: ['confirmPassword'],
+    })
+}
 
-export type ResetPasswordFormInput = z.infer<typeof resetPasswordFormSchema>
+export type ResetPasswordFormInput = z.infer<
+  ReturnType<typeof createResetPasswordFormSchema>
+>
 
 // ── Change Password ──
-export const changePasswordSchema = z
-  .object({
-    currentPassword: z.string().min(1, 'Current password is required'),
-    newPassword: password,
-  })
-  .refine((data) => data.currentPassword !== data.newPassword, {
-    message: 'New password must differ from current password',
-    path: ['newPassword'],
-  })
+export function createChangePasswordSchema(t: TFunction) {
+  return z
+    .object({
+      currentPassword: z.string().min(
+        1,
+        t('auth.validation.currentRequired', {
+          defaultValue: 'Current password is required',
+        }),
+      ),
+      newPassword: passwordValidator(t),
+    })
+    .refine((data) => data.currentPassword !== data.newPassword, {
+      message: t('auth.validation.newDiffers', {
+        defaultValue: 'New password must differ from current password',
+      }),
+      path: ['newPassword'],
+    })
+}
 
-export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
+export type ChangePasswordInput = z.infer<
+  ReturnType<typeof createChangePasswordSchema>
+>

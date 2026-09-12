@@ -8,6 +8,7 @@ import {
 import { RoomEvent } from 'livekit-client'
 import { motion } from 'motion/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
 
@@ -99,6 +100,7 @@ function LiveRoom({
 }: {
   fullScreenRef: React.RefObject<HTMLDivElement | null>
 }) {
+  const { t, i18n } = useTranslation()
   const isHost = useMeetingStore((s) => s.isHost)
   const gameStarted = useGameStore((s) => s.gameStarted)
   const startGame = useGameStore((s) => s.startGame)
@@ -111,6 +113,14 @@ function LiveRoom({
     : null
 
   const [selfTileHidden, setSelfTileHidden] = useState(false)
+  // In RTL the PiP docks to the inline-end (left) edge, so sliding
+  // outward means negative-x; in LTR it stays positive-x.
+  const isRtl = i18n.dir() === 'rtl'
+  const hiddenX = selfTileHidden
+    ? isRtl
+      ? 'calc(-100% + 1.5rem)'
+      : 'calc(100% - 1.5rem)'
+    : 0
 
   return (
     <div
@@ -126,10 +136,10 @@ function LiveRoom({
         </div>
 
         {/* Self-view PiP tile */}
-        <div className="absolute bottom-4 right-4 z-30 w-60 h-36">
+        <div className="absolute bottom-4 end-4 z-30 w-60 h-36">
           <motion.div
             initial={false}
-            animate={{ x: selfTileHidden ? 'calc(100% - 1.5rem)' : 0 }}
+            animate={{ x: hiddenX }}
             transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
             className={`relative w-60 h-36 rounded-lg shadow-2xl shadow-black/50 ring-1 ring-white/[0.08] ${
               selfTileHidden ? 'pointer-events-none' : ''
@@ -151,20 +161,27 @@ function LiveRoom({
               )}
             </TileEventOverlay>
 
-            {/* Handle strip along the card's left edge — stays visible when
-                the card is slid out to the right */}
+            {/* Handle strip along the card's inline-start edge — stays
+                visible when the card is slid outward */}
             <button
               type="button"
               onClick={() => setSelfTileHidden((v) => !v)}
-              className={`absolute left-0 top-0 bottom-0 w-6 z-30 flex items-center justify-center transition-colors duration-200 cursor-pointer bg-transparent hover:bg-[rgba(60,56,73,0.35)] ${
+              className={`absolute start-0 top-0 bottom-0 w-6 z-30 flex items-center justify-center transition-colors duration-200 cursor-pointer bg-transparent hover:bg-[rgba(60,56,73,0.35)] ${
                 selfTileHidden ? 'pointer-events-auto' : ''
               }`}
-              aria-label={selfTileHidden ? 'Show self view' : 'Hide self view'}
+              aria-label={
+                selfTileHidden
+                  ? t('room.live.showSelf')
+                  : t('room.live.hideSelf')
+              }
             >
               {selfTileHidden ? (
-                <ChevronLeft className="h-4 w-4" color="white" />
+                <ChevronLeft className="h-4 w-4 rtl:rotate-180" color="white" />
               ) : (
-                <ChevronRight className="h-4 w-4" color="white" />
+                <ChevronRight
+                  className="h-4 w-4 rtl:rotate-180"
+                  color="white"
+                />
               )}
             </button>
           </motion.div>

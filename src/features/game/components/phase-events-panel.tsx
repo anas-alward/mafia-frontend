@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useAuthStore } from '#/features/auth/store/auth-store'
@@ -98,17 +99,18 @@ function ActionAvatar({
   const isHovered = hovered === index
   // Neighbours slide away from the hovered avatar; the hovered one lifts.
   const spread =
-    hovered === null
-      ? 0
-      : hovered === index
-        ? 0
-        : index < hovered
-          ? -5
-          : 5
+    hovered === null ? 0 : hovered === index ? 0 : index < hovered ? -5 : 5
 
   const def = getActionDefinition(group.actionType)
   const Icon = def?.eventIcon
   const pendingCount = group.names.length
+
+  const { t } = useTranslation()
+
+  // Constants-driven action label, translated at the render site.
+  const actionLabel = t(`game.actions.${group.actionType}.label`, {
+    defaultValue: def?.label ?? group.actionType,
+  })
 
   // Solid avatar background: the action's full accent color, with a dark
   // icon for contrast. No transparency — overlaps stay clean.
@@ -119,15 +121,27 @@ function ActionAvatar({
   const tooltipLines =
     group.names[0] != null
       ? group.names.slice(0, 4)
-      : [`${def?.label ?? group.actionType} ×${pendingCount}`]
+      : [`${actionLabel} ×${pendingCount}`]
+
+  const ariaLabel = t('game.phaseEvents.pendingActions', {
+    count: pendingCount,
+    action: actionLabel,
+    defaultValue_one: `${pendingCount} required action: ${actionLabel}`,
+    defaultValue_other: `${pendingCount} required actions: ${actionLabel}`,
+    defaultValue: `${pendingCount} required actions: ${actionLabel}`,
+  })
 
   return (
     <motion.div
       onMouseEnter={() => setHovered(index)}
       onMouseLeave={() => setHovered(null)}
-      animate={{ x: spread, scale: hovered === index ? 1.08 : 1, y: hovered === index ? -2 : 0 }}
+      animate={{
+        x: spread,
+        scale: hovered === index ? 1.08 : 1,
+        y: hovered === index ? -2 : 0,
+      }}
       transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-      className={`relative ${index === 0 ? '' : '-ml-1.5'}`}
+      className={`relative ${index === 0 ? '' : '-ms-1.5'}`}
       style={{ zIndex: hovered === index ? 30 : 20 - index }}
     >
       <div
@@ -141,7 +155,7 @@ function ActionAvatar({
             ? { outline: '2px solid var(--game-gold)', outlineOffset: '1px' }
             : {}),
         }}
-        aria-label={`${pendingCount} required action${pendingCount === 1 ? '' : 's'}: ${group.actionType}`}
+        aria-label={ariaLabel}
       >
         {Icon && <Icon className="h-4 w-4" style={{ color: '#131314' }} />}
       </div>

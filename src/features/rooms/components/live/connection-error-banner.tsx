@@ -1,7 +1,9 @@
 import { WifiOff } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 
 export function ConnectionErrorBanner() {
+  const { t } = useTranslation()
   const wsState = useMeetingStore((s) => s.wsState)
   const sendError = useMeetingStore((s) => s.sendError)
 
@@ -17,9 +19,7 @@ export function ConnectionErrorBanner() {
       }}
     >
       <WifiOff className="h-3.5 w-3.5 shrink-0" />
-      <span className="text-xs">
-        {sendError || 'Connection lost. Check your network.'}
-      </span>
+      <span className="text-xs">{sendError || t('room.connection.lost')}</span>
     </div>
   )
 }

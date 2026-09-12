@@ -1,4 +1,5 @@
 import { TriangleAlert } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogClose,
@@ -34,6 +35,7 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation()
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent
@@ -44,7 +46,7 @@ export function ConfirmDialog({
           borderColor: 'var(--game-border)',
         }}
       >
-        <DialogHeader className="flex-row items-center gap-2.5 text-left">
+        <DialogHeader className="flex-row items-center gap-2.5 text-start">
           <TriangleAlert
             className="h-4 w-4 shrink-0"
             style={{
@@ -71,7 +73,7 @@ export function ConfirmDialog({
               className="px-3.5 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer hover:bg-white/[0.06]"
               style={{ color: 'var(--game-text-muted)' }}
             >
-              Cancel
+              {t('room.confirm.cancel')}
             </button>
           </DialogClose>
           <button

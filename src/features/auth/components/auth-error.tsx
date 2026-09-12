@@ -1,30 +1,55 @@
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
+
 interface AuthErrorProps {
   error: { code?: string; message: string; field?: string } | null
 }
 
 /** Maps API error codes to user-friendly messages for non-field errors */
-function friendlyMessage(error: { code?: string; message: string }): string {
+function friendlyMessage(
+  t: TFunction,
+  error: { code?: string; message: string },
+): string {
   switch (error.code) {
     case 'INVALID_CREDENTIALS':
-      return 'Invalid email or password.'
+      return t('auth.errors.invalidCredentials', {
+        defaultValue: 'Invalid email or password.',
+      })
     case 'USERNAME_TAKEN':
-      return 'This username is already registered.'
+      return t('auth.errors.usernameTaken', {
+        defaultValue: 'This username is already registered.',
+      })
     case 'EMAIL_TAKEN':
-      return 'This email is already registered.'
+      return t('auth.errors.emailTaken', {
+        defaultValue: 'This email is already registered.',
+      })
     case 'INVALID_RESET_TOKEN':
-      return 'This reset link is invalid or has expired.'
+      return t('auth.errors.invalidResetToken', {
+        defaultValue: 'This reset link is invalid or has expired.',
+      })
     case 'INVALID_CURRENT_PASSWORD':
-      return 'Current password is incorrect.'
+      return t('auth.errors.invalidCurrentPassword', {
+        defaultValue: 'Current password is incorrect.',
+      })
     case 'SAME_PASSWORD':
-      return 'New password must differ from the current password.'
+      return t('auth.errors.samePassword', {
+        defaultValue: 'New password must differ from the current password.',
+      })
     case 'VALIDATION_ERROR':
-      return error.message
+      // Server-provided message: pass through, translating only when known.
+      return t('auth.errors.server', { defaultValue: error.message })
     default:
-      return error.message || 'Something went wrong. Please try again.'
+      return (
+        t('auth.errors.server', { defaultValue: error.message }) ||
+        t('auth.errors.generic', {
+          defaultValue: 'Something went wrong. Please try again.',
+        })
+      )
   }
 }
 
 export function AuthError({ error }: AuthErrorProps) {
+  const { t } = useTranslation()
   if (!error) return null
 
   return (
@@ -32,7 +57,7 @@ export function AuthError({ error }: AuthErrorProps) {
       role="alert"
       className="rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700"
     >
-      {friendlyMessage(error)}
+      {friendlyMessage(t, error)}
     </div>
   )
 }

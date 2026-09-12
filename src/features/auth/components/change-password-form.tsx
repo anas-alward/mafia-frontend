@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
 import {
@@ -10,7 +11,7 @@ import {
   FormControl,
   FormMessage,
 } from '#/components/ui/form'
-import { changePasswordSchema } from '../schemas/auth'
+import { createChangePasswordSchema } from '../schemas/auth'
 import type { ChangePasswordInput } from '../schemas/auth'
 
 interface ChangePasswordFormProps {
@@ -20,8 +21,9 @@ interface ChangePasswordFormProps {
 }
 
 export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
+  const { t } = useTranslation()
   const form = useForm<ChangePasswordInput>({
-    resolver: zodResolver(changePasswordSchema),
+    resolver: zodResolver(createChangePasswordSchema(t)),
     defaultValues: { currentPassword: '', newPassword: '' },
   })
 
@@ -32,7 +34,7 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
         form.setError(
           (e.field ?? 'root') as keyof ChangePasswordInput | 'root',
           {
-            message: e.message,
+            message: t('auth.errors.server', { defaultValue: e.message }),
           },
         )
       }
@@ -51,7 +53,11 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
           name="currentPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Current Password</FormLabel>
+              <FormLabel>
+                {t('auth.fields.currentPassword', {
+                  defaultValue: 'Current Password',
+                })}
+              </FormLabel>
               <FormControl>
                 <Input
                   type="password"
@@ -69,7 +75,11 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
           name="newPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>New Password</FormLabel>
+              <FormLabel>
+                {t('auth.fields.newPassword', {
+                  defaultValue: 'New Password',
+                })}
+              </FormLabel>
               <FormControl>
                 <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
@@ -89,7 +99,9 @@ export function ChangePasswordForm({ onSubmit }: ChangePasswordFormProps) {
           className="w-full text-white"
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? 'Changing...' : 'Change Password'}
+          {form.formState.isSubmitting
+            ? t('auth.change.submitting', { defaultValue: 'Changing...' })
+            : t('auth.change.submit', { defaultValue: 'Change Password' })}
         </Button>
       </form>
     </Form>

@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
 import {
@@ -11,7 +12,7 @@ import {
   FormControl,
   FormMessage,
 } from '#/components/ui/form'
-import { loginSchema } from '../schemas/auth'
+import { createLoginSchema } from '../schemas/auth'
 import type { LoginInput } from '../schemas/auth'
 
 interface LoginFormProps {
@@ -23,8 +24,9 @@ interface LoginFormProps {
 
 export function LoginForm({ onSubmit, defaultEmail }: LoginFormProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const form = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(t)),
     defaultValues: { email: defaultEmail ?? '', password: '' },
   })
 
@@ -33,7 +35,7 @@ export function LoginForm({ onSubmit, defaultEmail }: LoginFormProps) {
     if (result?.errors) {
       for (const e of result.errors) {
         form.setError((e.field ?? 'root') as keyof LoginInput | 'root', {
-          message: e.message,
+          message: t('auth.errors.server', { defaultValue: e.message }),
         })
       }
     }
@@ -51,7 +53,9 @@ export function LoginForm({ onSubmit, defaultEmail }: LoginFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>
+                {t('auth.fields.email', { defaultValue: 'Email' })}
+              </FormLabel>
               <FormControl>
                 <Input type="email" autoComplete="email" {...field} />
               </FormControl>
@@ -66,12 +70,16 @@ export function LoginForm({ onSubmit, defaultEmail }: LoginFormProps) {
           render={({ field }) => (
             <FormItem>
               <div className="flex items-center justify-between">
-                <FormLabel>Password</FormLabel>
+                <FormLabel>
+                  {t('auth.fields.password', { defaultValue: 'Password' })}
+                </FormLabel>
                 <Link
                   to="/password/forgot"
                   className="text-sm text-neutral-600 underline underline-offset-2 hover:text-neutral-900"
                 >
-                  Forgot password?
+                  {t('auth.login.forgotLink', {
+                    defaultValue: 'Forgot password?',
+                  })}
                 </Link>
               </div>
               <FormControl>
@@ -97,17 +105,21 @@ export function LoginForm({ onSubmit, defaultEmail }: LoginFormProps) {
           className="w-full text-white"
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? 'Logging in...' : 'Log In'}
+          {form.formState.isSubmitting
+            ? t('auth.login.submitting', { defaultValue: 'Logging in...' })
+            : t('auth.login.submit', { defaultValue: 'Log In' })}
         </Button>
 
         <p className="text-sm text-center text-neutral-600">
-          Don&apos;t have an account?{' '}
+          {t('auth.login.noAccount', {
+            defaultValue: "Don't have an account?",
+          })}{' '}
           <button
             type="button"
             onClick={() => navigate({ to: '/signup' })}
             className="text-neutral-900 underline underline-offset-2 font-medium"
           >
-            Sign up
+            {t('auth.login.signUpLink', { defaultValue: 'Sign up' })}
           </button>
         </p>
       </form>

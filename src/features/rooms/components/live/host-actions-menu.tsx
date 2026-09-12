@@ -1,27 +1,12 @@
 import { useState } from 'react'
 import { ChevronDown, RotateCcw, Send, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Phase } from '#/features/game/constants/phases'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { ConfirmDialog } from '#/features/rooms/components/live/confirm-dialog'
 
 type PendingAction = 'reset' | 'cancel' | null
-
-const PENDING_COPY = {
-  reset: {
-    title: 'Restart game?',
-    description:
-      'Roles will be redealt and the current round will be discarded.',
-    confirmLabel: 'Restart game',
-    danger: false,
-  },
-  cancel: {
-    title: 'Cancel game?',
-    description: 'The game ends now and everyone returns to the lobby.',
-    confirmLabel: 'Cancel game',
-    danger: true,
-  },
-} as const
 
 /**
  * Host split button. Follows the StartGameButton orb design (h-9,
@@ -31,6 +16,7 @@ const PENDING_COPY = {
  * opens the alternatives dropdown.
  */
 export function HostActionsMenu() {
+  const { t } = useTranslation()
   const gameStarted = useGameStore((s) => s.gameStarted)
   const phase = useGameStore((s) => s.phase)
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
@@ -44,6 +30,21 @@ export function HostActionsMenu() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [pendingAction, setPendingAction] = useState<PendingAction>(null)
 
+  const pendingCopy = {
+    reset: {
+      title: t('room.hostMenu.confirmResetTitle'),
+      description: t('room.hostMenu.confirmResetDesc'),
+      confirmLabel: t('room.hostMenu.confirmResetLabel'),
+      danger: false,
+    },
+    cancel: {
+      title: t('room.hostMenu.confirmCancelTitle'),
+      description: t('room.hostMenu.confirmCancelDesc'),
+      confirmLabel: t('room.hostMenu.confirmCancelLabel'),
+      danger: true,
+    },
+  } as const
+
   if (!gameStarted || !isHost) return null
 
   const allVoted = alivePlayerIds.every((id) => currentVotes.has(id))
@@ -52,15 +53,18 @@ export function HostActionsMenu() {
   const primary =
     phase === Phase.DAY
       ? {
-          label: 'Submit Votes',
-          hint: `Waiting for all votes (${currentVotes.size}/${alivePlayerIds.length})`,
+          label: t('room.hostMenu.submitVotes'),
+          hint: t('room.hostMenu.waitingVotes', {
+            count: currentVotes.size,
+            total: alivePlayerIds.length,
+          }),
           ready: allVoted,
           run: submitVotes,
         }
       : phase === Phase.VOTE_RESULT
         ? {
-            label: 'Resolve Votes',
-            hint: 'Resolve votes',
+            label: t('room.hostMenu.resolveVotes'),
+            hint: t('room.hostMenu.resolveHint'),
             ready: true,
             run: submitVoteResult,
           }
@@ -79,7 +83,7 @@ export function HostActionsMenu() {
     setPendingAction(null)
   }
 
-  const pending = pendingAction ? PENDING_COPY[pendingAction] : null
+  const pending = pendingAction ? pendingCopy[pendingAction] : null
 
   return (
     <>
@@ -100,7 +104,7 @@ export function HostActionsMenu() {
             setMenuOpen(false)
           }}
           title={primary ? primary.hint : undefined}
-          className={`flex items-center justify-center w-9 rounded-l-xl transition-all duration-200 ${
+          className={`flex items-center justify-center w-9 rounded-s-xl transition-all duration-200 ${
             ready
               ? 'cursor-pointer hover:bg-white/[0.04]'
               : 'cursor-not-allowed opacity-50'
@@ -108,7 +112,14 @@ export function HostActionsMenu() {
           style={{
             color: ready ? 'var(--game-gold)' : 'var(--game-text-muted)',
           }}
-          aria-label={primary ? `${primary.label} (primary)` : 'Host actions'}
+          aria-label={
+            primary
+              ? t('room.hostMenu.primaryAction', {
+                  label: primary.label,
+                  defaultValue: '{{label}} (primary)',
+                })
+              : t('room.hostMenu.menu')
+          }
         >
           <Send className="h-4 w-4" />
         </button>
@@ -117,9 +128,9 @@ export function HostActionsMenu() {
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
-          className="flex items-center justify-center w-7 border-l rounded-r-xl transition-colors duration-200 cursor-pointer hover:bg-white/[0.04]"
+          className="flex items-center justify-center w-7 border-s rounded-e-xl transition-colors duration-200 cursor-pointer hover:bg-white/[0.04]"
           style={{ borderColor: 'rgba(237, 184, 58, 0.3)' }}
-          aria-label="Host actions menu"
+          aria-label={t('room.hostMenu.menu')}
           aria-expanded={menuOpen}
         >
           <ChevronDown
@@ -139,7 +150,7 @@ export function HostActionsMenu() {
               onClick={() => setMenuOpen(false)}
             />
             <div
-              className="absolute bottom-full left-0 mb-2 z-50 w-44 rounded-xl border shadow-2xl overflow-hidden py-1"
+              className="absolute bottom-full start-0 mb-2 z-50 w-44 rounded-xl border shadow-2xl overflow-hidden py-1"
               style={{
                 backgroundColor: 'var(--game-bg-elevated)',
                 borderColor: 'var(--game-border)',
@@ -147,12 +158,12 @@ export function HostActionsMenu() {
             >
               <HostMenuItem
                 icon={<RotateCcw className="h-3.5 w-3.5" />}
-                label="Reset Game"
+                label={t('room.hostMenu.resetGame')}
                 onClick={() => askConfirm('reset')}
               />
               <HostMenuItem
                 icon={<X className="h-3.5 w-3.5" />}
-                label="Cancel Game"
+                label={t('room.hostMenu.cancelGame')}
                 color="var(--game-crimson)"
                 onClick={() => askConfirm('cancel')}
               />
@@ -192,7 +203,7 @@ function HostMenuItem({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium text-left transition-colors ${
+      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium text-start transition-colors ${
         disabled
           ? 'opacity-40 cursor-not-allowed'
           : 'cursor-pointer hover:bg-white/[0.06]'

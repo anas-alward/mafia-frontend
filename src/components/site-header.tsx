@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Button } from '#/components/ui/button'
 import { Avatar, AvatarFallback } from '#/components/ui/avatar'
 import {
@@ -11,6 +12,7 @@ import {
 } from '#/components/ui/dropdown-menu'
 import { useAuthStore } from '#/features/auth/store/auth-store'
 import { logout } from '#/features/auth/api/client'
+import { LanguageSwitcher } from '#/components/language-switcher'
 import { KeyRound, LogOut } from 'lucide-react'
 
 function getInitials(username: string): string {
@@ -23,6 +25,7 @@ function getInitials(username: string): string {
 }
 
 export function SiteHeader() {
+  const { t } = useTranslation()
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const isLoading = useAuthStore((s) => s.isLoading)
   const user = useAuthStore((s) => s.user)
@@ -39,12 +42,13 @@ export function SiteHeader() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <nav className="hidden sm:flex items-center gap-4 mr-2">
+          <LanguageSwitcher />
+          <nav className="hidden sm:flex items-center gap-4 me-2">
             <Link
               to="/game/how-to-play"
               className="text-sm text-neutral-600 hover:text-neutral-900"
             >
-              How to play
+              {t('nav.howToPlay')}
             </Link>
           </nav>
           {isLoading ? null : isAuthenticated && user ? (
@@ -68,8 +72,8 @@ export function SiteHeader() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link to="/password/change">
-                    <KeyRound className="h-4 w-4 mr-2" />
-                    Change Password
+                    <KeyRound className="h-4 w-4 me-2" />
+                    {t('user.changePassword')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -83,22 +87,22 @@ export function SiteHeader() {
                     window.location.href = '/'
                   }}
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Log Out
+                  <LogOut className="h-4 w-4 me-2" />
+                  {t('user.logOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link to="/login">Log in</Link>
+                <Link to="/login">{t('user.logIn')}</Link>
               </Button>
               <Button
                 asChild
                 size="sm"
                 className="cta-glow text-white shadow-none"
               >
-                <Link to="/signup">Sign up</Link>
+                <Link to="/signup">{t('user.signUp')}</Link>
               </Button>
             </>
           )}

@@ -1,7 +1,9 @@
 import { useNavigate } from '@tanstack/react-router'
 import { Video } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export function RoomClosedState() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (
@@ -12,10 +14,10 @@ export function RoomClosedState() {
         </div>
         <div className="space-y-2">
           <h2 className="text-lg font-semibold text-[#f4f4f5]">
-            Meeting ended by host
+            {t('room.states.closedTitle')}
           </h2>
           <p className="text-sm text-[#a1a1aa]">
-            This room is no longer active.
+            {t('room.states.closedDesc')}
           </p>
         </div>
         <button
@@ -23,7 +25,7 @@ export function RoomClosedState() {
           onClick={() => navigate({ to: '/' })}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white/5 text-[#f4f4f5] hover:bg-white/10 transition-colors text-sm font-medium"
         >
-          Back to rooms
+          {t('room.states.back')}
         </button>
       </div>
     </div>

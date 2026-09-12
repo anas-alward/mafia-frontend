@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { Play, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface LiveKitParticipant {
   identity?: string
@@ -29,6 +30,7 @@ export default function StartGameTooltip({
   isOpen,
   onClose,
 }: StartGameTooltipProps) {
+  const { t } = useTranslation()
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const [placement, setPlacement] = useState<'above' | 'below'>('above')
@@ -147,7 +149,7 @@ export default function StartGameTooltip({
   const playerList = participants
     .map((p) => ({
       id: p.identity ? Number(p.identity) : NaN,
-      name: p.name ?? 'Unknown',
+      name: p.name ?? t('room.tiles.unknown', { defaultValue: 'Unknown' }),
     }))
     .filter((p) => !Number.isNaN(p.id))
 
@@ -193,7 +195,7 @@ export default function StartGameTooltip({
           className="text-xs font-semibold"
           style={{ color: 'var(--game-text-primary)' }}
         >
-          Select Players
+          {t('room.tooltip.selectPlayers')}
         </span>
         <button
           type="button"
@@ -201,7 +203,7 @@ export default function StartGameTooltip({
           className="text-xs font-medium transition-opacity cursor-pointer hover:opacity-80"
           style={{ color: 'var(--game-periwinkle)' }}
         >
-          Select All
+          {t('room.tooltip.selectAll')}
         </button>
       </div>
 
@@ -286,7 +288,10 @@ export default function StartGameTooltip({
           }}
         >
           <Play className="h-3.5 w-3.5" />
-          Start Game ({count}/6)
+          {t('room.tooltip.start', {
+            count,
+            defaultValue: `Start Game (${count}/6)`,
+          })}
         </button>
       </div>
     </div>,

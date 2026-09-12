@@ -1,13 +1,7 @@
-import {
-  Mic,
-  MicOff,
-  Skull,
-  User,
-  Video,
-  VideoOff,
-} from 'lucide-react'
+import { Mic, MicOff, Skull, User, Video, VideoOff } from 'lucide-react'
 import { Track } from 'livekit-client'
 import { useParticipants, useRoomContext } from '@livekit/components-react'
+import { useTranslation } from 'react-i18next'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useGameStore } from '#/features/game/store/game-store'
 import { sendHostMediaDisable } from '#/features/rooms/utils/host-media'
@@ -18,6 +12,7 @@ import { sendHostMediaDisable } from '#/features/rooms/utils/host-media'
  * another member's microphone or camera off.
  */
 export function MembersList() {
+  const { t } = useTranslation()
   const participants = useParticipants()
   const room = useRoomContext()
   const isHost = useMeetingStore((s) => s.isHost)
@@ -27,7 +22,7 @@ export function MembersList() {
   if (participants.length === 0) {
     return (
       <p className="px-5 py-12 text-[13px] text-[#71717a] text-center">
-        No members connected
+        {t('room.sidebar.noMembers')}
       </p>
     )
   }
@@ -46,10 +41,7 @@ export function MembersList() {
         const canControl = isHost && !isSelf
 
         return (
-          <li
-            key={p.identity}
-            className="flex items-center gap-3 px-5 py-2.5"
-          >
+          <li key={p.identity} className="flex items-center gap-3 px-5 py-2.5">
             <div className="relative shrink-0">
               <div className="h-9 w-9 rounded-full bg-white/[0.06] flex items-center justify-center">
                 {p.name ? (
@@ -62,7 +54,7 @@ export function MembersList() {
               </div>
               {isDead && (
                 <span
-                  className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center border border-[#1c1c1f]"
+                  className="absolute -bottom-0.5 -end-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center border border-[#1c1c1f]"
                   style={{ backgroundColor: 'var(--game-crimson)' }}
                 >
                   <Skull className="h-2 w-2 text-black/80" />
@@ -74,7 +66,11 @@ export function MembersList() {
               className="text-[13px] truncate min-w-0 flex-1"
               style={{ color: 'var(--game-text-primary)' }}
             >
-              {p.name ?? `Player ${p.identity}`}
+              {p.name ??
+                t('room.tiles.playerFallback', {
+                  id: p.identity,
+                  defaultValue: `Player ${p.identity}`,
+                })}
             </span>
 
             {isSelf && (
@@ -85,7 +81,7 @@ export function MembersList() {
                   backgroundColor: 'rgba(237, 184, 58, 0.1)',
                 }}
               >
-                You
+                {t('room.sidebar.you')}
               </span>
             )}
 
@@ -98,13 +94,23 @@ export function MembersList() {
                     sendHostMediaDisable(room, p.identity, 'microphone')
                   }
                   disabled={micMuted}
-                  title={micMuted ? 'Microphone already off' : 'Turn off microphone'}
+                  title={
+                    micMuted
+                      ? t('room.sidebar.micAlreadyOff')
+                      : t('room.sidebar.turnOffMic', {
+                          name: p.name ?? p.identity,
+                          defaultValue: `Turn off ${p.name ?? p.identity}'s microphone`,
+                        })
+                  }
                   className={`p-1.5 rounded-lg transition-colors ${
                     micMuted
                       ? 'cursor-default text-[#52525b]'
                       : 'cursor-pointer text-[#a1a1aa] hover:text-[#ef4444] hover:bg-[#ef4444]/10'
                   }`}
-                  aria-label={`Turn off ${p.name ?? p.identity}'s microphone`}
+                  aria-label={t('room.sidebar.turnOffMic', {
+                    name: p.name ?? p.identity,
+                    defaultValue: `Turn off ${p.name ?? p.identity}'s microphone`,
+                  })}
                 >
                   {micMuted ? (
                     <MicOff className="h-3.5 w-3.5" />
@@ -116,7 +122,9 @@ export function MembersList() {
                 <span
                   className="p-1.5 text-[#52525b]"
                   aria-label={
-                    micMuted ? 'Microphone off' : 'Microphone on'
+                    micMuted
+                      ? t('room.sidebar.micOff')
+                      : t('room.sidebar.micOn')
                   }
                 >
                   {micMuted ? (
@@ -135,13 +143,23 @@ export function MembersList() {
                     sendHostMediaDisable(room, p.identity, 'camera')
                   }
                   disabled={camMuted}
-                  title={camMuted ? 'Camera already off' : 'Turn off camera'}
+                  title={
+                    camMuted
+                      ? t('room.sidebar.camAlreadyOff')
+                      : t('room.sidebar.turnOffCam', {
+                          name: p.name ?? p.identity,
+                          defaultValue: `Turn off ${p.name ?? p.identity}'s camera`,
+                        })
+                  }
                   className={`p-1.5 rounded-lg transition-colors ${
                     camMuted
                       ? 'cursor-default text-[#52525b]'
                       : 'cursor-pointer text-[#a1a1aa] hover:text-[#ef4444] hover:bg-[#ef4444]/10'
                   }`}
-                  aria-label={`Turn off ${p.name ?? p.identity}'s camera`}
+                  aria-label={t('room.sidebar.turnOffCam', {
+                    name: p.name ?? p.identity,
+                    defaultValue: `Turn off ${p.name ?? p.identity}'s camera`,
+                  })}
                 >
                   {camMuted ? (
                     <VideoOff className="h-3.5 w-3.5" />
@@ -152,7 +170,11 @@ export function MembersList() {
               ) : (
                 <span
                   className="p-1.5 text-[#52525b]"
-                  aria-label={camMuted ? 'Camera off' : 'Camera on'}
+                  aria-label={
+                    camMuted
+                      ? t('room.sidebar.camOff')
+                      : t('room.sidebar.camOn')
+                  }
                 >
                   {camMuted ? (
                     <VideoOff className="h-3.5 w-3.5" />

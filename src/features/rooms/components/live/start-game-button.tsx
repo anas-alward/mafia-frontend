@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useParticipants } from '@livekit/components-react'
 import { Play } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import StartGameTooltip from '#/features/rooms/components/live/start-game-tooltip'
 
 const orbBase =
@@ -11,6 +12,7 @@ interface StartGameButtonProps {
 }
 
 export function StartGameButton({ onStartGame }: StartGameButtonProps) {
+  const { t } = useTranslation()
   const allParticipants = useParticipants()
   const [showStartTooltip, setShowStartTooltip] = useState(false)
   const startBtnRef = useRef<HTMLButtonElement>(null)
@@ -21,7 +23,7 @@ export function StartGameButton({ onStartGame }: StartGameButtonProps) {
         ref={startBtnRef}
         type="button"
         onClick={() => setShowStartTooltip((prev) => !prev)}
-        title="Start Game"
+        title={t('room.controlBar.startGame')}
         className={`${orbBase} cursor-pointer`}
         style={{
           color: 'var(--game-gold)',

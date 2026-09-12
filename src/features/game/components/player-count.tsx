@@ -1,7 +1,9 @@
 import { Skull } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '#/features/game/store/game-store'
 
 export function PlayerCount() {
+  const { t } = useTranslation()
   const gameStarted = useGameStore((s) => s.gameStarted)
   const alivePlayerIds = useGameStore((s) => s.alivePlayerIds)
   const deadPlayerIds = useGameStore((s) => s.deadPlayerIds)
@@ -24,7 +26,12 @@ export function PlayerCount() {
             boxShadow: '0 0 6px var(--game-mint)',
           }}
         />
-        <span>{aliveCount} alive</span>
+        <span>
+          {t('game.playerCount.alive', {
+            count: aliveCount,
+            defaultValue: `${aliveCount} alive`,
+          })}
+        </span>
       </div>
       {deadCount > 0 && (
         <div
@@ -32,7 +39,12 @@ export function PlayerCount() {
           style={{ color: 'var(--game-crimson)' }}
         >
           <Skull className="h-3.5 w-3.5" />
-          <span>{deadCount} dead</span>
+          <span>
+            {t('game.playerCount.dead', {
+              count: deadCount,
+              defaultValue: `${deadCount} dead`,
+            })}
+          </span>
         </div>
       )}
     </div>

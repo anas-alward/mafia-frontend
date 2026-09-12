@@ -1,7 +1,9 @@
 import { Mic, MicOff } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMediaConfigStore } from '#/features/rooms/store/media-config-store'
 
 export function AudioToggleButton() {
+  const { t } = useTranslation()
   const audioEnabled = useMediaConfigStore((s) => s.audioEnabled)
   const toggleAudio = useMediaConfigStore((s) => s.toggleAudio)
   const mediaError = useMediaConfigStore((s) => s.mediaError)
@@ -11,6 +13,9 @@ export function AudioToggleButton() {
       type="button"
       onClick={toggleAudio}
       disabled={!!mediaError}
+      aria-label={
+        audioEnabled ? t('room.join.turnOffMic') : t('room.join.turnOnMic')
+      }
       className={`h-12 w-12 rounded-full flex items-center justify-center transition-colors ${
         audioEnabled
           ? 'bg-[#60a5fa] text-white hover:bg-[#3b82f6]'

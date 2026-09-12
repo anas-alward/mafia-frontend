@@ -1,4 +1,5 @@
 import { LogIn, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useMediaConfigStore } from '#/features/rooms/store/media-config-store'
 
@@ -15,6 +16,7 @@ export function JoinButton({
   onJoin,
   onDismissError,
 }: JoinButtonProps) {
+  const { t } = useTranslation()
   const wsState = useMeetingStore((s) => s.wsState)
   const isReturningUser = useMeetingStore((s) => s.isReturningUser)
   const authToken = useMeetingStore((s) => s.authToken)
@@ -41,7 +43,9 @@ export function JoinButton({
     <div className="space-y-3">
       {wsState === 'error' && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-center">
-          <p className="text-sm text-red-400">Connection lost.</p>
+          <p className="text-sm text-red-400">
+            {t('room.join.connectionLost')}
+          </p>
         </div>
       )}
 
@@ -56,7 +60,7 @@ export function JoinButton({
             }}
             className="mt-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-[#f4f4f5] text-sm transition-colors"
           >
-            Try again
+            {t('room.join.tryAgain')}
           </button>
         </div>
       )}
@@ -76,36 +80,36 @@ export function JoinButton({
         {isJoining ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Joining...
+            {t('room.join.joining')}
           </>
         ) : !authToken && isReturningUser ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Connecting to room...
+            {t('room.join.connecting')}
           </>
         ) : !mediaReady ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Starting camera...
+            {t('room.join.startingCamera')}
           </>
         ) : isWaiting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Waiting for host...
+            {t('room.join.waitingHost')}
           </>
         ) : (
           <>
-            <LogIn className="h-4 w-4" />
-            {isReturningUser ? 'Join meeting' : 'Ask to join'}
+            <LogIn className="h-4 w-4 rtl:rotate-180" />
+            {isReturningUser
+              ? t('room.join.joinMeeting')
+              : t('room.join.askToJoin')}
           </>
         )}
       </button>
 
       {wasRejected && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-center">
-          <p className="text-sm text-red-400">
-            The host declined your request. You can try again.
-          </p>
+          <p className="text-sm text-red-400">{t('room.join.rejected')}</p>
         </div>
       )}
     </div>

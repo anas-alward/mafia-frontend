@@ -1,8 +1,10 @@
 import { useLocalParticipant, useRoomContext } from '@livekit/components-react'
 import { Mic, MicOff, PhoneOff, Video, VideoOff } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMicBlocked } from '#/features/rooms/hooks/use-mic-blocked'
 
 export function MediaControls() {
+  const { t } = useTranslation()
   const {
     localParticipant,
     isMicrophoneEnabled: audioEnabled,
@@ -18,7 +20,7 @@ export function MediaControls() {
         type="button"
         onClick={() => localParticipant.setMicrophoneEnabled(!audioEnabled)}
         disabled={micBlocked}
-        title={micBlocked ? 'You are silenced' : undefined}
+        title={micBlocked ? t('room.media.silenced') : undefined}
         className={`p-2.5 rounded-xl transition-all duration-200 border ${
           micBlocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
         }`}
@@ -40,10 +42,10 @@ export function MediaControls() {
         }}
         aria-label={
           micBlocked
-            ? 'You are silenced'
+            ? t('room.media.silenced')
             : audioEnabled
-              ? 'Mute microphone'
-              : 'Unmute microphone'
+              ? t('room.media.muteMic')
+              : t('room.media.unmuteMic')
         }
       >
         {audioEnabled && !micBlocked ? (
@@ -69,7 +71,9 @@ export function MediaControls() {
             ? 'var(--game-border)'
             : 'rgba(240, 96, 107, 0.25)',
         }}
-        aria-label={videoEnabled ? 'Turn off camera' : 'Turn on camera'}
+        aria-label={
+          videoEnabled ? t('room.media.cameraOff') : t('room.media.cameraOn')
+        }
       >
         {videoEnabled ? (
           <Video className="h-4 w-4" />
@@ -90,7 +94,7 @@ export function MediaControls() {
           backgroundColor: 'var(--game-crimson)',
           borderColor: 'var(--game-crimson)',
         }}
-        aria-label="Leave meeting"
+        aria-label={t('room.media.leave')}
       >
         <PhoneOff className="h-4 w-4" />
       </button>

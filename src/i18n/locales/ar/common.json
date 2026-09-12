@@ -1,0 +1,22 @@
+{
+  "language": {
+    "menu": "اللغة",
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "nav": {
+    "howToPlay": "طريقة اللعب",
+    "mechanics": "آليات اللعب",
+    "join": "انضم"
+  },
+  "footer": {
+    "tagline": "لعبة الاستنتاج الاجتماعي عبر الإنترنت",
+    "copyright": "© {{year}} Mafia. جميع الحقوق محفوظة."
+  },
+  "user": {
+    "changePassword": "تغيير كلمة المرور",
+    "logOut": "تسجيل الخروج",
+    "logIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب"
+  }
+}

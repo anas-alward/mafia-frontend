@@ -1,8 +1,10 @@
 import { useRef, useEffect } from 'react'
 import { VideoOff, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMediaConfigStore } from '#/features/rooms/store/media-config-store'
 
 export function VideoPreview() {
+  const { t } = useTranslation()
   const mediaStream = useMediaConfigStore((s) => s.mediaStream)
   const videoEnabled = useMediaConfigStore((s) => s.videoEnabled)
   const mediaReady = useMediaConfigStore((s) => s.mediaReady)
@@ -44,7 +46,9 @@ export function VideoPreview() {
               <VideoOff className="h-6 w-6 text-[#71717a]" />
             </div>
             <span className="text-xs text-[#71717a]">
-              {mediaError ? 'Camera unavailable' : 'Camera off'}
+              {mediaError
+                ? t('room.join.cameraUnavailable')
+                : t('room.join.cameraOff')}
             </span>
           </div>
         </div>

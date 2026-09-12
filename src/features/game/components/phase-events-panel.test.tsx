@@ -51,7 +51,7 @@ describe('PhaseEventsPanel', () => {
     startGame()
     const { container } = render(<PhaseEventsPanel />)
     expect(
-      container.querySelector('[aria-label="3 required actions: vote"]'),
+      container.querySelector('[aria-label="3 required actions: Vote"]'),
     ).not.toBeNull()
   })
 
@@ -61,7 +61,7 @@ describe('PhaseEventsPanel', () => {
     castVote(3, 2)
     const { container } = render(<PhaseEventsPanel />)
     expect(
-      container.querySelector('[aria-label="1 required action: vote"]'),
+      container.querySelector('[aria-label="1 required action: Vote"]'),
     ).not.toBeNull()
   })
 
@@ -79,7 +79,7 @@ describe('PhaseEventsPanel', () => {
     castVote(1, 2)
     const { container } = render(<PhaseEventsPanel />)
     fireEvent.mouseEnter(
-      container.querySelector('[aria-label="2 required actions: vote"]')!,
+      container.querySelector('[aria-label="2 required actions: Vote"]')!,
     )
     const text = container.textContent
     expect(text).toContain('Bob')

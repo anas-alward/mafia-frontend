@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { SignUpForm } from '#/features/auth/components/sign-up-form.tsx'
 import type { SignUpInput } from '#/features/auth/schemas/auth.ts'
 import { signUp } from '#/features/auth/api/client.ts'
@@ -10,6 +11,7 @@ export const Route = createFileRoute('/(auth)/signup')({
 
 function SignUpPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const handleSubmit = async (data: SignUpInput) => {
     try {
@@ -28,10 +30,15 @@ function SignUpPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
           <h1 className="display-title text-3xl text-neutral-900">
-            Create an account
+            {t('auth.pages.signup.title', {
+              defaultValue: 'Create an account',
+            })}
           </h1>
           <p className="mt-2 text-sm text-neutral-600">
-            Start your Mafia journey
+            {t('auth.pages.signup.subtitle', {
+              brand: 'Mafia',
+              defaultValue: 'Start your {{brand}} journey',
+            })}
           </p>
         </div>
         <SignUpForm onSubmit={handleSubmit} />

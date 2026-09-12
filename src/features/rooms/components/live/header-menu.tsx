@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Check, Link2, Maximize, Menu, Minimize } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 
 interface HeaderMenuAction {
@@ -21,6 +22,7 @@ interface HeaderMenuProps {
  * list below.
  */
 export function HeaderMenu({ fullScreenRef }: HeaderMenuProps) {
+  const { t } = useTranslation()
   const roomId = useMeetingStore((s) => s.roomId)
 
   const [menuOpen, setMenuOpen] = useState(false)
@@ -59,13 +61,15 @@ export function HeaderMenu({ fullScreenRef }: HeaderMenuProps) {
 
   const actions: HeaderMenuAction[] = [
     {
-      label: copied ? 'Link copied!' : 'Share link',
+      label: copied ? t('room.menu.copied') : t('room.menu.share'),
       Icon: copied ? Check : Link2,
       highlight: copied,
       run: shareLink,
     },
     {
-      label: isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen',
+      label: isFullscreen
+        ? t('room.menu.exitFullscreen')
+        : t('room.menu.enterFullscreen'),
       Icon: isFullscreen ? Minimize : Maximize,
       run: toggleFullscreen,
     },
@@ -83,7 +87,7 @@ export function HeaderMenu({ fullScreenRef }: HeaderMenuProps) {
             ? 'var(--game-text-primary)'
             : 'var(--game-text-muted)',
         }}
-        aria-label="Open menu"
+        aria-label={t('room.menu.open')}
         aria-expanded={menuOpen}
         aria-haspopup="menu"
       >
@@ -98,7 +102,7 @@ export function HeaderMenu({ fullScreenRef }: HeaderMenuProps) {
           />
           <div
             role="menu"
-            className="absolute right-0 top-full mt-2 z-50 w-44 rounded-xl border shadow-2xl overflow-hidden py-1"
+            className="absolute end-0 top-full mt-2 z-50 w-44 rounded-xl border shadow-2xl overflow-hidden py-1"
             style={{
               backgroundColor: 'var(--game-bg-elevated)',
               borderColor: 'var(--game-border)',
@@ -110,7 +114,7 @@ export function HeaderMenu({ fullScreenRef }: HeaderMenuProps) {
                 type="button"
                 role="menuitem"
                 onClick={() => run()}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium text-left transition-colors cursor-pointer hover:bg-white/[0.06]"
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium text-start transition-colors cursor-pointer hover:bg-white/[0.06]"
                 style={{
                   color: highlight
                     ? 'var(--game-mint)'

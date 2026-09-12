@@ -1,0 +1,116 @@
+{
+  "room": {
+    "hud": {
+      "showMembers": "عرض الأعضاء",
+      "showRequests": "عرض طلبات الانضمام"
+    },
+    "controlBar": {
+      "startGame": "بدء اللعبة"
+    },
+    "media": {
+      "muteMic": "كتم الميكروفون",
+      "unmuteMic": "إلغاء كتم الميكروفون",
+      "silenced": "تم إسكاتك",
+      "cameraOff": "إيقاف الكاميرا",
+      "cameraOn": "تشغيل الكاميرا",
+      "leave": "مغادرة الاجتماع"
+    },
+    "hostMenu": {
+      "submitVotes": "إرسال الأصوات",
+      "resolveVotes": "حسم الأصوات",
+      "primaryAction": "{{label}} (أساسي)",
+      "waitingVotes": "بانتظار جميع الأصوات ({{count}}/{{total}})",
+      "resolveHint": "حسم الأصوات",
+      "menu": "قائمة إجراءات المضيف",
+      "resetGame": "إعادة اللعبة",
+      "cancelGame": "إلغاء اللعبة",
+      "confirmResetTitle": "إعادة بدء اللعبة؟",
+      "confirmResetDesc": "سيتم توزيع الأدوار من جديد وسيتم تجاهل الجولة الحالية.",
+      "confirmResetLabel": "إعادة البدء",
+      "confirmCancelTitle": "إلغاء اللعبة؟",
+      "confirmCancelDesc": "ستنتهي اللعبة الآن وسيعود الجميع إلى الردهة.",
+      "confirmCancelLabel": "إلغاء اللعبة"
+    },
+    "confirm": {
+      "cancel": "إلغاء"
+    },
+    "tiles": {
+      "guest": "ضيف",
+      "unknown": "غير معروف",
+      "playerFallback": "اللاعب {{id}}"
+    },
+    "sidebar": {
+      "members": "الأعضاء",
+      "requests": "طلبات الانضمام",
+      "close": "إغلاق",
+      "noMembers": "لا يوجد أعضاء متصلون",
+      "noRequests": "لا توجد طلبات معلقة",
+      "you": "أنت",
+      "acceptUser": "قبول {{name}}",
+      "rejectUser": "رفض {{name}}",
+      "micOn": "الميكروفون يعمل",
+      "micOff": "الميكروفون متوقف",
+      "camOn": "الكاميرا تعمل",
+      "camOff": "الكاميرا متوقفة",
+      "turnOffMic": "إيقاف ميكروفون {{name}}",
+      "turnOffCam": "إيقاف كاميرا {{name}}",
+      "micAlreadyOff": "الميكروفون متوقف بالفعل",
+      "camAlreadyOff": "الكاميرا متوقفة بالفعل"
+    },
+    "join": {
+      "titleReturn": "مرحباً بعودتك",
+      "titleNew": "جاهز للانضمام؟",
+      "subtitleReturn": "اضبط الصوت والفيديو قبل الانضمام.",
+      "subtitleNew": "اضبط الصوت والفيديو ثم اطلب الانضمام.",
+      "connectFailed": "تعذر الاتصال بالاجتماع.",
+      "connectionLost": "انقطع الاتصال.",
+      "tryAgain": "حاول مجدداً",
+      "joining": "جارٍ الانضمام...",
+      "connecting": "جارٍ الاتصال بالغرفة...",
+      "startingCamera": "جارٍ تشغيل الكاميرا...",
+      "waitingHost": "بانتظار المضيف...",
+      "joinMeeting": "الانضمام إلى الاجتماع",
+      "askToJoin": "طلب الانضمام",
+      "rejected": "رفض المضيف طلبك. يمكنك المحاولة مجدداً.",
+      "micLabel": "الميكروفون",
+      "cameraLabel": "الكاميرا",
+      "cameraUnavailable": "الكاميرا غير متوفرة",
+      "cameraOff": "الكاميرا متوقفة",
+      "micFallback": "ميكروفون {{id}}",
+      "cameraFallback": "كاميرا {{id}}",
+      "turnOnMic": "تشغيل الميكروفون",
+      "turnOffMic": "إيقاف الميكروفون",
+      "turnOnCamera": "تشغيل الكاميرا",
+      "turnOffCamera": "إيقاف الكاميرا"
+    },
+    "ended": {
+      "title": "انتهى الاجتماع",
+      "subtitle": "شكراً لانضمامك.",
+      "back": "العودة إلى الغرف"
+    },
+    "states": {
+      "closedTitle": "أنهى المضيف الاجتماع",
+      "closedDesc": "هذه الغرفة لم تعد نشطة.",
+      "back": "العودة إلى الغرف"
+    },
+    "menu": {
+      "open": "فتح القائمة",
+      "share": "مشاركة الرابط",
+      "copied": "تم نسخ الرابط!",
+      "enterFullscreen": "ملء الشاشة",
+      "exitFullscreen": "الخروج من ملء الشاشة"
+    },
+    "tooltip": {
+      "selectPlayers": "اختيار اللاعبين",
+      "selectAll": "اختيار الكل",
+      "start": "بدء اللعبة ({{count}}/6)"
+    },
+    "connection": {
+      "lost": "انقطع الاتصال. تحقق من شبكتك."
+    },
+    "live": {
+      "showSelf": "إظهار صورتي",
+      "hideSelf": "إخفاء صورتي"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Room } from 'livekit-client'
+import { useTranslation } from 'react-i18next'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useMediaConfigStore } from '#/features/rooms/store/media-config-store'
 import {
@@ -17,6 +18,7 @@ export const Route = createFileRoute('/rooms/$roomId/join')({
 })
 
 function JoinRoute() {
+  const { t } = useTranslation()
   const mediaDisabled = import.meta.env.VITE_DISABLE_MEDIA === 'true'
 
   const navigate = useNavigate()
@@ -79,13 +81,13 @@ function JoinRoute() {
         // Stop the SDK from auto-reconnecting a half-open connection
         lkRoom.disconnect()
         setInitError(
-          err instanceof Error ? err.message : 'Failed to connect to meeting.',
+          err instanceof Error ? err.message : t('room.join.connectFailed'),
         )
         setIsJoining(false)
         joiningRef.current = false
       }
     },
-    [roomId, serverUrl, stopCamera, navigate],
+    [roomId, serverUrl, stopCamera, navigate, t],
   )
 
   // Auto-join for returning users (room_state includes this user in members)
@@ -129,15 +131,17 @@ function JoinRoute() {
       <div className="w-full max-w-lg mx-auto px-6 py-10 space-y-6">
         <div className="text-center space-y-1">
           <h2 className="text-xl font-semibold text-[#f4f4f5]">
-            {isReturningUser ? 'Welcome back' : 'Ready to join?'}
+            {isReturningUser
+              ? t('room.join.titleReturn')
+              : t('room.join.titleNew')}
           </h2>
           <span className="inline-block font-mono text-sm text-[#60a5fa] bg-[#212124] px-3 py-1 rounded-lg">
             #{roomId}
           </span>
           <p className="text-sm text-[#a1a1aa]">
             {isReturningUser
-              ? 'Set up your audio and video before joining.'
-              : 'Set up your audio and video, then ask to join.'}
+              ? t('room.join.subtitleReturn')
+              : t('room.join.subtitleNew')}
           </p>
           {mediaError && <p className="text-sm text-amber-400">{mediaError}</p>}
         </div>

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { Eye, Skull, User } from 'lucide-react'
 import { Track } from 'livekit-client'
+import { useTranslation } from 'react-i18next'
 import {
   useParticipantTracks,
   useParticipants,
@@ -19,6 +20,7 @@ import type { Participant as LkParticipant } from 'livekit-client'
  * role icon; your own chip keeps the skull as the death marker.
  */
 export function GraveyardStrip() {
+  const { t } = useTranslation()
   const gameStarted = useGameStore((s) => s.gameStarted)
   const deadPlayerIds = useGameStore((s) => s.deadPlayerIds)
   const playerIds = useGameStore((s) => s.playerIds)
@@ -41,9 +43,7 @@ export function GraveyardStrip() {
     return null
 
   const selfId = currentUser ? Number(currentUser.id) : null
-  const byIdentity = new Map(
-    lkParticipants.map((p) => [Number(p.identity), p]),
-  )
+  const byIdentity = new Map(lkParticipants.map((p) => [Number(p.identity), p]))
   const nameById = new Map(participants.map((p) => [p.userId, p.username]))
   const roleByPlayer = new Map<number, string>()
   const roleCodeByPlayer = new Map<number, string>()
@@ -73,7 +73,13 @@ export function GraveyardStrip() {
       id,
       participant,
       isSelf: id === selfId,
-      name: participant?.name ?? nameById.get(id) ?? `Player ${id}`,
+      name:
+        participant?.name ??
+        nameById.get(id) ??
+        t('room.tiles.playerFallback', {
+          id,
+          defaultValue: `Player ${id}`,
+        }),
       role: roleByPlayer.get(id),
       roleCode: roleCodeByPlayer.get(id),
     }
@@ -115,7 +121,12 @@ export function GraveyardStrip() {
           >
             <SpectatorChip participant={p} />
             <span className="text-[8px] text-[#a1a1aa] truncate w-16 text-center leading-tight">
-              {p.name ?? nameById.get(Number(p.identity)) ?? `Player ${p.identity}`}
+              {p.name ??
+                nameById.get(Number(p.identity)) ??
+                t('room.tiles.playerFallback', {
+                  id: p.identity,
+                  defaultValue: `Player ${p.identity}`,
+                })}
             </span>
           </motion.div>
         ))}
@@ -150,7 +161,7 @@ function SpectatorChip({ participant }: { participant: LkParticipant }) {
         </div>
       )}
       <div
-        className="absolute top-0.5 right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center border border-white/[0.1]"
+        className="absolute top-0.5 end-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center border border-white/[0.1]"
         style={{ backgroundColor: 'rgba(27, 25, 34, 0.9)' }}
       >
         <Eye className="h-2 w-2" style={{ color: 'var(--game-periwinkle)' }} />
@@ -194,14 +205,14 @@ function GraveyardChip({
       {/* Death marker: skull for your own chip, role icon for everyone else */}
       {isSelf || !RoleIcon ? (
         <div
-          className="absolute top-0.5 right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center"
+          className="absolute top-0.5 end-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center"
           style={{ backgroundColor: 'var(--game-crimson)' }}
         >
           <Skull className="h-2 w-2 text-black/80" />
         </div>
       ) : (
         <div
-          className="absolute top-0.5 right-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center border border-white/[0.1]"
+          className="absolute top-0.5 end-0.5 h-3.5 w-3.5 rounded-full flex items-center justify-center border border-white/[0.1]"
           style={{ backgroundColor: 'rgba(27, 25, 34, 0.9)' }}
         >
           <RoleIcon className="h-2 w-2 text-[#d4d4d8]" />

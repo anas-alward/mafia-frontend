@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
 import {
@@ -10,7 +11,7 @@ import {
   FormControl,
   FormMessage,
 } from '#/components/ui/form'
-import { verifyEmailSchema } from '../schemas/auth'
+import { createVerifyEmailSchema } from '../schemas/auth'
 import type { VerifyEmailInput } from '../schemas/auth'
 
 interface VerifyEmailFormProps {
@@ -21,8 +22,9 @@ interface VerifyEmailFormProps {
 }
 
 export function VerifyEmailForm({ email, onSubmit }: VerifyEmailFormProps) {
+  const { t } = useTranslation()
   const form = useForm<VerifyEmailInput>({
-    resolver: zodResolver(verifyEmailSchema),
+    resolver: zodResolver(createVerifyEmailSchema(t)),
     defaultValues: { email, code: '' },
   })
 
@@ -31,7 +33,7 @@ export function VerifyEmailForm({ email, onSubmit }: VerifyEmailFormProps) {
     if (result?.errors) {
       for (const e of result.errors) {
         form.setError((e.field ?? 'root') as keyof VerifyEmailInput | 'root', {
-          message: e.message,
+          message: t('auth.errors.server', { defaultValue: e.message }),
         })
       }
     }
@@ -46,8 +48,11 @@ export function VerifyEmailForm({ email, onSubmit }: VerifyEmailFormProps) {
       >
         <div className="rounded-md bg-blue-50 border border-blue-200 p-4">
           <p className="text-sm text-blue-800">
-            A verification code has been sent to{' '}
-            <span className="font-medium">{email}</span>. Please enter it below.
+            {t('auth.verify.notice', {
+              email,
+              defaultValue:
+                'A verification code has been sent to {{email}}. Please enter it below.',
+            })}
           </p>
         </div>
 
@@ -56,12 +61,18 @@ export function VerifyEmailForm({ email, onSubmit }: VerifyEmailFormProps) {
           name="code"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Verification Code</FormLabel>
+              <FormLabel>
+                {t('auth.fields.verificationCode', {
+                  defaultValue: 'Verification Code',
+                })}
+              </FormLabel>
               <FormControl>
                 <Input
                   type="text"
                   autoComplete="one-time-code"
-                  placeholder="Enter the code from your email"
+                  placeholder={t('auth.fields.codePlaceholder', {
+                    defaultValue: 'Enter the code from your email',
+                  })}
                   {...field}
                 />
               </FormControl>
@@ -81,7 +92,9 @@ export function VerifyEmailForm({ email, onSubmit }: VerifyEmailFormProps) {
           className="w-full text-white"
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? 'Verifying...' : 'Verify Email'}
+          {form.formState.isSubmitting
+            ? t('auth.verify.submitting', { defaultValue: 'Verifying...' })
+            : t('auth.verify.submit', { defaultValue: 'Verify Email' })}
         </Button>
       </form>
     </Form>
