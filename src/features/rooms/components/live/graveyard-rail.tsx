@@ -29,8 +29,10 @@ export function GraveyardStrip() {
   const currentUser = useAuthStore((s) => s.user)
 
   // Non-players: connected to the room but never dealt into the game.
+  // The local user is excluded — they already see themselves in the grid.
   const inGameIds = new Set(playerIds)
   const spectators = lkParticipants.filter((p) => {
+    if (p.isLocal) return false
     const id = Number(p.identity)
     return Number.isFinite(id) && !inGameIds.has(id)
   })
