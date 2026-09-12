@@ -22,22 +22,40 @@ beforeEach(() => {
   useMeetingStore.setState({ isHost: true })
 })
 
-describe('HostActionsMenu split button', () => {
+function resetButton(container: HTMLElement) {
+  return container.querySelector(
+    '[aria-label="Reset Game"]',
+  ) as HTMLButtonElement
+}
+
+function cancelButton(container: HTMLElement) {
+  return container.querySelector(
+    '[aria-label="Cancel Game"]',
+  ) as HTMLButtonElement
+}
+
+describe('HostActionsMenu inline buttons', () => {
   it('renders nothing for non-hosts', () => {
     useMeetingStore.setState({ isHost: false })
     const { container } = render(<HostActionsMenu />)
     expect(container.innerHTML).toBe('')
   })
 
-  it('primary is disabled until every player has voted', () => {
+  it('renders nothing before the game starts', () => {
+    useGameStore.setState({ gameStarted: false })
     const { container } = render(<HostActionsMenu />)
-    const primary = container.querySelector(
-      '[aria-label="Submit Votes (primary)"]',
-    ) as HTMLButtonElement
-    expect(primary.disabled).toBe(true)
+    expect(container.innerHTML).toBe('')
   })
 
-  it('primary submits votes when all have voted', () => {
+  it('submit is disabled until every player has voted', () => {
+    const { container } = render(<HostActionsMenu />)
+    const submit = container.querySelector(
+      '[aria-label="Submit Votes"]',
+    ) as HTMLButtonElement
+    expect(submit.disabled).toBe(true)
+  })
+
+  it('submit sends votes when all have voted', () => {
     useGameStore.setState({
       currentVotes: new Map([
         [1, 2],
@@ -45,58 +63,42 @@ describe('HostActionsMenu split button', () => {
       ]),
     })
     const { container } = render(<HostActionsMenu />)
-    const primary = container.querySelector(
-      '[aria-label="Submit Votes (primary)"]',
+    const submit = container.querySelector(
+      '[aria-label="Submit Votes"]',
     ) as HTMLButtonElement
-    expect(primary.disabled).toBe(false)
-    fireEvent.click(primary)
+    expect(submit.disabled).toBe(false)
+    fireEvent.click(submit)
     expect(useGameStore.getState().submitVotes).toHaveBeenCalled()
   })
 
-  it('primary resolves votes during the vote-result phase', () => {
+  it('resolve appears during the vote-result phase', () => {
     useGameStore.setState({ phase: Phase.VOTE_RESULT })
     const { container } = render(<HostActionsMenu />)
-    fireEvent.click(
-      container.querySelector('[aria-label="Resolve Votes (primary)"]')!,
-    )
+    fireEvent.click(container.querySelector('[aria-label="Resolve Votes"]')!)
     expect(useGameStore.getState().submitVoteResult).toHaveBeenCalled()
   })
 
-  it('chevron opens a menu with the alternative actions only', () => {
+  it('no submit button during the night', () => {
+    useGameStore.setState({ phase: Phase.NIGHT })
     const { container } = render(<HostActionsMenu />)
-    fireEvent.click(
-      container.querySelector('[aria-label="Host actions menu"]')!,
-    )
-    const text = container.textContent
-    expect(text).toContain('Reset Game')
-    expect(text).toContain('Cancel Game')
-    expect(text).not.toContain('Submit Votes\n')
+    expect(container.querySelector('[aria-label="Submit Votes"]')).toBeNull()
+    expect(container.querySelector('[aria-label="Resolve Votes"]')).toBeNull()
+    expect(resetButton(container)).not.toBeNull()
+    expect(cancelButton(container)).not.toBeNull()
   })
+})
 
-  it('clicking Reset Game asks for confirmation instead of resetting', () => {
+describe('HostActionsMenu confirm modals', () => {
+  it('reset asks for confirmation instead of resetting', () => {
     const { container, queryByRole } = render(<HostActionsMenu />)
-    fireEvent.click(
-      container.querySelector('[aria-label="Host actions menu"]')!,
-    )
-    fireEvent.click(
-      [...container.querySelectorAll('button')].find(
-        (b) => b.textContent === 'Reset Game',
-      )!,
-    )
+    fireEvent.click(resetButton(container))
     expect(useGameStore.getState().resetGame).not.toHaveBeenCalled()
     expect(queryByRole('dialog')?.textContent).toContain('Restart game?')
   })
 
   it('confirming the modal runs reset and closes it', () => {
     const { container, queryByRole, getByText } = render(<HostActionsMenu />)
-    fireEvent.click(
-      container.querySelector('[aria-label="Host actions menu"]')!,
-    )
-    fireEvent.click(
-      [...container.querySelectorAll('button')].find(
-        (b) => b.textContent === 'Reset Game',
-      )!,
-    )
+    fireEvent.click(resetButton(container))
     fireEvent.click(getByText('Restart game'))
     expect(useGameStore.getState().resetGame).toHaveBeenCalled()
     expect(queryByRole('dialog')).toBeNull()
@@ -104,14 +106,7 @@ describe('HostActionsMenu split button', () => {
 
   it('canceling the modal runs nothing and closes it', () => {
     const { container, queryByRole, getByText } = render(<HostActionsMenu />)
-    fireEvent.click(
-      container.querySelector('[aria-label="Host actions menu"]')!,
-    )
-    fireEvent.click(
-      [...container.querySelectorAll('button')].find(
-        (b) => b.textContent === 'Cancel Game',
-      )!,
-    )
+    fireEvent.click(cancelButton(container))
     expect(queryByRole('dialog')?.textContent).toContain('Cancel game?')
     fireEvent.click(getByText('Cancel'))
     expect(useGameStore.getState().cancelGame).not.toHaveBeenCalled()
@@ -121,14 +116,7 @@ describe('HostActionsMenu split button', () => {
 
   it('confirming Cancel Game runs cancel and closes the modal', () => {
     const { container, queryByRole, getByText } = render(<HostActionsMenu />)
-    fireEvent.click(
-      container.querySelector('[aria-label="Host actions menu"]')!,
-    )
-    fireEvent.click(
-      [...container.querySelectorAll('button')].find(
-        (b) => b.textContent === 'Cancel Game',
-      )!,
-    )
+    fireEvent.click(cancelButton(container))
     fireEvent.click(getByText('Cancel game'))
     expect(useGameStore.getState().cancelGame).toHaveBeenCalled()
     expect(queryByRole('dialog')).toBeNull()
@@ -136,14 +124,7 @@ describe('HostActionsMenu split button', () => {
 
   it('Escape dismisses the modal without running anything', () => {
     const { container, queryByRole } = render(<HostActionsMenu />)
-    fireEvent.click(
-      container.querySelector('[aria-label="Host actions menu"]')!,
-    )
-    fireEvent.click(
-      [...container.querySelectorAll('button')].find(
-        (b) => b.textContent === 'Reset Game',
-      )!,
-    )
+    fireEvent.click(resetButton(container))
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(useGameStore.getState().resetGame).not.toHaveBeenCalled()
     expect(queryByRole('dialog')).toBeNull()

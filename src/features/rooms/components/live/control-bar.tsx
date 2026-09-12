@@ -1,4 +1,3 @@
-import { useParticipants } from '@livekit/components-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import {
@@ -20,16 +19,11 @@ export default function ControlBar({
 }: ControlBarProps) {
   const gameStarted = useGameStore((s) => s.gameStarted)
   const isHost = useMeetingStore((s) => s.isHost)
-  const deadPlayerIds = useGameStore((s) => s.deadPlayerIds)
-  const playerIds = useGameStore((s) => s.playerIds)
-  const lkParticipants = useParticipants()
 
-  // The strip renders dead players and non-player spectators; the divider
-  // only makes sense when it actually has content.
-  const stripHasContent =
-    gameStarted &&
-    (deadPlayerIds.length > 0 ||
-      lkParticipants.some((p) => !playerIds.includes(Number(p.identity))))
+  // Host game buttons (start pre-game, submit/reset/cancel in-game) sit in
+  // the center next to the media buttons, split by a divider.
+  const showGameButtons =
+    (!gameStarted && isPreGameHost) || (gameStarted && isHost)
 
   return (
     // Pinned to LTR in every locale — control bar chrome never mirrors.
@@ -43,14 +37,19 @@ export default function ControlBar({
           backgroundColor: 'var(--game-bg-deep)',
         }}
       >
-        {/* Left: game management actions */}
+        {/* Left: graveyard strip — eliminated players (scrollable) */}
         <div className="flex items-center gap-1.5">
-          {/* Host split button — pinned to the far left (in game) */}
-          {gameStarted && <HostActionsMenu />}
+          <GraveyardStrip />
+        </div>
 
-          {/* Divider between the host split button and the graveyard —
-              only when the strip actually renders content */}
-          {gameStarted && isHost && stripHasContent && (
+        {/* Center: host game buttons + divider + media controls */}
+        <div className="flex items-center gap-1.5">
+          {!gameStarted && isPreGameHost && (
+            <StartGameButton onStartGame={onStartGame} />
+          )}
+          {gameStarted && isHost && <HostActionsMenu />}
+
+          {showGameButtons && (
             <span
               aria-hidden
               className="w-px self-stretch my-2.5"
@@ -58,20 +57,10 @@ export default function ControlBar({
             />
           )}
 
-          {/* Graveyard strip — eliminated players (scrollable) */}
-          <GraveyardStrip />
-
-          {/* Fullscreen (pre-game) */}
-          {!gameStarted && isPreGameHost && (
-            <StartGameButton onStartGame={onStartGame} />
-          )}
+          <MediaControls />
         </div>
 
-        {/* Center: media controls */}
-        <MediaControls />
-
-        {/* Right: empty — balances the bar so media stays centered.
-            Required actions moved into the header phase badge. */}
+        {/* Right: empty — balances the bar so media stays centered. */}
         <div className="flex items-center gap-1.5" aria-hidden="true" />
       </div>
     </div>

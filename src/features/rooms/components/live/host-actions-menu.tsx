@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, RotateCcw, Send, X } from 'lucide-react'
+import { RotateCcw, Send, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Phase } from '#/features/game/constants/phases'
 import { useGameStore } from '#/features/game/store/game-store'
@@ -8,12 +8,14 @@ import { ConfirmDialog } from '#/features/rooms/components/live/confirm-dialog'
 
 type PendingAction = 'reset' | 'cancel' | null
 
+const orbBase =
+  'flex items-center justify-center h-9 w-9 rounded-xl border transition-all duration-200'
+
 /**
- * Host split button. Follows the StartGameButton orb design (h-9,
- * rounded-xl, gold-tinted border) so the pre-game and in-game host
- * controls look like the same control. The primary section executes the
- * current phase's default action (submit/resolve votes); the chevron
- * opens the alternatives dropdown.
+ * In-game host buttons, rendered inline in the control bar center next to
+ * the media controls (same orb design as StartGameButton). Submit/Resolve
+ * only appears in its phase; Reset and Cancel always show in-game and ask
+ * for confirmation through a modal.
  */
 export function HostActionsMenu() {
   const { t } = useTranslation()
@@ -27,7 +29,6 @@ export function HostActionsMenu() {
   const cancelGame = useGameStore((s) => s.cancelGame)
   const isHost = useMeetingStore((s) => s.isHost)
 
-  const [menuOpen, setMenuOpen] = useState(false)
   const [pendingAction, setPendingAction] = useState<PendingAction>(null)
 
   const pendingCopy = {
@@ -49,7 +50,8 @@ export function HostActionsMenu() {
 
   const allVoted = alivePlayerIds.every((id) => currentVotes.has(id))
 
-  // The phase's default action for the primary section.
+  // The phase's submit action. Only day and vote-result have one —
+  // during the night there is nothing to submit.
   const primary =
     phase === Phase.DAY
       ? {
@@ -70,13 +72,6 @@ export function HostActionsMenu() {
           }
         : null
 
-  const ready = primary != null && primary.ready
-
-  const askConfirm = (action: Exclude<PendingAction, null>) => {
-    setPendingAction(action)
-    setMenuOpen(false)
-  }
-
   const runPending = () => {
     if (pendingAction === 'reset') resetGame()
     if (pendingAction === 'cancel') cancelGame()
@@ -87,89 +82,60 @@ export function HostActionsMenu() {
 
   return (
     <>
-      <div
-        className="relative flex items-stretch h-9 rounded-xl border transition-all duration-200"
-        style={{
-          color: 'var(--game-gold)',
-          backgroundColor: 'rgba(237, 184, 58, 0.1)',
-          borderColor: 'rgba(237, 184, 58, 0.3)',
-        }}
-      >
-        {/* Primary — phase's default action */}
-        <button
-          type="button"
-          disabled={primary == null || !primary.ready}
-          onClick={() => {
-            primary?.run()
-            setMenuOpen(false)
-          }}
-          title={primary ? primary.hint : undefined}
-          className={`flex items-center justify-center w-9 rounded-s-xl transition-all duration-200 ${
-            ready
-              ? 'cursor-pointer hover:bg-white/[0.04]'
-              : 'cursor-not-allowed opacity-50'
-          }`}
-          style={{
-            color: ready ? 'var(--game-gold)' : 'var(--game-text-muted)',
-          }}
-          aria-label={
-            primary
-              ? t('room.hostMenu.primaryAction', {
-                  label: primary.label,
-                  defaultValue: '{{label}} (primary)',
-                })
-              : t('room.hostMenu.menu')
-          }
-        >
-          <Send className="h-4 w-4" />
-        </button>
-
-        {/* Chevron — alternatives dropdown */}
-        <button
-          type="button"
-          onClick={() => setMenuOpen((o) => !o)}
-          className="flex items-center justify-center w-7 border-s rounded-e-xl transition-colors duration-200 cursor-pointer hover:bg-white/[0.04]"
-          style={{ borderColor: 'rgba(237, 184, 58, 0.3)' }}
-          aria-label={t('room.hostMenu.menu')}
-          aria-expanded={menuOpen}
-        >
-          <ChevronDown
-            className={`h-3.5 w-3.5 transition-transform duration-200 ${
-              menuOpen ? 'rotate-180' : ''
+      <div className="flex items-center gap-1.5">
+        {primary && (
+          <button
+            type="button"
+            disabled={!primary.ready}
+            onClick={primary.run}
+            title={primary.hint}
+            aria-label={primary.label}
+            className={`${orbBase} ${
+              primary.ready
+                ? 'cursor-pointer hover:bg-white/[0.04]'
+                : 'cursor-not-allowed opacity-50'
             }`}
             style={{
-              color: menuOpen ? 'var(--game-gold)' : 'var(--game-text-muted)',
+              color: primary.ready
+                ? 'var(--game-gold)'
+                : 'var(--game-text-muted)',
+              backgroundColor: 'rgba(237, 184, 58, 0.1)',
+              borderColor: 'rgba(237, 184, 58, 0.3)',
             }}
-          />
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setPendingAction('reset')}
+          title={t('room.hostMenu.resetGame')}
+          aria-label={t('room.hostMenu.resetGame')}
+          className={`${orbBase} cursor-pointer hover:bg-white/[0.04]`}
+          style={{
+            color: 'var(--game-gold)',
+            backgroundColor: 'rgba(237, 184, 58, 0.1)',
+            borderColor: 'rgba(237, 184, 58, 0.3)',
+          }}
+        >
+          <RotateCcw className="h-4 w-4" />
         </button>
 
-        {menuOpen && (
-          <>
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setMenuOpen(false)}
-            />
-            <div
-              className="absolute bottom-full start-0 mb-2 z-50 w-44 rounded-xl border shadow-2xl overflow-hidden py-1"
-              style={{
-                backgroundColor: 'var(--game-bg-elevated)',
-                borderColor: 'var(--game-border)',
-              }}
-            >
-              <HostMenuItem
-                icon={<RotateCcw className="h-3.5 w-3.5" />}
-                label={t('room.hostMenu.resetGame')}
-                onClick={() => askConfirm('reset')}
-              />
-              <HostMenuItem
-                icon={<X className="h-3.5 w-3.5" />}
-                label={t('room.hostMenu.cancelGame')}
-                color="var(--game-crimson)"
-                onClick={() => askConfirm('cancel')}
-              />
-            </div>
-          </>
-        )}
+        <button
+          type="button"
+          onClick={() => setPendingAction('cancel')}
+          title={t('room.hostMenu.cancelGame')}
+          aria-label={t('room.hostMenu.cancelGame')}
+          className={`${orbBase} cursor-pointer hover:bg-white/[0.04]`}
+          style={{
+            color: 'var(--game-crimson)',
+            backgroundColor: 'rgba(240, 96, 107, 0.12)',
+            borderColor: 'rgba(240, 96, 107, 0.35)',
+          }}
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       <ConfirmDialog
@@ -182,36 +148,5 @@ export function HostActionsMenu() {
         onCancel={() => setPendingAction(null)}
       />
     </>
-  )
-}
-
-function HostMenuItem({
-  icon,
-  label,
-  onClick,
-  disabled = false,
-  color = 'var(--game-text-primary)',
-}: {
-  icon: React.ReactNode
-  label: string
-  onClick: () => void
-  disabled?: boolean
-  color?: string
-}) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium text-start transition-colors ${
-        disabled
-          ? 'opacity-40 cursor-not-allowed'
-          : 'cursor-pointer hover:bg-white/[0.06]'
-      }`}
-      style={{ color }}
-    >
-      {icon}
-      <span className="flex-1">{label}</span>
-    </button>
   )
 }
