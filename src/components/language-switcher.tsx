@@ -4,6 +4,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '#/components/ui/dropdown-menu'
 import { setLocale } from '#/i18n'
 import type { SupportedLang } from '#/i18n'
