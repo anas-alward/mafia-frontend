@@ -118,7 +118,7 @@ function LiveRoom({
       style={{ backgroundColor: 'var(--game-bg-deep)' }}
     >
       <div className="game-vignette" />
-      <GameHUD />
+      <GameHUD fullScreenRef={fullScreenRef} />
 
       <div className="flex-1 min-h-0 relative overflow-hidden">
         <div style={{ position: 'absolute', inset: 0 }}>
@@ -137,7 +137,10 @@ function LiveRoom({
           >
             <TileEventOverlay userId={selfUserId}>
               {(isAnimating) => (
-                <TileActionOverlay participant={selfParticipant} hideActions={isAnimating}>
+                <TileActionOverlay
+                  participant={selfParticipant}
+                  hideActions={isAnimating}
+                >
                   <LiveParticipantTile
                     participant={selfParticipant}
                     isSelected={false}
@@ -168,11 +171,7 @@ function LiveRoom({
         </div>
       </div>
 
-      <ControlBar
-        fullScreenRef={fullScreenRef}
-        isPreGameHost={isPreGameHost}
-        onStartGame={startGame}
-      />
+      <ControlBar isPreGameHost={isPreGameHost} onStartGame={startGame} />
 
       <GameOverOverlay />
     </div>

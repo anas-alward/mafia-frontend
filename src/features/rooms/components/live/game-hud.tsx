@@ -3,12 +3,17 @@ import { useParticipants } from '@livekit/components-react'
 import { Users, UserPlus, Copy, Check } from 'lucide-react'
 import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
-import { LiveSidebar, useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
+import { useLiveSidebar } from '#/features/rooms/components/live/live-sidebar'
 import { PhaseBadge } from '#/features/game/components/phase-badge'
 import { RoundBadge } from '#/features/game/components/round-badge'
 import { PlayerCount } from '#/features/game/components/player-count'
+import { HeaderMenu } from '#/features/rooms/components/live/header-menu'
 
-export function GameHUD() {
+export function GameHUD({
+  fullScreenRef,
+}: {
+  fullScreenRef: React.RefObject<HTMLDivElement | null>
+}) {
   const roomId = useMeetingStore((s) => s.roomId)
   const gameStarted = useGameStore((s) => s.gameStarted)
   const phase = useGameStore((s) => s.phase)
@@ -78,13 +83,13 @@ export function GameHUD() {
         {/* Center: Game stats */}
         <PlayerCount />
 
-        {/* Right: members vs requests + log toggle */}
+        {/* Right: members, requests, menu */}
         <div className="flex items-center gap-3">
-          <LiveSidebar.LogToggle />
           <MembersToggle count={participantCount} />
           {pendingRequests.length > 0 && (
             <RequestsToggle count={pendingRequests.length} />
           )}
+          <HeaderMenu fullScreenRef={fullScreenRef} />
         </div>
       </div>
     </div>
@@ -102,9 +107,7 @@ function MembersToggle({ count }: { count: number }) {
       onClick={() => toggle('members')}
       className="flex items-center gap-1.5 text-xs font-semibold cursor-pointer transition-colors"
       style={{
-        color: isActive
-          ? 'var(--game-text-primary)'
-          : 'var(--game-text-muted)',
+        color: isActive ? 'var(--game-text-primary)' : 'var(--game-text-muted)',
       }}
       aria-label="Show members"
     >

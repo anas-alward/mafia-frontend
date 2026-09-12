@@ -4,7 +4,6 @@ import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { PhaseEventsPanel } from '#/features/game/components/phase-events-panel'
 import {
   ConnectionErrorBanner,
-  FullscreenButton,
   GraveyardStrip,
   HostActionsMenu,
   MediaControls,
@@ -12,13 +11,11 @@ import {
 } from '#/features/rooms/components'
 
 interface ControlBarProps {
-  fullScreenRef: React.RefObject<HTMLDivElement | null>
   isPreGameHost: boolean
   onStartGame: (playerIds: number[]) => void
 }
 
 export default function ControlBar({
-  fullScreenRef,
   isPreGameHost,
   onStartGame,
 }: ControlBarProps) {
@@ -33,9 +30,7 @@ export default function ControlBar({
   const stripHasContent =
     gameStarted &&
     (deadPlayerIds.length > 0 ||
-      lkParticipants.some(
-        (p) => !playerIds.includes(Number(p.identity)),
-      ))
+      lkParticipants.some((p) => !playerIds.includes(Number(p.identity))))
 
   return (
     <div className="shrink-0 z-50 flex flex-col">
@@ -70,16 +65,13 @@ export default function ControlBar({
           {!gameStarted && isPreGameHost && (
             <StartGameButton onStartGame={onStartGame} />
           )}
-
-          {!gameStarted && <FullscreenButton fullScreenRef={fullScreenRef} />}
         </div>
 
         {/* Center: media controls */}
         <MediaControls />
 
-        {/* Right: fullscreen (game) + required actions */}
+        {/* Right: required actions */}
         <div className="flex items-center gap-1.5">
-          {gameStarted && <FullscreenButton fullScreenRef={fullScreenRef} />}
           {gameStarted && <PhaseEventsPanel />}
         </div>
       </div>

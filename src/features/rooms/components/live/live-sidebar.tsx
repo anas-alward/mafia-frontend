@@ -1,15 +1,13 @@
 import type { ReactNode } from 'react'
 import { createContext, useContext, useState } from 'react'
-import { Users, UserPlus, ScrollText, X, Check } from 'lucide-react'
+import { Users, UserPlus, X, Check } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useParticipants } from '@livekit/components-react'
-import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 import { useJoinRequests } from '#/features/rooms/hooks/use-join-requests'
-import { GameLog } from '#/features/game/components/game-log'
 import { MembersList } from './members-list'
 
-type SidebarTab = 'log' | 'members' | 'requests' | null
+type SidebarTab = 'members' | 'requests' | null
 
 interface LiveSidebarContextValue {
   activeTab: SidebarTab
@@ -41,29 +39,6 @@ export function LiveSidebar({ children }: { children: ReactNode }) {
   )
 }
 
-function LogToggle() {
-  const gameStarted = useGameStore((s) => s.gameStarted)
-  const { activeTab, toggle } = useLiveSidebar()
-
-  if (!gameStarted) return null
-
-  const isActive = activeTab === 'log'
-
-  return (
-    <button
-      type="button"
-      onClick={() => toggle('log')}
-      className="p-1.5 rounded-lg transition-all cursor-pointer"
-      style={{
-        backgroundColor: isActive ? 'var(--game-bg-elevated)' : 'transparent',
-        color: isActive ? 'var(--game-text-primary)' : 'var(--game-text-muted)',
-      }}
-    >
-      <ScrollText className="h-4 w-4" />
-    </button>
-  )
-}
-
 function Panel() {
   const { activeTab, close } = useLiveSidebar()
   const open = activeTab !== null
@@ -82,16 +57,11 @@ function Panel() {
     })
   const count = joinRequests.length
 
-  const gameStarted = useGameStore((s) => s.gameStarted)
-  const showPanel =
-    open && ((activeTab === 'log' && gameStarted) || activeTab !== 'log')
+  const showPanel = open
 
   let title: string
-  let TitleIcon: typeof ScrollText
-  if (activeTab === 'log') {
-    title = 'Event Log'
-    TitleIcon = ScrollText
-  } else if (activeTab === 'members') {
+  let TitleIcon: typeof Users
+  if (activeTab === 'members') {
     title = 'Members'
     TitleIcon = Users
   } else if (activeTab === 'requests') {
@@ -99,7 +69,7 @@ function Panel() {
     TitleIcon = UserPlus
   } else {
     title = ''
-    TitleIcon = ScrollText
+    TitleIcon = Users
   }
 
   return (
@@ -138,7 +108,6 @@ function Panel() {
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {activeTab === 'log' && <GameLog />}
         {activeTab === 'members' && <MembersList />}
         {activeTab === 'requests' && (
           <>
@@ -204,5 +173,4 @@ function MembersCount() {
   )
 }
 
-LiveSidebar.LogToggle = LogToggle
 LiveSidebar.Panel = Panel

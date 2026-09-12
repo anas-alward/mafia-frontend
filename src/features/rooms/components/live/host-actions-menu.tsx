@@ -5,10 +5,11 @@ import { useGameStore } from '#/features/game/store/game-store'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 
 /**
- * Host split button, styled like the rest of the control bar: subtle
- * bordered container, accent used only through the icon color. The
- * primary section executes the current phase's default action
- * (submit/resolve votes); the chevron opens the alternatives dropdown.
+ * Host split button. Follows the StartGameButton orb design (h-9,
+ * rounded-xl, gold-tinted border) so the pre-game and in-game host
+ * controls look like the same control. The primary section executes the
+ * current phase's default action (submit/resolve votes); the chevron
+ * opens the alternatives dropdown.
  */
 export function HostActionsMenu() {
   const gameStarted = useGameStore((s) => s.gameStarted)
@@ -37,21 +38,23 @@ export function HostActionsMenu() {
           run: submitVotes,
         }
       : phase === Phase.VOTE_RESULT
-        ? { label: 'Resolve Votes', hint: 'Resolve votes', ready: true, run: submitVoteResult }
+        ? {
+            label: 'Resolve Votes',
+            hint: 'Resolve votes',
+            ready: true,
+            run: submitVoteResult,
+          }
         : null
 
   const ready = primary != null && primary.ready
 
   return (
     <div
-      className="relative flex items-stretch rounded-xl border transition-all duration-200"
+      className="relative flex items-stretch h-9 rounded-xl border transition-all duration-200"
       style={{
-        backgroundColor: menuOpen
-          ? 'var(--game-bg-elevated)'
-          : 'transparent',
-        borderColor: ready
-          ? 'rgba(237, 184, 58, 0.35)'
-          : 'var(--game-border)',
+        color: 'var(--game-gold)',
+        backgroundColor: 'rgba(237, 184, 58, 0.1)',
+        borderColor: 'rgba(237, 184, 58, 0.3)',
       }}
     >
       {/* Primary — phase's default action */}
@@ -63,7 +66,7 @@ export function HostActionsMenu() {
           setMenuOpen(false)
         }}
         title={primary ? primary.hint : undefined}
-        className={`flex items-center justify-center w-10 py-2.5 rounded-l-xl transition-all duration-200 ${
+        className={`flex items-center justify-center w-9 rounded-l-xl transition-all duration-200 ${
           ready
             ? 'cursor-pointer hover:bg-white/[0.04]'
             : 'cursor-not-allowed opacity-50'
@@ -81,7 +84,7 @@ export function HostActionsMenu() {
         type="button"
         onClick={() => setMenuOpen((o) => !o)}
         className="flex items-center justify-center w-7 border-l rounded-r-xl transition-colors duration-200 cursor-pointer hover:bg-white/[0.04]"
-        style={{ borderColor: 'var(--game-border)' }}
+        style={{ borderColor: 'rgba(237, 184, 58, 0.3)' }}
         aria-label="Host actions menu"
         aria-expanded={menuOpen}
       >
@@ -89,7 +92,9 @@ export function HostActionsMenu() {
           className={`h-3.5 w-3.5 transition-transform duration-200 ${
             menuOpen ? 'rotate-180' : ''
           }`}
-          style={{ color: menuOpen ? 'var(--game-gold)' : 'var(--game-text-muted)' }}
+          style={{
+            color: menuOpen ? 'var(--game-gold)' : 'var(--game-text-muted)',
+          }}
         />
       </button>
 
