@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { Check, Link2, Maximize, Menu, Minimize } from 'lucide-react'
+import { Check, Ellipsis, Link2, Maximize, Minimize } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useMeetingStore } from '#/features/rooms/store/meeting-store'
 
@@ -91,7 +91,7 @@ export function HeaderMenu({ fullScreenRef }: HeaderMenuProps) {
         aria-expanded={menuOpen}
         aria-haspopup="menu"
       >
-        <Menu className="h-4 w-4" />
+        <Ellipsis className="h-4 w-4" />
       </button>
 
       {menuOpen && (
