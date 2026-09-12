@@ -41,7 +41,7 @@ export function LiveSidebar({ children }: { children: ReactNode }) {
 }
 
 function Panel() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { activeTab, close } = useLiveSidebar()
   const open = activeTab !== null
 
@@ -60,6 +60,10 @@ function Panel() {
   const count = joinRequests.length
 
   const showPanel = open
+  // The panel docks to the inline-end side (right in LTR, left in RTL),
+  // so the hidden state slides it back out toward that same side.
+  const offScreenX =
+    i18n.dir() === 'rtl' ? 'calc(-100% - 1rem)' : 'calc(100% + 1rem)'
 
   let title: string
   let TitleIcon: typeof Users
@@ -78,7 +82,7 @@ function Panel() {
     <motion.aside
       initial={false}
       animate={{
-        x: showPanel ? 0 : 'calc(100% + 1rem)',
+        x: showPanel ? 0 : offScreenX,
         opacity: showPanel ? 1 : 0,
       }}
       transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
