@@ -29,20 +29,25 @@ export function GraveyardStrip() {
   const participants = useMeetingStore((s) => s.participants)
   const lkParticipants = useParticipants()
   const currentUser = useAuthStore((s) => s.user)
+  const selfId = currentUser ? Number(currentUser.id) : null
 
   // Non-players: connected to the room but never dealt into the game.
-  // The local user is excluded — they already see themselves in the grid.
+  // The local user is always excluded — they already have the self-view
+  // PiP tile. isLocal covers the LiveKit local participant, selfId covers
+  // the identity match.
   const inGameIds = new Set(playerIds)
   const spectators = lkParticipants.filter((p) => {
     if (p.isLocal) return false
     const id = Number(p.identity)
-    return Number.isFinite(id) && !inGameIds.has(id)
+    return Number.isFinite(id) && !inGameIds.has(id) && id !== selfId
   })
 
-  if (!gameStarted || (deadPlayerIds.length === 0 && spectators.length === 0))
+  // Dead players, minus the local user — they keep the self-view PiP.
+  const visibleDeadIds = deadPlayerIds.filter((id) => id !== selfId)
+
+  if (!gameStarted || (visibleDeadIds.length === 0 && spectators.length === 0))
     return null
 
-  const selfId = currentUser ? Number(currentUser.id) : null
   const byIdentity = new Map(lkParticipants.map((p) => [Number(p.identity), p]))
   const nameById = new Map(participants.map((p) => [p.userId, p.username]))
   const roleByPlayer = new Map<number, string>()
@@ -67,7 +72,7 @@ export function GraveyardStrip() {
     }
   }
 
-  const dead = deadPlayerIds.map((id) => {
+  const dead = visibleDeadIds.map((id) => {
     const participant = byIdentity.get(id)
     return {
       id,
