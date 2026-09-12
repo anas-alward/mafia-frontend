@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as GameRouteRouteImport } from './routes/game/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GamePhasesRouteImport } from './routes/game/phases'
 import { Route as GameHowToPlayRouteImport } from './routes/game/how-to-play'
 import { Route as GameActionsRouteImport } from './routes/game/actions'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GamePhasesRoute = GamePhasesRouteImport.update({
+  id: '/phases',
+  path: '/phases',
+  getParentRoute: () => GameRouteRoute,
 } as any)
 const GameHowToPlayRoute = GameHowToPlayRouteImport.update({
   id: '/how-to-play',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof authVerifyEmailRoute
   '/game/actions': typeof GameActionsRoute
   '/game/how-to-play': typeof GameHowToPlayRoute
+  '/game/phases': typeof GamePhasesRoute
   '/password/change': typeof authPasswordChangeRoute
   '/password/forgot': typeof authPasswordForgotRoute
   '/password/reset': typeof authPasswordResetRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof authVerifyEmailRoute
   '/game/actions': typeof GameActionsRoute
   '/game/how-to-play': typeof GameHowToPlayRoute
+  '/game/phases': typeof GamePhasesRoute
   '/password/change': typeof authPasswordChangeRoute
   '/password/forgot': typeof authPasswordForgotRoute
   '/password/reset': typeof authPasswordResetRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/game/actions': typeof GameActionsRoute
   '/game/how-to-play': typeof GameHowToPlayRoute
+  '/game/phases': typeof GamePhasesRoute
   '/(auth)/password/change': typeof authPasswordChangeRoute
   '/(auth)/password/forgot': typeof authPasswordForgotRoute
   '/(auth)/password/reset': typeof authPasswordResetRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/game/actions'
     | '/game/how-to-play'
+    | '/game/phases'
     | '/password/change'
     | '/password/forgot'
     | '/password/reset'
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/game/actions'
     | '/game/how-to-play'
+    | '/game/phases'
     | '/password/change'
     | '/password/forgot'
     | '/password/reset'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/(auth)/verify-email'
     | '/game/actions'
     | '/game/how-to-play'
+    | '/game/phases'
     | '/(auth)/password/change'
     | '/(auth)/password/forgot'
     | '/(auth)/password/reset'
@@ -258,6 +270,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/game/phases': {
+      id: '/game/phases'
+      path: '/phases'
+      fullPath: '/game/phases'
+      preLoaderRoute: typeof GamePhasesRouteImport
+      parentRoute: typeof GameRouteRoute
     }
     '/game/how-to-play': {
       id: '/game/how-to-play'
@@ -370,6 +389,7 @@ declare module '@tanstack/react-router' {
 interface GameRouteRouteChildren {
   GameActionsRoute: typeof GameActionsRoute
   GameHowToPlayRoute: typeof GameHowToPlayRoute
+  GamePhasesRoute: typeof GamePhasesRoute
   GameRolesRoleCodeRoute: typeof GameRolesRoleCodeRoute
   GameRolesDistributionRoute: typeof GameRolesDistributionRoute
   GameRolesIndexRoute: typeof GameRolesIndexRoute
@@ -378,6 +398,7 @@ interface GameRouteRouteChildren {
 const GameRouteRouteChildren: GameRouteRouteChildren = {
   GameActionsRoute: GameActionsRoute,
   GameHowToPlayRoute: GameHowToPlayRoute,
+  GamePhasesRoute: GamePhasesRoute,
   GameRolesRoleCodeRoute: GameRolesRoleCodeRoute,
   GameRolesDistributionRoute: GameRolesDistributionRoute,
   GameRolesIndexRoute: GameRolesIndexRoute,
