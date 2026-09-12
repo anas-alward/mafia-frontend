@@ -19,8 +19,8 @@ function Home() {
 
       <main>
         <HeroSection
-          headline="Deceive. Deduce. Survive."
-          subheadline="Mafia is the ultimate social deduction game where trust is your weapon and lies are your shield. Play online with friends — who will you believe?"
+          headline="Someone at this table is lying."
+          subheadline="Mafia is a social deduction game for 6–11 players, right in your browser. Get a secret role, argue with your friends, vote someone out — or get fooled trying."
         >
           <div className="flex flex-col items-center gap-4">
             <CreateMeetingButton />
@@ -40,11 +40,14 @@ function Home() {
         </HeroSection>
 
         <HowToPlaySection
-          title="Choose Your Role"
-          description="Every game assigns you a secret role with unique abilities. Your goal depends on which side you're on."
+          title="Everyone gets a secret"
+          description="Two teams, nine roles, nobody you can trust. This is who might be sitting at your table."
         />
 
-        <GameMechanicsSection title="The Game Cycle" phases={phases} />
+        <GameMechanicsSection
+          title="Night. Day. Vote. Repeat."
+          phases={phases}
+        />
       </main>
 
       <SiteFooter />

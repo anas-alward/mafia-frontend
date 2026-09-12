@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from '#/components/ui/card'
 import { Badge } from '#/components/ui/badge'
+import { Link } from '@tanstack/react-router'
 import { ROLES, Team } from '#/features/game/constants/roles'
 import type { RoleDefinition } from '#/features/game/constants/roles'
 import { ACTION_REGISTRY } from '#/features/game/constants/actions'
@@ -72,7 +73,7 @@ export function HowToPlaySection({
     <section id="how-to-play" className="py-20 sm:py-28 reveal-on-scroll">
       <div className="page-wrap">
         <div className="text-center mb-14">
-          <p className="island-kicker mb-3">The Roles</p>
+          <p className="island-kicker mb-3">The cast</p>
           <h2 className="display-title text-3xl sm:text-4xl md:text-5xl text-neutral-900">
             {title}
           </h2>
@@ -86,6 +87,15 @@ export function HowToPlaySection({
             <RoleCard key={role.code} role={role} />
           ))}
         </div>
+
+        <p className="mt-10 text-center">
+          <Link
+            to="/game/roles"
+            className="text-sm text-neutral-600 underline underline-offset-4 hover:text-neutral-900"
+          >
+            What can each role actually do?
+          </Link>
+        </p>
       </div>
     </section>
   )

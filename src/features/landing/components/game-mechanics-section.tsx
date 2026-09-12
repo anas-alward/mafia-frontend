@@ -7,6 +7,7 @@ import {
 } from '#/components/ui/card'
 import { Moon, Sun, Gavel, ArrowRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import type { GamePhase } from '../data/phases'
 
 const iconMap: Record<string, LucideIcon> = {
@@ -74,7 +75,7 @@ export function GameMechanicsSection({
     <section id="game-mechanics" className="py-20 sm:py-28 reveal-on-scroll">
       <div className="page-wrap">
         <div className="text-center mb-14">
-          <p className="island-kicker mb-3">How a Round Works</p>
+          <p className="island-kicker mb-3">One round</p>
           <h2 className="display-title text-3xl sm:text-4xl md:text-5xl text-neutral-900">
             {title}
           </h2>
@@ -89,6 +90,15 @@ export function GameMechanicsSection({
             />
           ))}
         </div>
+
+        <p className="mt-10 text-center">
+          <Link
+            to="/game/phases"
+            className="text-sm text-neutral-600 underline underline-offset-4 hover:text-neutral-900"
+          >
+            Who acts in each phase?
+          </Link>
+        </p>
       </div>
     </section>
   )

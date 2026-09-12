@@ -10,28 +10,28 @@ export interface GamePhase {
 export const phases: GamePhase[] = [
   {
     id: 'night',
-    name: 'Night Phase',
+    name: 'Night',
     order: 1,
     description:
-      'The village falls silent. Mafia members secretly choose a target. The Detective investigates a suspicious player. The Doctor protects someone from harm. All actions are hidden — only the moderator knows everything.',
+      'Lights out. The Mafia quietly pick a target, the Detective checks someone\u2019s alignment, the Doctor shields a hunch. Nobody sees a thing \u2014 every choice stays secret until morning.',
     activeRoles: 'Mafia, Detective, Doctor',
     icon: 'moon',
   },
   {
     id: 'day',
-    name: 'Day Phase',
+    name: 'Day',
     order: 2,
     description:
-      'The village wakes up. The moderator reveals what happened overnight — who was killed, or if the Doctor made a save. Players discuss, accuse, defend, and form alliances. Deception and deduction collide.',
+      'Morning comes with news: someone might be gone \u2014 unless the Doctor guessed right. Everyone talks at once. Accuse, deflect, bluff. Trust no one, especially your friends.',
     activeRoles: 'All players',
     icon: 'sun',
   },
   {
     id: 'voting',
-    name: 'Voting',
+    name: 'Vote',
     order: 3,
     description:
-      'After discussion, everyone casts a vote to eliminate one suspected Mafia member. The accused gets a final chance to defend themselves. The player with the most votes is eliminated and their role is revealed.',
+      'Talk is over. Everyone votes, the top suspect is out, and their role is revealed for all to see. Then night falls again \u2014 until one side is gone.',
     activeRoles: 'All players',
     icon: 'gavel',
   },
