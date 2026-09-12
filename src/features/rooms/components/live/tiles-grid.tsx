@@ -16,6 +16,7 @@ export function getColumns(count: number) {
 export default function TilesGrid() {
   const participants = useParticipants()
   const gameStarted = useGameStore((s) => s.gameStarted)
+  const playerIds = useGameStore((s) => s.playerIds)
   const deadPlayerIds = useGameStore((s) => s.deadPlayerIds)
   const graveyardHoldUntil = useGameStore((s) => s.graveyardHoldUntil)
 
@@ -31,11 +32,15 @@ export default function TilesGrid() {
 
   // Once a game is running, eliminated players leave the main grid
   // (they live on in the graveyard rail) — except players whose death
-  // animation is still playing out on their tile.
+  // animation is still playing out on their tile. Connected users who were
+  // never dealt into the game leave the grid too — the graveyard rail
+  // shows them in its spectator strip instead.
   const deadSet = new Set(deadPlayerIds)
+  const inGameSet = new Set(playerIds)
   const gridParticipants = gameStarted
     ? participants.filter((p) => {
         const id = Number(p.identity)
+        if (Number.isFinite(id) && !inGameSet.has(id)) return false
         if (!deadSet.has(id)) return true
         return (graveyardHoldUntil[id] ?? 0) > Date.now()
       })
@@ -62,7 +67,10 @@ export default function TilesGrid() {
           >
             <TileEventOverlay userId={userId}>
               {(isAnimating) => (
-                <TileActionOverlay participant={participant} hideActions={isAnimating}>
+                <TileActionOverlay
+                  participant={participant}
+                  hideActions={isAnimating}
+                >
                   <LiveParticipantTile
                     participant={participant}
                     isSelected={false}
