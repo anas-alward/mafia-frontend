@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as GameRouteRouteImport } from './routes/game/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GamePhasesRouteImport } from './routes/game/phases'
-import { Route as GameHowToPlayRouteImport } from './routes/game/how-to-play'
 import { Route as GameActionsRouteImport } from './routes/game/actions'
 import { Route as authVerifyEmailRouteImport } from './routes/(auth)/verify-email'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
@@ -41,11 +40,6 @@ const IndexRoute = IndexRouteImport.update({
 const GamePhasesRoute = GamePhasesRouteImport.update({
   id: '/phases',
   path: '/phases',
-  getParentRoute: () => GameRouteRoute,
-} as any)
-const GameHowToPlayRoute = GameHowToPlayRouteImport.update({
-  id: '/how-to-play',
-  path: '/how-to-play',
   getParentRoute: () => GameRouteRoute,
 } as any)
 const GameActionsRoute = GameActionsRouteImport.update({
@@ -127,7 +121,6 @@ export interface FileRoutesByFullPath {
   '/signup': typeof authSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/game/actions': typeof GameActionsRoute
-  '/game/how-to-play': typeof GameHowToPlayRoute
   '/game/phases': typeof GamePhasesRoute
   '/password/change': typeof authPasswordChangeRoute
   '/password/forgot': typeof authPasswordForgotRoute
@@ -147,7 +140,6 @@ export interface FileRoutesByTo {
   '/signup': typeof authSignupRoute
   '/verify-email': typeof authVerifyEmailRoute
   '/game/actions': typeof GameActionsRoute
-  '/game/how-to-play': typeof GameHowToPlayRoute
   '/game/phases': typeof GamePhasesRoute
   '/password/change': typeof authPasswordChangeRoute
   '/password/forgot': typeof authPasswordForgotRoute
@@ -168,7 +160,6 @@ export interface FileRoutesById {
   '/(auth)/signup': typeof authSignupRoute
   '/(auth)/verify-email': typeof authVerifyEmailRoute
   '/game/actions': typeof GameActionsRoute
-  '/game/how-to-play': typeof GameHowToPlayRoute
   '/game/phases': typeof GamePhasesRoute
   '/(auth)/password/change': typeof authPasswordChangeRoute
   '/(auth)/password/forgot': typeof authPasswordForgotRoute
@@ -190,7 +181,6 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/game/actions'
-    | '/game/how-to-play'
     | '/game/phases'
     | '/password/change'
     | '/password/forgot'
@@ -210,7 +200,6 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/game/actions'
-    | '/game/how-to-play'
     | '/game/phases'
     | '/password/change'
     | '/password/forgot'
@@ -230,7 +219,6 @@ export interface FileRouteTypes {
     | '/(auth)/signup'
     | '/(auth)/verify-email'
     | '/game/actions'
-    | '/game/how-to-play'
     | '/game/phases'
     | '/(auth)/password/change'
     | '/(auth)/password/forgot'
@@ -276,13 +264,6 @@ declare module '@tanstack/react-router' {
       path: '/phases'
       fullPath: '/game/phases'
       preLoaderRoute: typeof GamePhasesRouteImport
-      parentRoute: typeof GameRouteRoute
-    }
-    '/game/how-to-play': {
-      id: '/game/how-to-play'
-      path: '/how-to-play'
-      fullPath: '/game/how-to-play'
-      preLoaderRoute: typeof GameHowToPlayRouteImport
       parentRoute: typeof GameRouteRoute
     }
     '/game/actions': {
@@ -388,7 +369,6 @@ declare module '@tanstack/react-router' {
 
 interface GameRouteRouteChildren {
   GameActionsRoute: typeof GameActionsRoute
-  GameHowToPlayRoute: typeof GameHowToPlayRoute
   GamePhasesRoute: typeof GamePhasesRoute
   GameRolesRoleCodeRoute: typeof GameRolesRoleCodeRoute
   GameRolesDistributionRoute: typeof GameRolesDistributionRoute
@@ -397,7 +377,6 @@ interface GameRouteRouteChildren {
 
 const GameRouteRouteChildren: GameRouteRouteChildren = {
   GameActionsRoute: GameActionsRoute,
-  GameHowToPlayRoute: GameHowToPlayRoute,
   GamePhasesRoute: GamePhasesRoute,
   GameRolesRoleCodeRoute: GameRolesRoleCodeRoute,
   GameRolesDistributionRoute: GameRolesDistributionRoute,
@@ -437,12 +416,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

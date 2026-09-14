@@ -54,7 +54,7 @@ function GameRolesPage() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/game/how-to-play">
+              <Link to="/" hash="how-to-play">
                 {t('game.pages.roles.readGuide', {
                   defaultValue: 'Read the guide',
                 })}

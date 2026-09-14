@@ -15,7 +15,7 @@ export function SiteFooter() {
         </div>
 
         <div className="flex items-center gap-6">
-          <Link to="/game/how-to-play" className="nav-link text-sm">
+          <Link to="/" hash="how-to-play" className="nav-link text-sm">
             {t('nav.howToPlay')}
           </Link>
           <a href="#game-mechanics" className="nav-link text-sm">

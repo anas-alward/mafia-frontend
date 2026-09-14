@@ -41,7 +41,7 @@ function GameActionsPage() {
           </h2>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg" className="text-white">
-              <Link to="/game/how-to-play">
+              <Link to="/" hash="how-to-play">
                 {t('game.pages.actions.readGuide', {
                   defaultValue: 'Read the guide',
                 })}

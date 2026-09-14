@@ -52,7 +52,11 @@ const steps: { Icon: LucideIcon; key: string; title: string; text: string }[] =
 export function GameFlow() {
   const { t } = useTranslation()
   return (
-    <section aria-labelledby="flow-heading" className="py-16 sm:py-20">
+    <section
+      id="how-to-play"
+      aria-labelledby="flow-heading"
+      className="py-16 sm:py-20 scroll-mt-16"
+    >
       <div className="page-wrap">
         <div className="text-center mb-12">
           <p className="island-kicker mb-3">

@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { SiteHeader } from '#/components/site-header'
 import { SiteFooter } from '#/components/site-footer'
 import { HeroSection } from '#/features/landing/components/hero-section'
 import { FaqSection } from '#/features/landing/components/faq-section'
+import { GameFlow } from '#/features/how-to-play/components/game-flow'
 import {
   CreateMeetingButton,
   JoinMeetingForm,
@@ -33,14 +34,16 @@ function Home() {
               <div className="flex-1 h-px bg-neutral-200" />
             </div>
             <JoinMeetingForm />
-            <Link
-              to="/game/how-to-play"
+            <a
+              href="#how-to-play"
               className="text-sm text-neutral-600 underline underline-offset-2 hover:text-neutral-900"
             >
               {t('hero.howToPlayLink')}
-            </Link>
+            </a>
           </div>
         </HeroSection>
+
+        <GameFlow />
 
         <FaqSection />
       </main>

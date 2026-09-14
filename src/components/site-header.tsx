@@ -45,7 +45,8 @@ export function SiteHeader() {
           <LanguageSwitcher />
           <nav className="hidden sm:flex items-center gap-4 me-2">
             <Link
-              to="/game/how-to-play"
+              to="/"
+              hash="how-to-play"
               className="text-sm text-neutral-600 hover:text-neutral-900"
             >
               {t('nav.howToPlay')}
