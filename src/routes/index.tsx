@@ -9,8 +9,17 @@ import {
   CreateMeetingButton,
   JoinMeetingForm,
 } from '#/features/rooms/components'
+import { SITE_URL } from '#/lib/site'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  component: Home,
+  head: () => ({
+    // Root-only: every other page inherits the base tags, but og:url must
+    // name the page actually being shared.
+    meta: [{ property: 'og:url', content: SITE_URL }],
+    links: [{ rel: 'canonical', href: SITE_URL }],
+  }),
+})
 
 function Home() {
   const { t } = useTranslation()

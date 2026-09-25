@@ -13,6 +13,13 @@ import { SessionInit } from '../features/auth/components/session-init'
 import { LocaleSync } from '../i18n/LocaleSync'
 
 import appCss from '../styles.css?url'
+import {
+  SHARE_IMAGE,
+  SHARE_IMAGE_HEIGHT,
+  SHARE_IMAGE_WIDTH,
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+} from '#/lib/site'
 
 import type { QueryClient } from '@tanstack/react-query'
 import type { AuthState } from '../features/auth/types'
@@ -52,32 +59,77 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         name: 'description',
-        content:
-          'Mafia is a multiplayer social deduction game. Deceive, deduce, and survive — play online with friends.',
+        content: SITE_DESCRIPTION,
       },
       {
-        title: 'Mafia — Social Deduction Online',
+        title: SITE_TITLE,
+      },
+      // Open Graph — Facebook, LinkedIn, WhatsApp, Discord, Telegram…
+      {
+        property: 'og:type',
+        content: 'website',
+      },
+      {
+        property: 'og:site_name',
+        content: 'Mafia',
       },
       {
         property: 'og:title',
-        content: 'Mafia — Social Deduction Online',
+        content: SITE_TITLE,
       },
       {
         property: 'og:description',
-        content:
-          'Mafia is a multiplayer social deduction game. Deceive, deduce, and survive — play online with friends.',
+        content: SITE_DESCRIPTION,
       },
       {
         property: 'og:image',
-        content: '/logo512.png',
+        content: SHARE_IMAGE,
       },
       {
+        property: 'og:image:secure_url',
+        content: SHARE_IMAGE,
+      },
+      {
+        property: 'og:image:type',
+        content: 'image/png',
+      },
+      {
+        property: 'og:image:width',
+        content: String(SHARE_IMAGE_WIDTH),
+      },
+      {
+        property: 'og:image:height',
+        content: String(SHARE_IMAGE_HEIGHT),
+      },
+      {
+        property: 'og:image:alt',
+        content: SITE_TITLE,
+      },
+      {
+        property: 'og:locale',
+        content: 'en_US',
+      },
+      // X / Twitter — preview.png is 1200×630, so it fills the large card
+      // without cropping.
+      {
         name: 'twitter:card',
-        content: 'summary',
+        content: 'summary_large_image',
+      },
+      {
+        name: 'twitter:title',
+        content: SITE_TITLE,
+      },
+      {
+        name: 'twitter:description',
+        content: SITE_DESCRIPTION,
       },
       {
         name: 'twitter:image',
-        content: '/logo512.png',
+        content: SHARE_IMAGE,
+      },
+      {
+        name: 'twitter:image:alt',
+        content: SITE_TITLE,
       },
       {
         name: 'theme-color',
