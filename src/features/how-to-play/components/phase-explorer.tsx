@@ -19,7 +19,7 @@ const phaseDescriptionFallbacks: Record<Phase, string> = {
   [Phase.NIGHT]:
     'The village sleeps. Players with night abilities act one by one, in secret. Nobody sees who chose whom — only the outcomes surface in the morning.',
   [Phase.DAY]:
-    'The village wakes and talks. Everyone discusses the events of the night, shares suspicions, and defends themselves. The Vigilante may spend a bullet instead of voting — but shooting a Town player backfires.',
+    'The village wakes and talks. Everyone discusses the events of the night, shares suspicions, and defends themselves — then each living player votes against another player. The Vigilante may spend a bullet instead of voting, but shooting a Town player backfires.',
   [Phase.VOTE_RESULT]:
     'Discussion ends and every living player votes. The top suspect is eliminated and their role is revealed for all to see. If the Crimson Kamikaze dies, they take their killer down with them.',
 }

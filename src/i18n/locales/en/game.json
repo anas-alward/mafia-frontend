@@ -51,7 +51,7 @@
     "phases": {
       "day": {
         "label": "Day",
-        "description": "The village wakes and talks. Everyone discusses the events of the night, shares suspicions, and defends themselves. The Vigilante may spend a bullet instead of voting — but shooting a Town player backfires."
+        "description": "The village wakes and talks. Everyone discusses the events of the night, shares suspicions, and defends themselves — then each living player votes against another player. The Vigilante may spend a bullet instead of voting, but shooting a Town player backfires."
       },
       "night": {
         "label": "Night",
