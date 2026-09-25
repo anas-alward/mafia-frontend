@@ -58,11 +58,66 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         title: 'Mafia — Social Deduction Online',
       },
+      {
+        property: 'og:title',
+        content: 'Mafia — Social Deduction Online',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Mafia is a multiplayer social deduction game. Deceive, deduce, and survive — play online with friends.',
+      },
+      {
+        property: 'og:image',
+        content: '/logo512.png',
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary',
+      },
+      {
+        name: 'twitter:image',
+        content: '/logo512.png',
+      },
+      {
+        name: 'theme-color',
+        content: '#18181b',
+      },
+      {
+        name: 'apple-mobile-web-app-title',
+        content: 'Mafia',
+      },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'icon',
+        href: '/favicon.ico',
+        sizes: '16x16 32x32 48x48',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/logo192.png',
+        sizes: '192x192',
+      },
+      {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/logo512.png',
+        sizes: '512x512',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon.png',
+        sizes: '180x180',
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
       },
     ],
   }),
