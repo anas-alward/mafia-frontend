@@ -72,6 +72,7 @@ export function useRoomWebSocket(
   const wsRef = useRef<WebSocket | null>(null)
   const wasEverOpenRef = useRef(false)
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const backoffRef = useRef(0)
   const mountedRef = useRef(true)
   const onMessageRef = useRef(onMessage)
   onMessageRef.current = onMessage
@@ -97,6 +98,7 @@ export function useRoomWebSocket(
 
     ws.onopen = () => {
       if (!mountedRef.current) return
+      backoffRef.current = 0
       setState('open')
       setSendError(null)
       if (!wasEverOpenRef.current) {
@@ -105,16 +107,26 @@ export function useRoomWebSocket(
       }
     }
 
-    ws.onclose = () => {
+    ws.onclose = (event) => {
       if (!mountedRef.current) return
       setState('closed')
-      // Auto-reconnect after 2s if the socket was ever open
+      // 4001 — the backend has no session for this room (unknown room or
+      // lost Redis state). Retrying can never succeed; stop instead of
+      // spinning up hundreds of identical connections.
+      if (event.code === 4001) {
+        setSendError('Room is no longer available')
+        return
+      }
+      // Auto-reconnect with exponential backoff (1s → 30s cap) so a
+      // repeatedly-closing socket can't storm the server.
       if (wasEverOpenRef.current) {
+        const delay = Math.min(30_000, 1000 * 2 ** backoffRef.current)
+        backoffRef.current = Math.min(backoffRef.current + 1, 5)
         reconnectTimerRef.current = setTimeout(() => {
           if (mountedRef.current) {
             connect()
           }
-        }, 2000)
+        }, delay)
       }
     }
 
@@ -149,6 +161,7 @@ export function useRoomWebSocket(
   useEffect(() => {
     mountedRef.current = true
     wasEverOpenRef.current = false
+    backoffRef.current = 0
     setWasEverOpen(false)
     connect()
 
