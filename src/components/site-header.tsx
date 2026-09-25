@@ -36,8 +36,14 @@ export function SiteHeader() {
       <div className="page-wrap flex items-center justify-between h-16">
         <Link
           to="/"
-          className="display-title text-xl text-neutral-900 no-underline tracking-tight"
+          className="display-title flex items-center gap-2 text-xl text-neutral-900 no-underline tracking-tight"
         >
+          <img
+            src="/logo192.png"
+            alt=""
+            aria-hidden="true"
+            className="size-8 rounded-md shrink-0"
+          />
           Mafia
         </Link>
 
